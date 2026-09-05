@@ -1,15 +1,46 @@
 {
     "$schema": "https://www.schemastore.org/package.json",
+    "name": "cbtwise-desktop",
+    "version": "1.0.0",
+    "description": "CBTwise AI-Powered CBT Prep Desktop Platform",
+    "author": "CBTwise Team <hello@cbtwise.com.ng>",
     "private": true,
     "type": "module",
+    "main": "main.js",
     "scripts": {
         "build": "vite build",
-        "dev": "vite"
+        "dev": "vite",
+        "electron:start": "electron .",
+        "electron:build": "electron-builder --win"
+    },
+    "build": {
+        "appId": "com.cbtwise.app",
+        "productName": "CBTwise",
+        "directories": {
+            "output": "dist"
+        },
+        "files": [
+            "main.js",
+            "public/**/*"
+        ],
+        "win": {
+            "target": ["nsis", "portable"],
+            "icon": "public/icons/icon-512x512.png"
+        },
+        "nsis": {
+            "oneClick": false,
+            "allowToChangeInstallationDirectory": true,
+            "createDesktopShortcut": true,
+            "createStartMenuShortcut": true,
+            "shortcutName": "CBTwise"
+        }
     },
     "devDependencies": {
         "@tailwindcss/forms": "^0.5.2",
         "autoprefixer": "^10.4.2",
         "concurrently": "^9.0.1",
+        "electron": "^44.2.0",
+        "electron-builder": "^26.15.3",
         "laravel-vite-plugin": "^1.0.0",
         "postcss": "^8.4.31",
         "tailwindcss": "^3.4.0",
