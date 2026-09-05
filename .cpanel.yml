@@ -2,5 +2,5 @@
 deployment:
   tasks:
     - export DEPLOYPATH=/home/istrate1/cbtwise.com.ng
-    - /bin/cp -r * $DEPLOYPATH/
-    - /bin/cp -r .env.example $DEPLOYPATH/.env
+    - /bin/cp -R * $DEPLOYPATH
+    - /bin/cp -R .env.example $DEPLOYPATH/.env
