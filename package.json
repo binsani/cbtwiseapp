@@ -21,7 +21,18 @@
         },
         "files": [
             "main.js",
-            "public/**/*"
+            ".env",
+            "app/**/*",
+            "bootstrap/**/*",
+            "config/**/*",
+            "database/**/*",
+            "lang/**/*",
+            "public/**/*",
+            "resources/views/**/*",
+            "routes/**/*",
+            "storage/**/*",
+            "vendor/**/*",
+            "php-win/**/*"
         ],
         "win": {
             "target": ["nsis", "portable"],
