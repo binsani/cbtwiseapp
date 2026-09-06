@@ -13,7 +13,7 @@ return new class extends Migration
             $table->foreignId('exam_id')->constrained()->cascadeOnDelete();
             $table->string('slug', 60);
             $table->string('name', 100);
-            $table->string('icon', 10)->nullable(); // emoji or icon key
+            $table->string('icon', 50)->nullable(); // emoji or icon key
             $table->unsignedTinyInteger('sort_order')->default(0);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
