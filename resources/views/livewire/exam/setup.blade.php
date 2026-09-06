@@ -47,24 +47,31 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     @foreach($exams as $exam)
-                        <div wire:click="$set('selectedExamId', {{ $exam->id }})"
-                             class="group relative border-2 rounded-2xl p-6 cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between h-48
-                             {{ $selectedExamId == $exam->id ? 'border-emerald-500 bg-emerald-50/40 ring-4 ring-emerald-50' : 'border-gray-200 bg-white hover:border-emerald-200' }}">
-                            
-                            <div>
-                                <span class="text-xs font-bold uppercase tracking-widest px-3 py-1 bg-gray-100 rounded-full text-gray-500 group-hover:bg-emerald-100 group-hover:text-emerald-700 transition-colors duration-300">
-                                    {{ $exam->slug }}
-                                </span>
-                                <h4 class="text-xl font-bold text-gray-900 mt-4 group-hover:text-emerald-800 transition-colors duration-300">{{ $exam->name }}</h4>
-                                <p class="text-sm text-gray-500 mt-1 line-clamp-2">{{ $exam->description }}</p>
-                            </div>
+                        @php
+                            if (is_string($exam)) {
+                                $exam = \App\Models\Exam::where('slug', $exam)->orWhere('id', $exam)->first();
+                            }
+                        @endphp
+                        @if($exam)
+                            <div wire:click="$set('selectedExamId', {{ $exam->id }})"
+                                 class="group relative border-2 rounded-2xl p-6 cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between h-48
+                                 {{ $selectedExamId == $exam->id ? 'border-emerald-500 bg-emerald-50/40 ring-4 ring-emerald-50' : 'border-gray-200 bg-white hover:border-emerald-200' }}">
+                                
+                                <div>
+                                    <span class="text-xs font-bold uppercase tracking-widest px-3 py-1 bg-gray-100 rounded-full text-gray-500 group-hover:bg-emerald-100 group-hover:text-emerald-700 transition-colors duration-300">
+                                        {{ $exam->slug }}
+                                    </span>
+                                    <h4 class="text-xl font-bold text-gray-900 mt-4 group-hover:text-emerald-800 transition-colors duration-300">{{ $exam->name }}</h4>
+                                    <p class="text-sm text-gray-500 mt-1 line-clamp-2">{{ $exam->description }}</p>
+                                </div>
 
-                            <div class="flex justify-end">
-                                <span class="w-8 h-8 rounded-full flex items-center justify-center border-2 border-gray-200 group-hover:border-emerald-500 group-hover:bg-emerald-500 group-hover:text-white transition-all duration-300">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                                </span>
+                                <div class="flex justify-end">
+                                    <span class="w-8 h-8 rounded-full flex items-center justify-center border-2 border-gray-200 group-hover:border-emerald-500 group-hover:bg-emerald-500 group-hover:text-white transition-all duration-300">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                                    </span>
+                                </div>
                             </div>
-                        </div>
+                        @endif
                     @endforeach
                 </div>
                 @error('selectedExamId')
@@ -138,7 +145,7 @@
                     <div>
                         <h3 class="text-2xl font-bold text-gray-900 font-heading">Select Curriculum Subjects</h3>
                         <p class="text-gray-500 text-sm mt-1">
-                            @if(Exam::find($selectedExamId)->slug === 'utme')
+                            @if(($selectedExam?->slug ?? '') === 'utme')
                                 JAMB UTME requires exactly <strong>4 subjects</strong>. English is compulsory.
                             @else
                                 Choose between <strong>1 and 9 subjects</strong> for SSCE.
@@ -164,7 +171,7 @@
 
                             <div class="flex-1 min-w-0">
                                 <p class="text-sm font-bold text-gray-900 truncate group-hover:text-emerald-700 transition-colors duration-300">{{ $subj->name }}</p>
-                                @if(Exam::find($selectedExamId)->slug === 'utme' && $subj->slug === 'english-language')
+                                @if(($selectedExam?->slug ?? '') === 'utme' && $subj->slug === 'english-language')
                                     <span class="text-[9px] font-extrabold text-emerald-600 uppercase tracking-wide">Compulsory</span>
                                 @endif
                             </div>

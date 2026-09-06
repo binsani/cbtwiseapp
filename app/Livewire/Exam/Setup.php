@@ -11,10 +11,6 @@ use Livewire\Component;
 
 class Setup extends Component
 {
-    public $exams = [];
-    public $subjects = [];
-    public $years = [];
-
     // Form inputs
     public $selectedExamId = null;
     public $mode = 'practice'; // practice, mock, study
@@ -26,10 +22,7 @@ class Setup extends Component
 
     public function mount()
     {
-        $this->exams = Cache::remember('active_exams', 3600, function () {
-            return Exam::active()->get();
-        });
-        $this->years = config('cbtwise.exam_years', range(now()->year, 2000));
+        Cache::forget('active_exams');
     }
 
     public function updatedSelectedExamId($examId)
@@ -37,19 +30,12 @@ class Setup extends Component
         $this->selectedSubjects = [];
         if ($examId) {
             $exam = Exam::find($examId);
-            $this->subjects = Cache::remember("exam_subjects:{$examId}", 3600, function () use ($exam) {
-                return $exam->subjects;
-            });
-
-            // Compulsory English for UTME
-            if ($exam->slug === 'utme') {
+            if ($exam && $exam->slug === 'utme') {
                 $english = $exam->subjects()->where('slug', 'english-language')->first();
                 if ($english) {
                     $this->selectedSubjects[] = (string) $english->id;
                 }
             }
-        } else {
-            $this->subjects = [];
         }
     }
 
@@ -171,7 +157,16 @@ class Setup extends Component
 
     public function render()
     {
-        return view('livewire.exam.setup')
-            ->layout('layouts.app');
+        $exams = Exam::active()->get();
+        $selectedExam = $this->selectedExamId ? Exam::find($this->selectedExamId) : null;
+        $subjects = $selectedExam ? $selectedExam->subjects : collect();
+        $years = config('cbtwise.exam_years', range(now()->year, 2000));
+
+        return view('livewire.exam.setup', [
+            'exams' => $exams,
+            'selectedExam' => $selectedExam,
+            'subjects' => $subjects,
+            'years' => $years,
+        ])->layout('layouts.app');
     }
 }
