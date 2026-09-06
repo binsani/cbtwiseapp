@@ -16,8 +16,8 @@
 
         <script type="application/ld+json">
         {
-          "@context": "https://schema.org",
-          "@type": "WebSite",
+          "@@context": "https://schema.org",
+          "@@type": "WebSite",
           "name": "CBTWise",
           "url": "{{ url('/') }}",
           "description": "Premium CBT practice exam platform with AI tutoring for JAMB, WAEC, and NECO."
