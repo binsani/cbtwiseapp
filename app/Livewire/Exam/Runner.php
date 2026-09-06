@@ -34,7 +34,20 @@ class Runner extends Component
         
         $examSession = ExamSession::where('user_id', Auth::id())
             ->where('status', 'in_progress')
-            ->findOrFail($session);
+            ->find($session);
+
+        if (!$examSession) {
+            $submitted = ExamSession::where('user_id', Auth::id())
+                ->where('status', 'submitted')
+                ->find($session);
+
+            if ($submitted) {
+                return $this->redirectRoute('exam.results', ['session' => $session]);
+            }
+
+            session()->flash('error', 'Exam session not found or already completed. Please configure a new session.');
+            return $this->redirectRoute('exam.setup');
+        }
             
         $this->mode = $examSession->mode;
         
