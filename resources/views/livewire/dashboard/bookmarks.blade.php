@@ -1,5 +1,8 @@
-<div class="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8 font-sans space-y-8">
+<div class="max-w-4xl mx-auto py-4 px-4 sm:px-6 lg:px-8 font-sans space-y-8">
     
+    <!-- Navigation Tabs -->
+    <x-dashboard-nav />
+
     <!-- Header -->
     <div class="flex justify-between items-center border-b border-slate-100 pb-4">
         <div>

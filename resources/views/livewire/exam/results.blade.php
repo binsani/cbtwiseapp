@@ -1,6 +1,15 @@
-<div class="max-w-5xl mx-auto py-12 px-4 sm:px-6 lg:px-8" 
+<div class="max-w-5xl mx-auto py-6 px-4 sm:px-6 lg:px-8" 
      @if($explainingQuestionId) wire:poll.2s="checkAiExplanationStatus" @endif>
     
+    <!-- Navigation Tabs -->
+    <x-dashboard-nav />
+
+    @if (session()->has('message'))
+        <div class="mb-6 p-4 bg-emerald-50 border-l-4 border-emerald-500 text-emerald-800 rounded-r-2xl text-xs font-bold shadow-sm">
+            {{ session('message') }}
+        </div>
+    @endif
+
     <!-- Top Result Banner -->
     <div class="text-center mb-10">
         <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight font-heading">
@@ -106,6 +115,12 @@
                     
                     <!-- Actions -->
                     <div class="flex items-center space-x-2">
+                        <button wire:click="toggleBookmark({{ $q['id'] }})"
+                                class="text-xs font-bold px-3 py-1.5 rounded-xl border flex items-center space-x-1.5 transition-all
+                                {{ in_array($q['id'], $bookmarkedQuestionIds) ? 'bg-amber-50 text-amber-800 border-amber-300' : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100' }}">
+                            <span>{{ in_array($q['id'], $bookmarkedQuestionIds) ? '🔖 Bookmarked' : '🔖 Bookmark' }}</span>
+                        </button>
+
                         <button wire:click="$dispatch('openReportModal', { questionId: {{ $q['id'] }} })"
                                 class="text-xs font-bold text-rose-600 hover:text-rose-800 bg-rose-50 px-3 py-1.5 rounded-xl border border-rose-100 flex items-center space-x-1.5 transition-colors">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>

@@ -23,6 +23,38 @@ class Setup extends Component
     public function mount()
     {
         Cache::forget('active_exams');
+
+        // Support query parameters from dashboard quick links: ?exam=utme, ?mode=mock, ?subject=3
+        $examParam = request('exam');
+        if ($examParam) {
+            $exam = is_numeric($examParam) ? Exam::find($examParam) : Exam::where('slug', $examParam)->first();
+            if ($exam) {
+                $this->selectedExamId = $exam->id;
+                $this->updatedSelectedExamId($exam->id);
+                $this->currentStep = 2;
+            }
+        }
+
+        $modeParam = request('mode');
+        if (in_array($modeParam, ['practice', 'mock', 'study'])) {
+            $this->mode = $modeParam;
+        }
+
+        $subjectParam = request('subject');
+        if ($subjectParam) {
+            $subject = is_numeric($subjectParam) ? Subject::find($subjectParam) : Subject::where('slug', $subjectParam)->first();
+            if ($subject) {
+                if (!$this->selectedExamId && $subject->exams()->exists()) {
+                    $exam = $subject->exams()->first();
+                    $this->selectedExamId = $exam->id;
+                    $this->updatedSelectedExamId($exam->id);
+                }
+                if (!in_array((string)$subject->id, $this->selectedSubjects)) {
+                    $this->selectedSubjects[] = (string)$subject->id;
+                }
+                $this->currentStep = 3;
+            }
+        }
     }
 
     public function updatedSelectedExamId($examId)

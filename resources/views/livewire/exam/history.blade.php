@@ -1,4 +1,6 @@
-<div class="max-w-5xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+<div class="max-w-5xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+    <x-dashboard-nav />
+
     <div class="mb-8">
         <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight font-heading">
             Practice Session History

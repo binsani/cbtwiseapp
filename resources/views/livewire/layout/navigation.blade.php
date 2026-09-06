@@ -29,10 +29,16 @@ new class extends Component
                 </div>
 
                 <!-- Navigation Links -->
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                <div class="hidden space-x-6 sm:-my-px sm:ms-10 sm:flex">
                     @auth
                         <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
                             {{ __('Dashboard') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('exam.setup')" :active="request()->routeIs('exam.setup*')" wire:navigate class="text-emerald-600 font-bold">
+                            {{ __('Practice CBT') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('dashboard.history')" :active="request()->routeIs('dashboard.history*')" wire:navigate>
+                            {{ __('History') }}
                         </x-nav-link>
                     @endauth
                     <x-nav-link :href="route('pricing')" :active="request()->routeIs('pricing')" wire:navigate>
@@ -45,8 +51,21 @@ new class extends Component
             </div>
 
             <!-- Settings Dropdown -->
-            <div class="hidden sm:flex sm:items-center sm:ms-6">
+            <div class="hidden sm:flex sm:items-center sm:ms-6 sm:space-x-3">
                 @auth
+                    <!-- Notification Bell -->
+                    @php
+                        $unreadBellCount = \App\Models\UserNotification::where('user_id', auth()->id())->whereNull('read_at')->count();
+                    @endphp
+                    <a href="{{ route('dashboard.notifications') }}" wire:navigate 
+                       class="relative p-2 rounded-xl text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+                       title="Notifications">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                        @if($unreadBellCount > 0)
+                            <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full animate-pulse"></span>
+                        @endif
+                    </a>
+
                     <x-dropdown align="right" width="48">
                         <x-slot name="trigger">
                             <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
@@ -62,10 +81,27 @@ new class extends Component
 
                         <x-slot name="content">
                             <x-dropdown-link :href="route('account.profile')" wire:navigate>
-                                {{ __('Profile') }}
+                                {{ __('My Profile') }}
+                            </x-dropdown-link>
+
+                            <x-dropdown-link :href="route('dashboard.bookmarks')" wire:navigate>
+                                {{ __('Bookmarks') }}
+                            </x-dropdown-link>
+
+                            <x-dropdown-link :href="route('dashboard.streak')" wire:navigate>
+                                {{ __('Study Streak') }}
+                            </x-dropdown-link>
+
+                            <x-dropdown-link :href="route('dashboard.leaderboard')" wire:navigate>
+                                {{ __('Leaderboard') }}
+                            </x-dropdown-link>
+
+                            <x-dropdown-link :href="route('account.subscription')" wire:navigate>
+                                {{ __('Subscription') }}
                             </x-dropdown-link>
 
                             @role('admin')
+                                <div class="border-t border-gray-100 my-1"></div>
                                 <x-dropdown-link :href="route('admin.dashboard')" wire:navigate>
                                     {{ __('Admin Dashboard') }}
                                 </x-dropdown-link>
@@ -79,6 +115,8 @@ new class extends Component
                                     {{ __('Moderation Queue') }}
                                 </x-dropdown-link>
                             @endhasanyrole
+
+                            <div class="border-t border-gray-100 my-1"></div>
 
                             <!-- Authentication -->
                             <button wire:click="logout" class="w-full text-start">
@@ -114,6 +152,18 @@ new class extends Component
             @auth
                 <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
                     {{ __('Dashboard') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('exam.setup')" :active="request()->routeIs('exam.setup*')" wire:navigate class="text-emerald-600 font-bold">
+                    {{ __('Practice CBT') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('dashboard.history')" :active="request()->routeIs('dashboard.history*')" wire:navigate>
+                    {{ __('Session History') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('dashboard.bookmarks')" :active="request()->routeIs('dashboard.bookmarks')" wire:navigate>
+                    {{ __('Bookmarks') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('dashboard.notifications')" :active="request()->routeIs('dashboard.notifications')" wire:navigate>
+                    {{ __('Notifications') }}
                 </x-responsive-nav-link>
             @endauth
             <x-responsive-nav-link :href="route('pricing')" :active="request()->routeIs('pricing')" wire:navigate>

@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Dashboard;
 
+use App\Models\Bookmark;
 use App\Models\ExamAnswer;
 use App\Models\ExamSession;
 use App\Models\Question;
@@ -15,6 +16,7 @@ class SessionReview extends Component
     public $examSession;
     public $breakdown = [];
     public $reviewQuestions = [];
+    public $bookmarkedQuestionIds = [];
 
     // AI explaining states
     public $explainingQuestionId = null;
@@ -31,6 +33,35 @@ class SessionReview extends Component
         $this->breakdown = $this->examSession->score_breakdown ?? [];
 
         $this->loadReviewQuestions();
+        $this->loadBookmarks();
+    }
+
+    protected function loadBookmarks()
+    {
+        $questionIds = collect($this->reviewQuestions)->pluck('id');
+        $this->bookmarkedQuestionIds = Bookmark::where('user_id', Auth::id())
+            ->whereIn('question_id', $questionIds)
+            ->pluck('question_id')
+            ->toArray();
+    }
+
+    public function toggleBookmark($questionId)
+    {
+        $userId = Auth::id();
+        $existing = Bookmark::where('user_id', $userId)->where('question_id', $questionId)->first();
+
+        if ($existing) {
+            $existing->delete();
+            $this->bookmarkedQuestionIds = array_values(array_diff($this->bookmarkedQuestionIds, [$questionId]));
+            session()->flash('message', 'Question removed from bookmarks.');
+        } else {
+            Bookmark::create([
+                'user_id' => $userId,
+                'question_id' => $questionId,
+            ]);
+            $this->bookmarkedQuestionIds[] = $questionId;
+            session()->flash('message', 'Question saved to bookmarks!');
+        }
     }
 
     protected function loadReviewQuestions()

@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Exam;
 
+use App\Models\Bookmark;
 use App\Models\ExamAnswer;
 use App\Models\ExamSession;
 use App\Models\Question;
@@ -22,6 +23,7 @@ class Runner extends Component
     // Light-weight state arrays
     public $answers = []; // question_id => selected_option
     public $flagged = []; // question_id => boolean
+    public $bookmarked = []; // question_id => boolean
     
     public $timeRemaining;
     
@@ -118,11 +120,19 @@ class Runner extends Component
             }
         }
         
-        // Load answers and flagged status
+        // Load answers, flagged status, and bookmarks
         $sessionAnswers = ExamAnswer::where('exam_session_id', $examSession->id)->get();
         foreach ($sessionAnswers as $ans) {
             $this->answers[$ans->question_id] = $ans->selected_option;
             $this->flagged[$ans->question_id] = (bool) $ans->flagged_for_review;
+        }
+
+        $bookmarks = Bookmark::where('user_id', Auth::id())
+            ->whereIn('question_id', $sessionAnswers->pluck('question_id'))
+            ->pluck('question_id')
+            ->toArray();
+        foreach ($bookmarks as $bId) {
+            $this->bookmarked[$bId] = true;
         }
     }
     
@@ -178,6 +188,24 @@ class Runner extends Component
         ExamAnswer::where('exam_session_id', $this->sessionId)
             ->where('question_id', $questionId)
             ->update(['flagged_for_review' => $isFlagged]);
+    }
+
+    public function toggleBookmark($questionId)
+    {
+        $userId = Auth::id();
+        $isBookmarked = !($this->bookmarked[$questionId] ?? false);
+        $this->bookmarked[$questionId] = $isBookmarked;
+
+        if ($isBookmarked) {
+            Bookmark::firstOrCreate([
+                'user_id' => $userId,
+                'question_id' => $questionId,
+            ]);
+        } else {
+            Bookmark::where('user_id', $userId)
+                ->where('question_id', $questionId)
+                ->delete();
+        }
     }
     
     public function navigate($index)

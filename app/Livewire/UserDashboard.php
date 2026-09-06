@@ -2,8 +2,11 @@
 
 namespace App\Livewire;
 
+use App\Models\Bookmark;
 use App\Models\ExamSession;
 use App\Models\ExamAnswer;
+use App\Models\Subject;
+use App\Models\User;
 use App\Jobs\StudyPlanJob;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -17,6 +20,16 @@ class UserDashboard extends Component
     public $totalAnswered = 0;
     public $accuracy = 0;
     
+    // New Feature States
+    public $todayAnswered = 0;
+    public $dailyGoal = 20;
+    public $activeSession = null;
+    public $bookmarkCount = 0;
+    public $leaderboardRank = null;
+    public $weakestSubject = null;
+    public $strongestSubject = null;
+    public $referralCode = '';
+
     public $recentSessions = [];
     public $subjectPerformance = []; // subject name => accuracy %
     
@@ -31,6 +44,7 @@ class UserDashboard extends Component
         $user->updateStreak();
         
         $this->streakDays = $user->study_streak_days;
+        $this->referralCode = $user->referral_code;
         
         // 1. Calculate general stats
         $sessions = ExamSession::where('user_id', $user->id)
@@ -39,14 +53,43 @@ class UserDashboard extends Component
             
         $sessionIds = $sessions->pluck('id');
         
-        $answers = ExamAnswer::whereIn('exam_session_id', $sessionIds)->get();
-        
-        $this->totalAnswered = $answers->whereNotNull('selected_option')->count();
-        $correct = $answers->where('is_correct', true)->count();
+        $this->totalAnswered = ExamAnswer::whereIn('exam_session_id', $sessionIds)
+            ->whereNotNull('selected_option')
+            ->count();
+            
+        $correct = ExamAnswer::whereIn('exam_session_id', $sessionIds)
+            ->where('is_correct', true)
+            ->count();
         
         $this->accuracy = $this->totalAnswered > 0 ? round(($correct / $this->totalAnswered) * 100, 1) : 0;
+
+        // 2. Daily Goal & Activity
+        $this->dailyGoal = config('cbtwise.free_daily_limit', 20);
+        $this->todayAnswered = ExamAnswer::whereIn('exam_session_id', $sessionIds)
+            ->whereDate('updated_at', today())
+            ->whereNotNull('selected_option')
+            ->count();
+
+        // 3. Active in-progress session
+        $this->activeSession = ExamSession::where('user_id', $user->id)
+            ->where('status', 'in_progress')
+            ->with('exam')
+            ->latest('started_at')
+            ->first();
+
+        // 4. Bookmarks Count
+        $this->bookmarkCount = Bookmark::where('user_id', $user->id)->count();
+
+        // 5. Leaderboard Rank Snapshot
+        if ($user->study_streak_days > 0) {
+            $this->leaderboardRank = User::where('is_leaderboard_visible', true)
+                ->where('study_streak_days', '>', $user->study_streak_days)
+                ->count() + 1;
+        } else {
+            $this->leaderboardRank = null;
+        }
         
-        // 2. Recent Sessions
+        // 6. Recent Sessions
         $this->recentSessions = ExamSession::where('user_id', $user->id)
             ->where('status', 'submitted')
             ->with('exam')
@@ -54,7 +97,7 @@ class UserDashboard extends Component
             ->take(5)
             ->get();
             
-        // 3. Subject Performance for Chart.js
+        // 7. Subject Performance for Chart.js
         $subAnswers = ExamAnswer::whereIn('exam_session_id', $sessionIds)
             ->join('questions', 'exam_answers.question_id', '=', 'questions.id')
             ->join('subjects', 'questions.subject_id', '=', 'subjects.id')
@@ -69,12 +112,38 @@ class UserDashboard extends Component
             $this->subjectPerformance[$name] = round(($corr / $total) * 100, 1);
         }
         
-        // Sort subjects to find strong/weak
+        // Sort subjects ascending to identify weak vs strong
         asort($this->subjectPerformance);
+
+        if (!empty($this->subjectPerformance)) {
+            $subNames = array_keys($this->subjectPerformance);
+            $weakestName = reset($subNames);
+            $strongestName = end($subNames);
+            
+            $weakestSub = Subject::where('name', $weakestName)->first();
+            $this->weakestSubject = [
+                'name' => $weakestName,
+                'accuracy' => $this->subjectPerformance[$weakestName],
+                'id' => $weakestSub?->id,
+            ];
+            $this->strongestSubject = [
+                'name' => $strongestName,
+                'accuracy' => $this->subjectPerformance[$strongestName],
+            ];
+        }
         
-        // 4. Study Plan Cache check
+        // 8. Study Plan Cache check
         $this->studyPlan = Cache::get("study-plan:{$user->id}");
         $this->studyPlanStatus = Cache::get("study-plan-status:{$user->id}");
+    }
+
+    public function cancelActiveSession()
+    {
+        if ($this->activeSession) {
+            $this->activeSession->delete();
+            $this->activeSession = null;
+            session()->flash('message', 'Incomplete exam session has been discarded.');
+        }
     }
 
     public function generateStudyPlan()
