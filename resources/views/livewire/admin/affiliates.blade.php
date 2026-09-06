@@ -1,11 +1,16 @@
-<div>
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<div class="flex flex-col lg:flex-row min-h-screen bg-slate-50/50 -mt-8 -mx-4 sm:-mx-6 lg:-mx-8">
+    
+    <!-- Sidebar Navigation -->
+    <x-admin-sidebar />
+
+    <!-- Main Content Area -->
+    <main class="flex-1 p-8 space-y-8 overflow-x-hidden font-sans">
         
         {{-- Header --}}
-        <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-                <h1 class="text-3xl font-black text-slate-900">{{ __('Manage Affiliates') }}</h1>
-                <p class="text-sm text-slate-500 mt-1">{{ __('Review user partner applications, approve payouts, and monitor performance.') }}</p>
+                <h1 class="text-2xl font-black text-slate-950 font-heading">{{ __('Manage Affiliates') }}</h1>
+                <p class="text-xs text-slate-500 mt-0.5">{{ __('Review user partner applications, approve payouts, and monitor performance.') }}</p>
             </div>
         </div>
 
@@ -189,5 +194,5 @@
             </div>
         @endif
 
-    </div>
+    </main>
 </div>

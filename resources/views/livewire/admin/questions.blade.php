@@ -1,56 +1,7 @@
 <div class="flex flex-col lg:flex-row min-h-screen bg-slate-50/50 -mt-8 -mx-4 sm:-mx-6 lg:-mx-8">
     
     <!-- Sidebar Navigation -->
-    <aside class="w-full lg:w-64 bg-white border-r border-slate-100 flex-shrink-0 p-6 space-y-8 font-sans">
-        <div>
-            <p class="text-xs font-black uppercase tracking-wider text-slate-400 mb-4">Admin Panel</p>
-            <nav class="space-y-1">
-                <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 text-slate-600 hover:text-slate-900 font-bold rounded-2xl text-sm transition-all">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z"/></svg>
-                    Dashboard
-                </a>
-                <a href="{{ route('admin.questions') }}" class="flex items-center gap-3 px-4 py-3 bg-emerald-50 text-emerald-700 font-extrabold rounded-2xl text-sm transition-all">
-                    <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    Questions
-                </a>
-                <a href="#" class="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 text-slate-600 hover:text-slate-900 font-bold rounded-2xl text-sm transition-all">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-                    Exams & Subjects
-                </a>
-                <a href="#" class="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 text-slate-600 hover:text-slate-900 font-bold rounded-2xl text-sm transition-all">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-                    Users
-                </a>
-                <a href="#" class="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 text-slate-600 hover:text-slate-900 font-bold rounded-2xl text-sm transition-all">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
-                    Subscriptions
-                </a>
-                <a href="#" class="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 text-slate-600 hover:text-slate-900 font-bold rounded-2xl text-sm transition-all">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 00-2-2h-2a2 2 0 00-2 2v14"/></svg>
-                    Analytics
-                </a>
-                <a href="#" class="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 text-slate-600 hover:text-slate-900 font-bold rounded-2xl text-sm transition-all">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0a2 2 0 01-2 2H6a2 2 0 01-2-2m16 0V9a2 2 0 00-2-2H6a2 2 0 00-2 2v5m16 0a2 2 0 00-2-2H6a2 2 0 00-2 2v5m16 0a2 2 0 01-2 2H6a2 2 0 01-2-2"/></svg>
-                    Messages
-                </a>
-                <a href="{{ route('admin.reports') }}" class="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 text-slate-600 hover:text-slate-900 font-bold rounded-2xl text-sm transition-all">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                    Reports
-                </a>
-                <a href="{{ route('admin.purchase-codes') }}" class="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 text-slate-600 hover:text-slate-900 font-bold rounded-2xl text-sm transition-all">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m-5-3a2 2 0 00-2 2v7a2 2 0 002 2h5a2 2 0 002-2V9a2 2 0 00-2-2h-5z"/></svg>
-                    Purchase Codes
-                </a>
-            </nav>
-        </div>
-
-        <div class="border-t border-slate-100 pt-6">
-            <a href="{{ route('dashboard') }}" class="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 text-slate-600 hover:text-slate-900 font-bold rounded-2xl text-sm transition-all">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-                Back to App
-            </a>
-        </div>
-    </aside>
+    <x-admin-sidebar />
 
     <!-- Main Content Area -->
     <main class="flex-1 p-8 space-y-8 overflow-x-hidden font-sans">
@@ -62,12 +13,9 @@
                 <p class="text-xs text-slate-500 mt-0.5">{{ number_format($totalQuestionsInBank) }} questions in bank</p>
             </div>
             <div class="flex items-center gap-3">
-                <button class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl text-xs font-bold shadow-sm transition-colors flex items-center gap-1.5">
-                    <span>✨</span> AI Generate
-                </button>
-                <button class="px-4 py-2 border border-slate-200 rounded-2xl text-xs font-bold text-slate-700 bg-white hover:bg-slate-50 shadow-sm transition-colors flex items-center gap-1.5">
-                    <span>📤</span> Import CSV
-                </button>
+                <a href="{{ route('admin.bulk-seeder') }}" class="px-4 py-2 border border-slate-200 rounded-2xl text-xs font-bold text-slate-700 bg-white hover:bg-slate-50 shadow-sm transition-colors flex items-center gap-1.5">
+                    <span>⚡</span> Bulk Seeder
+                </a>
                 <button wire:click="openCreateForm" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl text-xs font-bold shadow-sm shadow-emerald-600/10 transition-colors flex items-center gap-1.5">
                     <span>+</span> Add Question
                 </button>
@@ -82,20 +30,30 @@
 
         <!-- Search and Filter Bar -->
         <div class="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div class="relative w-full md:max-w-md">
+            <div class="relative w-full md:max-w-xs">
                 <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                 </span>
                 <input wire:model.live.debounce.300ms="search" type="text" placeholder="Search questions..." class="w-full pl-10 pr-4 py-2.5 border border-slate-200 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-2xl text-sm transition-colors" />
             </div>
 
-            <!-- Exam Buttons Filters -->
-            <div class="flex flex-wrap gap-2">
-                @foreach(['all', 'UTME', 'WAEC', 'NECO'] as $type)
-                    <button wire:click="$set('examFilter', '{{ $type }}')" class="px-4 py-2 rounded-2xl text-xs font-bold transition-all {{ $examFilter === $type ? 'bg-emerald-700 text-white shadow-sm' : 'bg-slate-100/80 text-slate-600 hover:bg-slate-200/60' }}">
-                        {{ $type === 'all' ? 'All' : $type }}
-                    </button>
-                @endforeach
+            <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                <!-- Subject Filter -->
+                <select wire:model.live="subjectFilter" class="px-3.5 py-2 border border-slate-200 rounded-2xl text-xs font-bold bg-white text-slate-700 focus:border-emerald-500">
+                    <option value="all">All Subjects</option>
+                    @foreach($allFilterSubjects as $sub)
+                        <option value="{{ $sub->id }}">{{ $sub->name }}</option>
+                    @endforeach
+                </select>
+
+                <!-- Exam Buttons Filters -->
+                <div class="flex flex-wrap gap-1.5">
+                    @foreach(['all', 'UTME', 'WAEC', 'NECO'] as $type)
+                        <button wire:click="$set('examFilter', '{{ $type }}')" class="px-3.5 py-2 rounded-2xl text-xs font-bold transition-all {{ $examFilter === $type ? 'bg-emerald-700 text-white shadow-sm' : 'bg-slate-100/80 text-slate-600 hover:bg-slate-200/60' }}">
+                            {{ $type === 'all' ? 'All' : $type }}
+                        </button>
+                    @endforeach
+                </div>
             </div>
         </div>
 
@@ -113,18 +71,25 @@
                             <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider w-40">Subject</th>
                             <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider w-20">Year</th>
                             <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider w-28">Difficulty</th>
-                            <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider w-24 text-right">Actions</th>
+                            <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider w-28 text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
                         @forelse ($questions as $q)
-                            <tr class="hover:bg-slate-50/40 transition-colors">
+                            <tr class="hover:bg-slate-50/40 transition-colors {{ $q->is_flagged ? 'bg-amber-50/30' : '' }}">
                                 <td class="px-6 py-4">
                                     <input type="checkbox" class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" />
                                 </td>
                                 <td class="px-6 py-4">
-                                    <div class="text-sm font-medium text-slate-800 line-clamp-2">
-                                        {{ strip_tags($q->question_text) }}
+                                    <div class="flex items-center gap-2">
+                                        @if($q->is_flagged)
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-black bg-red-100 text-red-700">
+                                                FLAGGED
+                                            </span>
+                                        @endif
+                                        <div class="text-sm font-medium text-slate-800 line-clamp-2">
+                                            {{ strip_tags($q->question_text) }}
+                                        </div>
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
@@ -149,12 +114,18 @@
                                     <span class="{{ $diffClass }}">{{ $q->difficulty ?? 'easy' }}</span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <div class="flex items-center justify-end gap-2.5">
-                                        <button wire:click="openEditForm({{ $q->id }})" class="text-slate-500 hover:text-emerald-700 transition-colors" title="Edit">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                    <div class="flex items-center justify-end gap-2">
+                                        <!-- Flag Toggle Button -->
+                                        <button wire:click="toggleFlag({{ $q->id }})" class="p-1.5 {{ $q->is_flagged ? 'text-red-600 bg-red-50' : 'text-slate-400 hover:text-amber-600 hover:bg-amber-50' }} rounded-lg transition-colors" title="{{ $q->is_flagged ? 'Remove Flag' : 'Flag Question' }}">
+                                            <svg class="w-4 h-4" fill="{{ $q->is_flagged ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"/></svg>
                                         </button>
-                                        <button wire:click="deleteQuestion({{ $q->id }})" wire:confirm="Are you sure you want to delete this question?" class="text-slate-400 hover:text-red-600 transition-colors" title="Delete">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                        <!-- Edit Button -->
+                                        <button wire:click="openEditForm({{ $q->id }})" class="p-1.5 text-slate-500 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors" title="Edit">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                        </button>
+                                        <!-- Delete Button -->
+                                        <button wire:click="deleteQuestion({{ $q->id }})" wire:confirm="Are you sure you want to delete this question?" class="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                         </button>
                                     </div>
                                 </td>

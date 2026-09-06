@@ -16,6 +16,7 @@ class Questions extends Component
     // Filters
     public $search = '';
     public $examFilter = 'all'; // all, UTME, WAEC, NECO (or exam IDs)
+    public $subjectFilter = 'all';
     
     // Form management state
     public $isFormOpen = false;
@@ -45,6 +46,7 @@ class Questions extends Component
     protected $queryString = [
         'search' => ['except' => ''],
         'examFilter' => ['except' => 'all'],
+        'subjectFilter' => ['except' => 'all'],
     ];
 
     public function mount()
@@ -62,6 +64,20 @@ class Questions extends Component
     public function updatedExamFilter()
     {
         $this->resetPage();
+    }
+
+    public function updatedSubjectFilter()
+    {
+        $this->resetPage();
+    }
+
+    public function toggleFlag($id)
+    {
+        $question = Question::findOrFail($id);
+        $question->is_flagged = !$question->is_flagged;
+        $question->save();
+
+        session()->flash('message', $question->is_flagged ? 'Question flagged for review.' : 'Question flag removed.');
     }
 
     public function updatedExamId($value)
@@ -230,12 +246,18 @@ class Questions extends Component
             });
         }
 
+        if ($this->subjectFilter !== 'all') {
+            $query->where('subject_id', $this->subjectFilter);
+        }
+
         $questions = $query->latest()->paginate(15);
         $totalQuestionsInBank = Question::count();
+        $allFilterSubjects = Subject::orderBy('name')->get();
 
         return view('livewire.admin.questions', [
             'questions' => $questions,
             'totalQuestionsInBank' => $totalQuestionsInBank,
+            'allFilterSubjects' => $allFilterSubjects,
         ])->layout('layouts.app');
     }
 }

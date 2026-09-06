@@ -11,6 +11,8 @@ class Messages extends Component
     use WithPagination;
 
     public $search = '';
+    public $selectedMessage = null;
+    public $isViewModalOpen = false;
 
     protected $queryString = [
         'search' => ['except' => ''],
@@ -19,6 +21,30 @@ class Messages extends Component
     public function updatedSearch()
     {
         $this->resetPage();
+    }
+
+    public function viewMessage($id)
+    {
+        $this->selectedMessage = ContactMessage::findOrFail($id);
+        $this->isViewModalOpen = true;
+    }
+
+    public function closeViewModal()
+    {
+        $this->isViewModalOpen = false;
+        $this->selectedMessage = null;
+    }
+
+    public function deleteMessage($id)
+    {
+        $msg = ContactMessage::findOrFail($id);
+        $msg->delete();
+
+        if ($this->selectedMessage && $this->selectedMessage->id === $id) {
+            $this->closeViewModal();
+        }
+
+        session()->flash('message', 'Message deleted successfully.');
     }
 
     public function render()

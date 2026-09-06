@@ -78,11 +78,13 @@ class Dashboard extends Component
 
         // 5. Revenue data for Chart (last 6 months)
         $sixMonthsAgo = now()->subMonths(6)->startOfMonth();
+        $isSqlite = DB::getDriverName() === 'sqlite';
+        $monthExpr = $isSqlite ? "strftime('%Y-%m', paid_at)" : "DATE_FORMAT(paid_at, '%Y-%m')";
         
         $monthlyRevenue = Payment::where('status', 'success')
             ->where('paid_at', '>=', $sixMonthsAgo)
             ->select(
-                DB::raw("strftime('%Y-%m', paid_at) as month"), // SQLite compatible
+                DB::raw("{$monthExpr} as month"),
                 DB::raw('sum(amount_kobo) as total')
             )
             ->groupBy('month')
@@ -93,6 +95,15 @@ class Dashboard extends Component
         foreach ($monthlyRevenue as $rev) {
             $this->revenueData[$rev->month] = $rev->total / 100;
         }
+    }
+
+    public function clearSystemCache()
+    {
+        \Illuminate\Support\Facades\Artisan::call('view:clear');
+        \Illuminate\Support\Facades\Artisan::call('cache:clear');
+        \Illuminate\Support\Facades\Artisan::call('route:clear');
+
+        session()->flash('message', 'System views, application cache, and route cache cleared successfully!');
     }
 
     /**
