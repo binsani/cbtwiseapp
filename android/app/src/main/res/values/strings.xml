@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">CBTwise</string>
+    <string name="title_activity_main">CBTwise</string>
+    <string name="package_name">ng.com.cbtwise.app</string>
+    <string name="custom_url_scheme">ng.com.cbtwise.app</string>
+</resources>
