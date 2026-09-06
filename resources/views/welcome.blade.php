@@ -14,7 +14,6 @@
         <!-- Scripts & Styles -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-        @yield('json_ld')
         <script type="application/ld+json">
         {
           "@context": "https://schema.org",
