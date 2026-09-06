@@ -81,6 +81,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Account settings subpages
     Route::get('account/profile', \App\Livewire\Account\Profile::class)->name('account.profile');
+    Route::get('profile', \App\Livewire\Account\Profile::class)->name('profile');
     Route::get('account/security', \App\Livewire\Account\Security::class)->name('account.security');
     Route::get('account/subscription', \App\Livewire\Account\Subscription::class)->name('account.subscription');
     Route::get('account/purchase-codes', \App\Livewire\Account\PurchaseCodes::class)->name('account.purchase-codes');
