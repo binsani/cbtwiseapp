@@ -42,18 +42,18 @@
                     <a href="#contact" class="hover:text-emerald-600 transition-colors">Contact</a>
                 </nav>
                 <div class="flex items-center gap-4">
-                    @auth
+                    <?php if (auth()->check()): ?>
                         <a href="{{ route('dashboard') }}" class="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-sm font-extrabold rounded-2xl transition-all shadow-md">
                             Dashboard
                         </a>
-                    @else
+                    <?php else: ?>
                         <a href="{{ route('login') }}" class="text-sm font-bold text-slate-700 hover:text-emerald-600 transition-colors hidden sm:block">
                             Sign In
                         </a>
                         <a href="{{ route('register') }}" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-extrabold rounded-2xl transition-all shadow-md shadow-emerald-600/10">
                             Get Started
                         </a>
-                    @endauth
+                    <?php endif; ?>
                 </div>
             </div>
         </header>
