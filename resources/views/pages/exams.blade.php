@@ -6,13 +6,13 @@
 @section('json_ld')
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@type": "ItemList",
+  "@@context": "https://schema.org",
+  "@@type": "ItemList",
   "name": "CBTWise Exams Library",
   "itemListElement": [
     @foreach($exams as $index => $exam)
     {
-      "@type": "ListItem",
+      "@@type": "ListItem",
       "position": {{ $index + 1 }},
       "url": "{{ route('exams.show', $exam->slug) }}",
       "name": "{{ $exam->name }}"

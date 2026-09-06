@@ -6,8 +6,8 @@
 @section('json_ld')
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@type": "EducationalOrganization",
+  "@@context": "https://schema.org",
+  "@@type": "EducationalOrganization",
   "name": "{{ $exam->name }} prep on CBTWise",
   "url": "{{ route('exams.show', $exam->slug) }}",
   "description": "Realistic exam simulation for {{ $exam->name }} containing {{ $totalQuestions }} active practice questions."

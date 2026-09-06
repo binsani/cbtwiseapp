@@ -10,8 +10,8 @@
 @endif
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@type": "Organization",
+  "@@context": "https://schema.org",
+  "@@type": "Organization",
   "name": "CBTWise",
   "url": "{{ config('app.url') }}",
   "logo": "{{ config('app.url') }}/images/logo.png"

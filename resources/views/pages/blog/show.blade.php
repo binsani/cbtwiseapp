@@ -6,21 +6,21 @@
 @section('json_ld')
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@type": "BlogPosting",
+  "@@context": "https://schema.org",
+  "@@type": "BlogPosting",
   "headline": "{{ $post->title }}",
   "description": "{{ $post->meta_description ?? $post->excerpt }}",
   "image": "{{ $post->featured_image ?? url('/logo.png') }}",
   "datePublished": "{{ $post->published_at ? $post->published_at->toIso8601String() : $post->created_at->toIso8601String() }}",
   "author": {
-    "@type": "Person",
+    "@@type": "Person",
     "name": "{{ $post->author?->name ?? 'CBTWise Academic Team' }}"
   },
   "publisher": {
-    "@type": "EducationalOrganization",
+    "@@type": "EducationalOrganization",
     "name": "CBTWise",
     "logo": {
-      "@type": "ImageObject",
+      "@@type": "ImageObject",
       "url": "{{ url('/logo.png') }}"
     }
   }

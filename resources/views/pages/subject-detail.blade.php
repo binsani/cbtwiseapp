@@ -6,12 +6,12 @@
 @section('json_ld')
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@type": "Course",
+  "@@context": "https://schema.org",
+  "@@type": "Course",
   "name": "{{ $subject->name }} Syllabus",
   "description": "Comprehensive syllabus outline and past questions simulator for {{ $subject->name }} under {{ $subject->exam?->name ?? 'General' }}.",
   "provider": {
-    "@type": "EducationalOrganization",
+    "@@type": "EducationalOrganization",
     "name": "CBTWise",
     "url": "{{ url('/') }}"
   }

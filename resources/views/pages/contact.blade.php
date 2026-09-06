@@ -6,8 +6,8 @@
 @section('json_ld')
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@type": "ContactPage",
+  "@@context": "https://schema.org",
+  "@@type": "ContactPage",
   "name": "Contact CBTWise",
   "description": "Get support or send feedback to CBTWise."
 }

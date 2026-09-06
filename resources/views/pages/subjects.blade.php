@@ -6,8 +6,8 @@
 @section('json_ld')
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@type": "WebPage",
+  "@@context": "https://schema.org",
+  "@@type": "WebPage",
   "name": "CBTWise Subject Catalog",
   "description": "Syllabus catalog for UTME, WAEC, and NECO subjects."
 }
