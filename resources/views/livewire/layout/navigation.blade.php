@@ -23,62 +23,77 @@ new class extends Component
             <div class="flex">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}" wire:navigate>
+                    <a href="{{ auth()->check() ? route('dashboard') : url('/') }}" wire:navigate>
                         <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
                     </a>
                 </div>
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
-                        {{ __('Dashboard') }}
+                    @auth
+                        <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
+                            {{ __('Dashboard') }}
+                        </x-nav-link>
+                    @endauth
+                    <x-nav-link :href="route('pricing')" :active="request()->routeIs('pricing')" wire:navigate>
+                        {{ __('Pricing') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('redeem')" :active="request()->routeIs('redeem')" wire:navigate>
+                        {{ __('Redeem Code') }}
                     </x-nav-link>
                 </div>
             </div>
 
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6">
-                <x-dropdown align="right" width="48">
-                    <x-slot name="trigger">
-                        <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
-                            <div x-data="{{ json_encode(['name' => auth()->user()->name]) }}" x-text="name" x-on:profile-updated.window="name = $event.detail.name"></div>
+                @auth
+                    <x-dropdown align="right" width="48">
+                        <x-slot name="trigger">
+                            <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
+                                <div x-data="{{ json_encode(['name' => auth()->user()?->name ?? '']) }}" x-text="name" x-on:profile-updated.window="name = $event.detail.name"></div>
 
-                            <div class="ms-1">
-                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                </svg>
-                            </div>
-                        </button>
-                    </x-slot>
+                                <div class="ms-1">
+                                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                            </button>
+                        </x-slot>
 
-                    <x-slot name="content">
-                        <x-dropdown-link :href="route('profile')" wire:navigate>
-                            {{ __('Profile') }}
-                        </x-dropdown-link>
-
-                        @role('admin')
-                            <x-dropdown-link :href="route('admin.dashboard')" wire:navigate>
-                                {{ __('Admin Dashboard') }}
+                        <x-slot name="content">
+                            <x-dropdown-link :href="route('profile')" wire:navigate>
+                                {{ __('Profile') }}
                             </x-dropdown-link>
-                            <x-dropdown-link :href="route('admin.purchase-codes')" wire:navigate>
-                                {{ __('Purchase Codes') }}
-                            </x-dropdown-link>
-                        @endrole
 
-                        @hasanyrole('admin|moderator')
-                            <x-dropdown-link :href="route('admin.reports')" wire:navigate>
-                                {{ __('Moderation Queue') }}
-                            </x-dropdown-link>
-                        @endhasanyrole
+                            @role('admin')
+                                <x-dropdown-link :href="route('admin.dashboard')" wire:navigate>
+                                    {{ __('Admin Dashboard') }}
+                                </x-dropdown-link>
+                                <x-dropdown-link :href="route('admin.purchase-codes')" wire:navigate>
+                                    {{ __('Purchase Codes') }}
+                                </x-dropdown-link>
+                            @endrole
 
-                        <!-- Authentication -->
-                        <button wire:click="logout" class="w-full text-start">
-                            <x-dropdown-link>
-                                {{ __('Log Out') }}
-                            </x-dropdown-link>
-                        </button>
-                    </x-slot>
-                </x-dropdown>
+                            @hasanyrole('admin|moderator')
+                                <x-dropdown-link :href="route('admin.reports')" wire:navigate>
+                                    {{ __('Moderation Queue') }}
+                                </x-dropdown-link>
+                            @endhasanyrole
+
+                            <!-- Authentication -->
+                            <button wire:click="logout" class="w-full text-start">
+                                <x-dropdown-link>
+                                    {{ __('Log Out') }}
+                                </x-dropdown-link>
+                            </button>
+                        </x-slot>
+                    </x-dropdown>
+                @else
+                    <div class="flex items-center gap-3">
+                        <a href="{{ route('login') }}" class="text-sm font-semibold text-gray-700 hover:text-emerald-600 transition" wire:navigate>{{ __('Log in') }}</a>
+                        <a href="{{ route('register') }}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-semibold rounded-lg text-white bg-emerald-600 hover:bg-emerald-700 shadow-sm transition" wire:navigate>{{ __('Register') }}</a>
+                    </div>
+                @endauth
             </div>
 
             <!-- Hamburger -->
@@ -96,45 +111,64 @@ new class extends Component
     <!-- Responsive Navigation Menu -->
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
-                {{ __('Dashboard') }}
+            @auth
+                <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
+                    {{ __('Dashboard') }}
+                </x-responsive-nav-link>
+            @endauth
+            <x-responsive-nav-link :href="route('pricing')" :active="request()->routeIs('pricing')" wire:navigate>
+                {{ __('Pricing') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('redeem')" :active="request()->routeIs('redeem')" wire:navigate>
+                {{ __('Redeem Code') }}
             </x-responsive-nav-link>
         </div>
 
         <!-- Responsive Settings Options -->
         <div class="pt-4 pb-1 border-t border-gray-200">
-            <div class="px-4">
-                <div class="font-medium text-base text-gray-800" x-data="{{ json_encode(['name' => auth()->user()->name]) }}" x-text="name" x-on:profile-updated.window="name = $event.detail.name"></div>
-                <div class="font-medium text-sm text-gray-500">{{ auth()->user()->email }}</div>
-            </div>
+            @auth
+                <div class="px-4">
+                    <div class="font-medium text-base text-gray-800" x-data="{{ json_encode(['name' => auth()->user()?->name ?? '']) }}" x-text="name" x-on:profile-updated.window="name = $event.detail.name"></div>
+                    <div class="font-medium text-sm text-gray-500">{{ auth()->user()?->email }}</div>
+                </div>
 
-            <div class="mt-3 space-y-1">
-                <x-responsive-nav-link :href="route('profile')" wire:navigate>
-                    {{ __('Profile') }}
-                </x-responsive-nav-link>
+                <div class="mt-3 space-y-1">
+                    <x-responsive-nav-link :href="route('profile')" wire:navigate>
+                        {{ __('Profile') }}
+                    </x-responsive-nav-link>
 
-                @role('admin')
-                    <x-responsive-nav-link :href="route('admin.dashboard')" wire:navigate>
-                        {{ __('Admin Dashboard') }}
-                    </x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('admin.purchase-codes')" wire:navigate>
-                        {{ __('Purchase Codes') }}
-                    </x-responsive-nav-link>
-                @endrole
+                    @role('admin')
+                        <x-responsive-nav-link :href="route('admin.dashboard')" wire:navigate>
+                            {{ __('Admin Dashboard') }}
+                        </x-responsive-nav-link>
+                        <x-responsive-nav-link :href="route('admin.purchase-codes')" wire:navigate>
+                            {{ __('Purchase Codes') }}
+                        </x-responsive-nav-link>
+                    @endrole
 
-                @hasanyrole('admin|moderator')
-                    <x-responsive-nav-link :href="route('admin.reports')" wire:navigate>
-                        {{ __('Moderation Queue') }}
-                    </x-responsive-nav-link>
-                @endhasanyrole
+                    @hasanyrole('admin|moderator')
+                        <x-responsive-nav-link :href="route('admin.reports')" wire:navigate>
+                            {{ __('Moderation Queue') }}
+                        </x-responsive-nav-link>
+                    @endhasanyrole
 
-                <!-- Authentication -->
-                <button wire:click="logout" class="w-full text-start">
-                    <x-responsive-nav-link>
-                        {{ __('Log Out') }}
+                    <!-- Authentication -->
+                    <button wire:click="logout" class="w-full text-start">
+                        <x-responsive-nav-link>
+                            {{ __('Log Out') }}
+                        </x-responsive-nav-link>
+                    </button>
+                </div>
+            @else
+                <div class="px-4 py-2 space-y-2">
+                    <x-responsive-nav-link :href="route('login')" wire:navigate>
+                        {{ __('Log in') }}
                     </x-responsive-nav-link>
-                </button>
-            </div>
+                    <x-responsive-nav-link :href="route('register')" wire:navigate>
+                        {{ __('Register') }}
+                    </x-responsive-nav-link>
+                </div>
+            @endauth
         </div>
     </div>
 </nav>
