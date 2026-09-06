@@ -40,8 +40,6 @@ Route::get('subjects/{slug}', [App\Http\Controllers\SubjectLandingController::cl
 Route::get('blog', [App\Http\Controllers\BlogController::class, 'index'])->name('blog.index');
 Route::get('blog/{slug}', [App\Http\Controllers\BlogController::class, 'show'])->name('blog.show');
 
-// SEO Landing Pages
-Route::get('{exam}/{subject}/{year}', [App\Http\Controllers\SeoPageController::class, 'show'])->name('seo.page');
 
 // Paystack Checkout and Verification
 Route::post('payment/paystack/initialize', [PaymentController::class, 'initialize'])
@@ -66,9 +64,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Exam running session is protected by daily limit
     Route::get('exam/{session}/run', ExamRunner::class)
         ->name('exam.run')
+        ->whereNumber('session')
         ->middleware(['daily_limit']);
         
-    Route::get('exam/{session}/results', ExamResults::class)->name('exam.results');
+    Route::get('exam/{session}/results', ExamResults::class)
+        ->name('exam.results')
+        ->whereNumber('session');
 
     // Dashboard Subpages
     Route::get('dashboard/performance', \App\Livewire\Dashboard\Performance::class)->name('dashboard.performance');
@@ -109,5 +110,12 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
 Route::middleware(['auth', 'role:admin,moderator'])->prefix('admin')->group(function () {
     Route::get('reports', AdminReportsIndex::class)->name('admin.reports');
 });
+
+// SEO Landing Pages (e.g. /utme/english-language/2024)
+Route::get('{exam}/{subject}/{year}', [App\Http\Controllers\SeoPageController::class, 'show'])
+    ->where('exam', '^(?!admin|dashboard|exam|account|payment|webhooks|blog|exams|subjects|pricing|redeem|about|faq|contact|terms|privacy|refund-policy|login|register).*$')
+    ->where('subject', '[a-zA-Z0-9\-]+')
+    ->where('year', '[0-9]{4}')
+    ->name('seo.page');
 
 require __DIR__.'/auth.php';
