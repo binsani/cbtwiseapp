@@ -525,7 +525,7 @@
                         <ul class="space-y-4 text-sm text-slate-500">
                             <li><a href="{{ route('terms') }}" class="hover:text-emerald-600 transition-colors">Terms of Service</a></li>
                             <li><a href="{{ route('privacy') }}" class="hover:text-emerald-600 transition-colors">Privacy Policy</a></li>
-                            <li><a href="{{ route('refund.policy') }}" class="hover:text-emerald-600 transition-colors">Refund Policy</a></li>
+                            <li><a href="{{ route('refund-policy') }}" class="hover:text-emerald-600 transition-colors">Refund Policy</a></li>
                         </ul>
                     </div>
                 </div>
