@@ -7,7 +7,7 @@
 <aside class="w-full lg:w-64 bg-white border-r border-slate-200/80 flex-shrink-0 p-6 space-y-8 font-sans">
     <div>
         <div class="flex items-center justify-between mb-4">
-            <p class="text-xs font-black uppercase tracking-wider text-slate-400">Admin Control Center</p>
+            <p class="text-xs font-black uppercase tracking-wider text-slate-400">Admin Panel</p>
             <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-black rounded-full uppercase">Admin</span>
         </div>
         <nav class="space-y-1">

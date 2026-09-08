@@ -80,11 +80,11 @@
             <!-- Metric 5 -->
             <div class="bg-white border border-slate-100/80 p-5 rounded-2xl shadow-sm hover:shadow transition-shadow col-span-2 md:col-span-1">
                 <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-3">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
                 </div>
-                <h3 class="text-3xl font-black text-slate-900 font-heading leading-tight">{{ $flaggedQuestions }}</h3>
-                <p class="text-xs font-bold text-slate-500 mt-1">Reported</p>
-                <p class="text-[10px] text-slate-400 mt-0.5">Flagged questions</p>
+                <h3 class="text-3xl font-black text-slate-900 font-heading leading-tight">{{ \App\Models\ContactMessage::count() }}</h3>
+                <p class="text-xs font-bold text-slate-500 mt-1">Messages</p>
+                <p class="text-[10px] text-slate-400 mt-0.5">Contact submissions</p>
             </div>
         </div>
 
@@ -110,6 +110,14 @@
                     <a href="{{ route('admin.subscriptions') }}" class="flex items-center gap-3 p-4 border border-slate-100 hover:bg-slate-50 rounded-2xl text-sm font-semibold text-slate-700 transition-colors">
                         <span class="p-2 bg-emerald-50 text-emerald-600 rounded-lg">💳</span>
                         Subscriptions
+                    </a>
+                    <a href="{{ route('admin.analytics') }}" class="flex items-center gap-3 p-4 border border-slate-100 hover:bg-slate-50 rounded-2xl text-sm font-semibold text-slate-700 transition-colors">
+                        <span class="p-2 bg-emerald-50 text-emerald-600 rounded-lg">📊</span>
+                        Analytics
+                    </a>
+                    <a href="{{ route('admin.messages') }}" class="flex items-center gap-3 p-4 border border-slate-100 hover:bg-slate-50 rounded-2xl text-sm font-semibold text-slate-700 transition-colors">
+                        <span class="p-2 bg-emerald-50 text-emerald-600 rounded-lg">💬</span>
+                        Messages
                     </a>
                 </div>
             </div>
@@ -141,7 +149,12 @@
 
         <!-- Question Coverage Grid -->
         <div class="bg-white border border-slate-100/80 p-6 rounded-3xl shadow-sm">
-            <h3 class="text-lg font-bold text-slate-900 font-heading mb-6">Local Question Coverage</h3>
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-bold text-slate-900 font-heading">Local Question Coverage</h3>
+                <span class="text-xs font-bold text-slate-500 bg-slate-50 border border-slate-100 px-3 py-1 rounded-full">
+                    {{ number_format($totalQuestions) }} total questions
+                </span>
+            </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 @forelse ($questionCoverage as $subject)
                     <div class="p-4 border border-slate-50 bg-slate-50/20 rounded-2xl">
