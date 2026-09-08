@@ -12,6 +12,10 @@
         "dev": "vite",
         "electron:start": "electron .",
         "electron:build": "electron-builder --win",
+        "electron:build:win": "electron-builder --win",
+        "electron:build:linux": "electron-builder --linux AppImage deb",
+        "electron:build:mac": "electron-builder --mac dmg zip",
+        "electron:build:all": "electron-builder -mwl",
         "mobile:sync": "cap sync",
         "mobile:open": "cap open android"
     },
@@ -41,6 +45,22 @@
                 "nsis",
                 "portable"
             ],
+            "icon": "public/icons/icon-512x512.png"
+        },
+        "mac": {
+            "target": [
+                "dmg",
+                "zip"
+            ],
+            "category": "public.app-category.education",
+            "icon": "public/icons/icon-512x512.png"
+        },
+        "linux": {
+            "target": [
+                "AppImage",
+                "deb"
+            ],
+            "category": "Education",
             "icon": "public/icons/icon-512x512.png"
         },
         "nsis": {
