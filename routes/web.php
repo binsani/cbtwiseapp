@@ -115,7 +115,7 @@ Route::middleware(['auth', 'role:admin,moderator'])->prefix('admin')->group(func
 
 // SEO Landing Pages (e.g. /utme/english-language/2024)
 Route::get('{exam}/{subject}/{year}', [App\Http\Controllers\SeoPageController::class, 'show'])
-    ->where('exam', '^(?!admin|dashboard|exam|account|payment|webhooks|blog|exams|subjects|pricing|redeem|about|faq|contact|terms|privacy|refund-policy|login|register).*$')
+    ->where('exam', '^(?!admin|dashboard|exam|account|payment|webhooks|blog|exams|subjects|pricing|redeem|download|about|faq|contact|terms|privacy|refund-policy|login|register).*$')
     ->where('subject', '[a-zA-Z0-9\-]+')
     ->where('year', '[0-9]{4}')
     ->name('seo.page');
