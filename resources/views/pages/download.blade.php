@@ -1,4 +1,4 @@
-﻿@extends('layouts.public')
+@extends('layouts.public')
 
 @section('title', 'Download CBTwise Desktop App — Practice JAMB, WAEC & NECO Offline')
 @section('meta_description', 'Download the CBTwise Desktop App for Windows, macOS, and Linux. Practice authentic CBT past questions completely offline with our 8-key exam simulator.')
@@ -6,13 +6,13 @@
 @section('json_ld')
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
+  "@@context": "https://schema.org",
+  "@@type": "SoftwareApplication",
   "name": "CBTwise Desktop",
   "operatingSystem": "Windows 10, Windows 11, macOS, Linux",
   "applicationCategory": "EducationalApplication",
   "offers": {
-    "@type": "Offer",
+    "@@type": "Offer",
     "price": "0",
     "priceCurrency": "NGN"
   },
