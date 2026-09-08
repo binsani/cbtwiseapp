@@ -34,9 +34,14 @@
                         CBTWise
                     </span>
                 </div>
-                <nav class="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-600">
+                <nav class="hidden md:flex items-center gap-7 text-sm font-semibold text-slate-600">
                     <a href="/" class="hover:text-emerald-600 transition-colors">Home</a>
                     <a href="{{ route('pricing') }}" class="hover:text-emerald-600 transition-colors">Pricing</a>
+                    <a href="{{ route('download') }}" class="hover:text-emerald-600 transition-colors flex items-center gap-1.5 text-emerald-700 font-bold">
+                        <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                        <span>Download App</span>
+                        <span class="px-1.5 py-0.5 text-[9px] font-black uppercase rounded bg-emerald-100 text-emerald-800">New</span>
+                    </a>
                     <a href="#about" class="hover:text-emerald-600 transition-colors">About</a>
                     <a href="#faq" class="hover:text-emerald-600 transition-colors">FAQ</a>
                     <a href="#contact" class="hover:text-emerald-600 transition-colors">Contact</a>
@@ -79,6 +84,10 @@
                     <div class="mt-10 flex flex-col sm:flex-row justify-center items-center gap-4">
                         <a href="{{ route('register') }}" class="w-full sm:w-auto px-10 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-2xl text-center shadow-xl shadow-emerald-600/20 transition-all transform hover:-translate-y-0.5 text-lg">
                             Practice Free Exams &rarr;
+                        </a>
+                        <a href="{{ route('download') }}" class="w-full sm:w-auto px-8 py-4 bg-white hover:bg-slate-50 text-slate-800 font-extrabold rounded-2xl text-center border border-slate-200 shadow-sm transition-all transform hover:-translate-y-0.5 text-lg flex items-center justify-center gap-2.5">
+                            <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                            <span>Download Desktop App</span>
                         </a>
                     </div>
 

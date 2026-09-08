@@ -46,7 +46,7 @@
                 "nsis",
                 "portable"
             ],
-            "icon": "public/icons/icon-512x512.png"
+            "icon": "public/icons/icon.ico"
         },
         "mac": {
             "target": [
@@ -67,6 +67,8 @@
         "nsis": {
             "oneClick": true,
             "perMachine": false,
+            "installerIcon": "public/icons/icon.ico",
+            "uninstallerIcon": "public/icons/icon.ico",
             "createDesktopShortcut": true,
             "createStartMenuShortcut": true,
             "shortcutName": "CBTwise"

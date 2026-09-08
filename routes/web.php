@@ -20,6 +20,8 @@ Route::get('pricing', Pricing::class)->name('pricing');
 Route::get('redeem', Redeem::class)->name('redeem');
 
 // Public Marketing Pages
+Route::get('download', [App\Http\Controllers\PageController::class, 'download'])->name('download');
+Route::get('download/windows', [App\Http\Controllers\PageController::class, 'downloadWindows'])->name('download.windows');
 Route::get('about', [App\Http\Controllers\PageController::class, 'about'])->name('about');
 Route::get('faq', [App\Http\Controllers\PageController::class, 'faq'])->name('faq');
 Route::get('contact', [App\Http\Controllers\PageController::class, 'contact'])->name('contact');

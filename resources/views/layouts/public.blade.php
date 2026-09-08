@@ -43,9 +43,14 @@
                 </a>
 
                 <!-- Desktop Navigation -->
-                <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
+                <nav class="hidden md:flex items-center gap-7 text-sm font-medium text-slate-600">
                     <a href="{{ url('/') }}" class="hover:text-emerald-600 transition-colors {{ request()->is('/') ? 'text-emerald-600 font-semibold' : '' }}">Home</a>
                     <a href="{{ route('pricing') }}" class="hover:text-emerald-600 transition-colors {{ request()->routeIs('pricing') ? 'text-emerald-600 font-semibold' : '' }}">Pricing</a>
+                    <a href="{{ route('download') }}" class="hover:text-emerald-600 transition-colors flex items-center gap-1.5 {{ request()->routeIs('download') ? 'text-emerald-600 font-bold' : 'text-emerald-700 font-semibold' }}">
+                        <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                        <span>Download App</span>
+                        <span class="px-1.5 py-0.5 text-[9px] font-black uppercase rounded bg-emerald-100 text-emerald-800">New</span>
+                    </a>
                     <a href="{{ route('about') }}" class="hover:text-emerald-600 transition-colors {{ request()->routeIs('about') ? 'text-emerald-600 font-semibold' : '' }}">About</a>
                     <a href="{{ route('faq') }}" class="hover:text-emerald-600 transition-colors {{ request()->routeIs('faq') ? 'text-emerald-600 font-semibold' : '' }}">FAQ</a>
                     <a href="{{ route('contact') }}" class="hover:text-emerald-600 transition-colors {{ request()->routeIs('contact') ? 'text-emerald-600 font-semibold' : '' }}">Contact</a>
@@ -82,6 +87,13 @@
             <div x-show="mobileOpen" x-cloak class="md:hidden border-b border-slate-200 bg-white px-4 pt-2 pb-6 space-y-2">
                 <a href="{{ url('/') }}" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700 hover:bg-slate-50 hover:text-emerald-600">Home</a>
                 <a href="{{ route('pricing') }}" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700 hover:bg-slate-50 hover:text-emerald-600">Pricing</a>
+                <a href="{{ route('download') }}" class="flex items-center justify-between px-3 py-2 rounded-lg text-base font-bold text-emerald-700 bg-emerald-50/60 hover:bg-emerald-50">
+                    <span class="flex items-center gap-2">
+                        <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                        <span>Download Desktop App</span>
+                    </span>
+                    <span class="px-2 py-0.5 text-[10px] font-black uppercase rounded bg-emerald-200/80 text-emerald-900">Offline</span>
+                </a>
                 <a href="{{ route('about') }}" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700 hover:bg-slate-50 hover:text-emerald-600">About</a>
                 <a href="{{ route('faq') }}" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700 hover:bg-slate-50 hover:text-emerald-600">FAQ</a>
                 <a href="{{ route('contact') }}" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700 hover:bg-slate-50 hover:text-emerald-600">Contact</a>

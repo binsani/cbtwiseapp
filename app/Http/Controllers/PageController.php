@@ -58,6 +58,21 @@ class PageController extends Controller
         return view('pages.privacy');
     }
 
+    public function download()
+    {
+        return view('pages.download');
+    }
+
+    public function downloadWindows()
+    {
+        $localPath = public_path('downloads/CBTwise-Setup.exe');
+        if (file_exists($localPath)) {
+            return response()->download($localPath, 'CBTwise-Setup.exe');
+        }
+
+        return redirect('https://github.com/binsani/cbtwiseapp/releases');
+    }
+
     public function refundPolicy()
     {
         return view('pages.refund-policy');
