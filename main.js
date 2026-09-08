@@ -70,49 +70,67 @@ function waitForServer(port, timeoutMs = 15000) {
 }
 
 // Locate appropriate PHP binary across Windows, macOS, and Linux
+function getAppBasePath() {
+  if (!app.isPackaged) return __dirname;
+  const candidates = [
+    path.join(process.resourcesPath, 'app'),
+    path.join(process.resourcesPath, 'app.asar.unpacked'),
+    app.getAppPath(),
+    __dirname,
+  ];
+  for (const c of candidates) {
+    if (fs.existsSync(c)) return c;
+  }
+  return path.join(process.resourcesPath, 'app');
+}
+
+// Locate appropriate PHP binary across Windows, macOS, and Linux
 function resolvePhpExecutable() {
   const isPackaged = app.isPackaged;
   const platform = process.platform;
-  const basePath = isPackaged
-    ? path.join(process.resourcesPath, 'app')
-    : __dirname;
+  const basePath = getAppBasePath();
 
   if (platform === 'win32') {
-    const winPath = isPackaged
-      ? path.join(process.resourcesPath, 'app', 'php-win', 'php.exe')
-      : path.join(__dirname, 'php-win', 'php.exe');
-    return fs.existsSync(winPath) ? winPath : 'php';
+    const candidates = [
+      path.join(basePath, 'php-win', 'php.exe'),
+      path.join(process.resourcesPath, 'php-win', 'php.exe'),
+      path.join(process.resourcesPath, 'app', 'php-win', 'php.exe'),
+      path.join(process.resourcesPath, 'app.asar.unpacked', 'php-win', 'php.exe'),
+      path.join(app.getAppPath(), 'php-win', 'php.exe'),
+      path.join(__dirname, 'php-win', 'php.exe'),
+    ];
+    for (const p of candidates) {
+      if (fs.existsSync(p)) return p;
+    }
+    return 'php';
   }
 
   if (platform === 'darwin') {
-    const macBundled = isPackaged
-      ? path.join(process.resourcesPath, 'app', 'php-mac', 'php')
-      : path.join(__dirname, 'php-mac', 'php');
-    if (fs.existsSync(macBundled)) return macBundled;
-
-    // Common macOS Homebrew and system locations
-    const macPaths = [
+    const macCandidates = [
+      path.join(basePath, 'php-mac', 'php'),
+      path.join(process.resourcesPath, 'php-mac', 'php'),
+      path.join(process.resourcesPath, 'app', 'php-mac', 'php'),
+      path.join(process.resourcesPath, 'app.asar.unpacked', 'php-mac', 'php'),
       '/opt/homebrew/bin/php',
       '/usr/local/bin/php',
       '/usr/bin/php',
     ];
-    for (const p of macPaths) {
+    for (const p of macCandidates) {
       if (fs.existsSync(p)) return p;
     }
     return 'php';
   }
 
   if (platform === 'linux') {
-    const linuxBundled = isPackaged
-      ? path.join(process.resourcesPath, 'app', 'php-linux', 'php')
-      : path.join(__dirname, 'php-linux', 'php');
-    if (fs.existsSync(linuxBundled)) return linuxBundled;
-
-    const linuxPaths = [
+    const linuxCandidates = [
+      path.join(basePath, 'php-linux', 'php'),
+      path.join(process.resourcesPath, 'php-linux', 'php'),
+      path.join(process.resourcesPath, 'app', 'php-linux', 'php'),
+      path.join(process.resourcesPath, 'app.asar.unpacked', 'php-linux', 'php'),
       '/usr/bin/php',
       '/usr/local/bin/php',
     ];
-    for (const p of linuxPaths) {
+    for (const p of linuxCandidates) {
       if (fs.existsSync(p)) return p;
     }
     return 'php';
@@ -135,13 +153,27 @@ function stopPhpServer() {
 async function startPhpServer() {
   if (phpProcess) return true;
 
-  const isPackaged = app.isPackaged;
-  const basePath = isPackaged
-    ? path.join(process.resourcesPath, 'app')
-    : __dirname;
-
+  const basePath = getAppBasePath();
   const publicPath = path.join(basePath, 'public');
   const phpExecutable = resolvePhpExecutable();
+
+  // If bundled binary wasn't found and fallback is 'php' which might not be installed
+  if (phpExecutable === 'php' && process.platform === 'win32') {
+    if (mainWindow) {
+      dialog.showMessageBox(mainWindow, {
+        type: 'info',
+        title: 'Offline Engine Notice',
+        message: 'The bundled offline PHP engine was not found on this device.\n\nWould you like to switch to Online Mode to use CBTwise directly over the internet?',
+        buttons: ['Switch to Online Mode', 'Cancel'],
+        defaultId: 0,
+      }).then(({ response }) => {
+        if (response === 0) {
+          setMode('online');
+        }
+      });
+    }
+    return false;
+  }
 
   try {
     phpProcess = spawn(
