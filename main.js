@@ -327,7 +327,7 @@ function showNetworkErrorPage(failedUrl) {
     </body>
     </html>
   `;
-  mainWindow.loadURL(\`data:text/html;charset=utf-8,\${encodeURIComponent(html)}\`);
+  mainWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`);
 }
 
 function createWindow() {
@@ -336,7 +336,7 @@ function createWindow() {
     height: 800,
     minWidth: 1024,
     minHeight: 700,
-    title: \`CBTwise — AI-Powered CBT Platform (\${currentMode === 'offline' ? 'Offline Standalone' : 'Online Cloud'})\`,
+    title: `CBTwise — AI-Powered CBT Platform (${currentMode === 'offline' ? 'Offline Standalone' : 'Online Cloud'})`,
     icon: path.join(__dirname, 'public', 'icons', 'icon-512x512.png'),
     webPreferences: {
       nodeIntegration: false,
@@ -351,7 +351,7 @@ function createWindow() {
   // Listen for navigation errors in Online Mode
   mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription, validatedURL) => {
     if (currentMode === 'online' && !validatedURL.startsWith('data:')) {
-      console.warn(\`Failed to load \${validatedURL}: [\${errorCode}] \${errorDescription}\`);
+      console.warn(`Failed to load ${validatedURL}: [${errorCode}] ${errorDescription}`);
       showNetworkErrorPage(validatedURL);
     }
   });
@@ -383,7 +383,7 @@ function createWindow() {
   if (currentMode === 'offline') {
     startPhpServer().then((ok) => {
       if (ok) {
-        mainWindow.loadURL(\`\${OFFLINE_URL}/dashboard\`);
+        mainWindow.loadURL(`${OFFLINE_URL}/dashboard`);
       } else {
         setMode('online');
       }
