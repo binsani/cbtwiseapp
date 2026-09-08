@@ -64,8 +64,8 @@
             "icon": "public/icons/icon-512x512.png"
         },
         "nsis": {
-            "oneClick": false,
-            "allowToChangeInstallationDirectory": true,
+            "oneClick": true,
+            "perMachine": false,
             "createDesktopShortcut": true,
             "createStartMenuShortcut": true,
             "shortcutName": "CBTwise"
