@@ -119,20 +119,30 @@
                                     {{ $c->plan_duration_days }} days
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    @if ($c->isUsed())
-                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-blue-50 text-blue-700">used</span>
+                                    @if ($c->status === 'disabled')
+                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-rose-50 text-rose-700">disabled</span>
+                                    @elseif ($c->isUsed())
+                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-blue-50 text-blue-700">redeemed</span>
                                     @else
-                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-50 text-emerald-700">active</span>
+                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-50 text-emerald-700">available</span>
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
                                     {{ $c->created_at->format('n/j/Y') }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-xs text-slate-400">
-                                    —
+                                    {{ $c->notes ?: '—' }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    —
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-xs font-bold">
+                                    @if($c->status === 'disabled')
+                                        <button wire:click="restoreCode({{ $c->id }})" class="text-emerald-600 hover:text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-xl transition-colors">
+                                            Restore
+                                        </button>
+                                    @else
+                                        <button wire:click="disableCode({{ $c->id }})" wire:confirm="Are you sure you want to disable this purchase code?" class="text-rose-600 hover:text-rose-800 bg-rose-50 px-2.5 py-1 rounded-xl transition-colors">
+                                            Disable
+                                        </button>
+                                    @endif
                                 </td>
                             </tr>
                         @empty

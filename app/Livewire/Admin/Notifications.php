@@ -68,6 +68,12 @@ class Notifications extends Component
         session()->flash('message', 'Notification deleted successfully.');
     }
 
+    public function markAllAsRead()
+    {
+        AdminNotification::where('is_read', false)->update(['is_read' => true]);
+        session()->flash('message', 'All notifications marked as read.');
+    }
+
     public function markSelectedAsRead()
     {
         AdminNotification::whereIn('id', $this->selectedNotifications)->update(['is_read' => true]);

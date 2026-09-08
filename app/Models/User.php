@@ -23,6 +23,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'daily_count_reset_at', 'study_streak_days', 'last_active_date',
         'google_id', 'avatar', 'email_verified_at',
         'referral_code', 'referred_by', 'streak_freeze_tokens',
+        'is_suspended', 'suspended_at',
     ];
 
     protected static function booted(): void
@@ -43,6 +44,8 @@ class User extends Authenticatable implements MustVerifyEmail
             'password'             => 'hashed',
             'premium_expires_at'   => 'datetime',
             'daily_count_reset_at' => 'datetime',
+            'suspended_at'         => 'datetime',
+            'is_suspended'         => 'boolean',
             'last_active_date'     => 'date',
             'exam_year'            => 'integer',
             'daily_question_count' => 'integer',

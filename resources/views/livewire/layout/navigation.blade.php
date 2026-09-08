@@ -100,19 +100,10 @@ new class extends Component
                                 {{ __('Subscription') }}
                             </x-dropdown-link>
 
-                            @role('admin')
+                            @hasanyrole('admin|moderator|support|content_editor|analyst')
                                 <div class="border-t border-gray-100 my-1"></div>
-                                <x-dropdown-link :href="route('admin.dashboard')" wire:navigate>
+                                <x-dropdown-link :href="route('admin.dashboard')" wire:navigate class="text-emerald-700 font-bold">
                                     {{ __('Admin Dashboard') }}
-                                </x-dropdown-link>
-                                <x-dropdown-link :href="route('admin.purchase-codes')" wire:navigate>
-                                    {{ __('Purchase Codes') }}
-                                </x-dropdown-link>
-                            @endrole
-
-                            @hasanyrole('admin|moderator')
-                                <x-dropdown-link :href="route('admin.reports')" wire:navigate>
-                                    {{ __('Moderation Queue') }}
                                 </x-dropdown-link>
                             @endhasanyrole
 

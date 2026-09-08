@@ -4,6 +4,7 @@ namespace App\Livewire\Admin;
 
 use App\Models\PurchaseCode;
 use App\Models\User;
+use App\Services\AdminLogger;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -20,7 +21,7 @@ class PurchaseCodes extends Component
     public $notes = '';
 
     // Filter fields
-    public $filterStatus = 'all'; // all, active (unused), used, cancelled
+    public $filterStatus = 'all'; // all, active, used, disabled
     public $search = '';
 
     // Modal forms state
@@ -75,18 +76,34 @@ class PurchaseCodes extends Component
             PurchaseCode::generate($adminId, $this->durationDays, $this->studentName ?: null, $this->notes ?: null);
         }
 
-        // Record audit trail event
-        \App\Models\AdminActivityLog::record(
-            $adminId,
+        AdminLogger::log(
             'purchase_code.batch_generated',
-            null,
-            null,
+            PurchaseCode::class,
             ['duration_days' => $this->durationDays, 'quantity' => $this->quantity, 'student_name' => $this->studentName]
         );
 
         session()->flash('message', "Successfully generated {$this->quantity} purchase codes of {$this->durationDays} days duration.");
         $this->closeModal();
     }
+
+    public function disableCode($id)
+    {
+        $code = PurchaseCode::findOrFail($id);
+        $code->disable();
+
+        AdminLogger::log('purchase_code.disabled', $code, ['code' => $code->code]);
+        session()->flash('message', "Purchase code {$code->code} has been disabled.");
+    }
+
+    public function restoreCode($id)
+    {
+        $code = PurchaseCode::findOrFail($id);
+        $code->restore();
+
+        AdminLogger::log('purchase_code.restored', $code, ['code' => $code->code]);
+        session()->flash('message', "Purchase code {$code->code} has been restored.");
+    }
+
     public function downloadCsv(): StreamedResponse
     {
         $headers = [
@@ -104,12 +121,13 @@ class PurchaseCodes extends Component
             PurchaseCode::with('usedBy')
                 ->chunk(100, function($codes) use ($file) {
                     foreach ($codes as $c) {
+                        $status = $c->status ?? ($c->isUsed() ? 'used' : 'active');
                         fputcsv($file, [
                             $c->id,
                             $c->code,
                             $c->plan_duration_days,
-                            $c->isUsed() ? 'used' : 'active',
-                            $c->usedBy->name ?? 'N/A',
+                            $status,
+                            $c->usedBy->name ?? ($c->student_name ?? 'N/A'),
                             $c->usedBy->email ?? 'N/A',
                             $c->created_at->toDateTimeString(),
                         ]);
@@ -126,23 +144,26 @@ class PurchaseCodes extends Component
     {
         // 1. Core analytics counts
         $totalCodes = PurchaseCode::count();
-        $activeCodes = PurchaseCode::whereNull('used_by_user_id')->count();
+        $activeCodes = PurchaseCode::whereNull('used_by_user_id')->where('status', '!=', 'disabled')->count();
         $usedCodes = PurchaseCode::whereNotNull('used_by_user_id')->count();
-        $cancelledCodes = 0; // standard placeholder count matching layout
+        $disabledCodes = PurchaseCode::where('status', 'disabled')->count();
 
         // 2. Query execution
         $query = PurchaseCode::query()
             ->with(['usedBy', 'createdBy']);
 
         if ($this->filterStatus === 'active') {
-            $query->whereNull('used_by_user_id');
+            $query->whereNull('used_by_user_id')->where('status', '!=', 'disabled');
         } elseif ($this->filterStatus === 'used') {
             $query->whereNotNull('used_by_user_id');
+        } elseif ($this->filterStatus === 'disabled') {
+            $query->where('status', 'disabled');
         }
 
         if (!empty($this->search)) {
             $query->where(function($q) {
                 $q->where('code', 'like', '%' . strtoupper($this->search) . '%')
+                  ->orWhere('student_name', 'like', '%' . $this->search . '%')
                   ->orWhereHas('usedBy', function($u) {
                       $u->where('name', 'like', '%' . $this->search . '%')
                         ->orWhere('email', 'like', '%' . $this->search . '%');
@@ -157,7 +178,7 @@ class PurchaseCodes extends Component
             'totalCodes' => $totalCodes,
             'activeCodes' => $activeCodes,
             'usedCodes' => $usedCodes,
-            'cancelledCodes' => $cancelledCodes,
+            'cancelledCodes' => $disabledCodes,
         ])->layout('layouts.app');
     }
 }

@@ -6,22 +6,47 @@ use App\Models\Exam;
 use App\Models\Subject;
 use App\Models\Question;
 use App\Http\Clients\AlocApiClient;
+use App\Services\AdminLogger;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 
 class BulkSeeder extends Component
 {
-    public $batches = 3; // default: 3 batches (~120 questions/subject)
+    public $batches = 3;
+    public $selectedExamId = 'all';
+    public $selectedSubjectId = 'all';
+    public $dryRun = false;
+
+    public $isRunning = false;
+    public $logs = [];
+    public $totalScanned = 0;
+    public $totalCreated = 0;
+    public $totalSkippedDuplicates = 0;
+    public $totalInvalid = 0;
 
     public function startBulkFetch()
     {
-        $alocClient = new AlocApiClient();
-        $subjects = Subject::with('exam')->where('is_active', true)->get();
-        $totalFetched = 0;
-        $totalCreated = 0;
+        $this->isRunning = true;
+        $this->logs = [];
+        $this->totalScanned = 0;
+        $this->totalCreated = 0;
+        $this->totalSkippedDuplicates = 0;
+        $this->totalInvalid = 0;
 
-        // Map common subject names if they differ
+        $alocClient = new AlocApiClient();
+        
+        $query = Subject::with('exam')->where('is_active', true);
+        if ($this->selectedExamId !== 'all') {
+            $query->where('exam_id', $this->selectedExamId);
+        }
+        if ($this->selectedSubjectId !== 'all') {
+            $query->where('id', $this->selectedSubjectId);
+        }
+
+        $subjects = $query->get();
+
+        $this->logs[] = "[" . now()->toTimeString() . "] Starting bulk import for {$subjects->count()} subject(s). Batches: {$this->batches}. Dry run: " . ($this->dryRun ? 'YES' : 'NO');
+
         $subjectMapping = [
             'english language' => 'english',
             'christian religious studies' => 'crk',
@@ -29,8 +54,6 @@ class BulkSeeder extends Component
             'further mathematics' => 'furthermaths',
         ];
 
-        // Fetch multiple batches to get different years/sets from ALOC API
-        // Usually, 1 batch fetching 40 questions retrieves a single random collection.
         $questionsPerBatch = 40;
 
         foreach ($subjects as $subject) {
@@ -39,9 +62,17 @@ class BulkSeeder extends Component
                 $alocSubjectName = $subjectMapping[$alocSubjectName];
             }
 
+            $subjectCreated = 0;
+            $subjectDupes = 0;
+
             for ($b = 0; $b < $this->batches; $b++) {
-                $alocQuestionsData = $alocClient->fetchQuestions($alocSubjectName, $questionsPerBatch);
-                
+                try {
+                    $alocQuestionsData = $alocClient->fetchQuestions($alocSubjectName, $questionsPerBatch);
+                } catch (\Exception $e) {
+                    $this->logs[] = "[" . now()->toTimeString() . "] Warning: Failed batch " . ($b+1) . " for {$subject->name}: " . $e->getMessage();
+                    continue;
+                }
+
                 if (empty($alocQuestionsData)) {
                     continue;
                 }
@@ -49,10 +80,11 @@ class BulkSeeder extends Component
                 foreach ($alocQuestionsData as $item) {
                     $questionText = $item['question'] ?? $item['question_text'] ?? '';
                     if (empty($questionText)) {
+                        $this->totalInvalid++;
                         continue;
                     }
 
-                    $totalFetched++;
+                    $this->totalScanned++;
 
                     // Normalise correct option
                     $correctOption = strtolower($item['answer'] ?? $item['correct_option'] ?? 'a');
@@ -67,53 +99,80 @@ class BulkSeeder extends Component
                     $optionE = $item['option']['e'] ?? $item['option_e'] ?? null;
 
                     if (empty($optionA) || empty($optionB)) {
+                        $this->totalInvalid++;
                         continue;
                     }
 
                     $hash = Question::dedupeHash($questionText);
-
-                    // Check if exists
                     $exists = Question::where('dedupe_hash', $hash)->exists();
-                    if (!$exists) {
-                        Question::create([
-                            'dedupe_hash' => $hash,
-                            'exam_id' => $subject->exam_id,
-                            'subject_id' => $subject->id,
-                            'topic_id' => null,
-                            'created_by' => Auth::id(),
-                            'year' => $item['year'] ?? now()->year,
-                            'question_text' => $questionText,
-                            'question_image' => $item['image'] ?? null,
-                            'option_a' => $optionA,
-                            'option_b' => $optionB,
-                            'option_c' => $optionC,
-                            'option_d' => $optionD,
-                            'option_e' => $optionE,
-                            'correct_option' => $correctOption,
-                            'explanation' => $item['solution'] ?? $item['explanation'] ?? null,
-                            'source' => 'aloc',
-                        ]);
-                        $totalCreated++;
+
+                    if ($exists) {
+                        $this->totalSkippedDuplicates++;
+                        $subjectDupes++;
+                    } else {
+                        if (!$this->dryRun) {
+                            Question::create([
+                                'dedupe_hash' => $hash,
+                                'exam_id' => $subject->exam_id,
+                                'subject_id' => $subject->id,
+                                'topic_id' => null,
+                                'created_by' => Auth::id(),
+                                'year' => $item['year'] ?? now()->year,
+                                'question_text' => $questionText,
+                                'question_image' => $item['image'] ?? null,
+                                'option_a' => $optionA,
+                                'option_b' => $optionB,
+                                'option_c' => $optionC,
+                                'option_d' => $optionD,
+                                'option_e' => $optionE,
+                                'correct_option' => $correctOption,
+                                'explanation' => $item['solution'] ?? $item['explanation'] ?? null,
+                                'source' => 'aloc',
+                            ]);
+                        }
+                        $this->totalCreated++;
+                        $subjectCreated++;
                     }
                 }
             }
+
+            $this->logs[] = "[" . now()->toTimeString() . "] {$subject->name}: +{$subjectCreated} imported, {$subjectDupes} duplicate(s) skipped.";
         }
 
-        // Record audit trail event
-        \App\Models\AdminActivityLog::record(
-            Auth::id(),
-            'bulk_seeder.fetch_completed',
+        $this->logs[] = "[" . now()->toTimeString() . "] Bulk seeder finished! Scanned: {$this->totalScanned}, Created: {$this->totalCreated}, Duplicates skipped: {$this->totalSkippedDuplicates}.";
+
+        AdminLogger::log(
+            'bulk_seeder.run',
             null,
-            null,
-            ['batches' => $this->batches, 'total_fetched' => $totalFetched, 'total_created' => $totalCreated]
+            [
+                'batches' => $this->batches,
+                'scanned' => $this->totalScanned,
+                'created' => $this->totalCreated,
+                'duplicates' => $this->totalSkippedDuplicates,
+                'dry_run' => $this->dryRun,
+            ]
         );
 
-        session()->flash('message', "Bulk fetch finished. Fetched {$totalFetched} questions from ALOC; created {$totalCreated} new unique questions locally.");
+        $this->isRunning = false;
+        session()->flash('message', "Bulk run complete. Processed {$this->totalScanned} items; created {$this->totalCreated} new questions.");
     }
 
     public function render()
     {
-        return view('livewire.admin.bulk-seeder')
-            ->layout('layouts.app');
+        $exams = Exam::all();
+        $subjects = Subject::orderBy('name')->get();
+
+        // Subjects with very low coverage (< 50 questions)
+        $lowCoverageSubjects = Subject::with('exam')
+            ->withCount('questions')
+            ->having('questions_count', '<', 50)
+            ->orderBy('questions_count')
+            ->get();
+
+        return view('livewire.admin.bulk-seeder', [
+            'exams' => $exams,
+            'subjects' => $subjects,
+            'lowCoverageSubjects' => $lowCoverageSubjects,
+        ])->layout('layouts.app');
     }
 }

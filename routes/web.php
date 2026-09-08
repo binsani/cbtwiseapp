@@ -92,8 +92,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('account/delete', \App\Livewire\Account\DeleteAccount::class)->name('account.delete');
 });
 
-// Admin Panel Routing
-Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
+// Admin Panel Routing (Supports all administrative staff roles)
+Route::middleware(['auth', 'role:admin|moderator|support|content_editor|analyst'])->prefix('admin')->group(function () {
+    Route::get('/', AdminDashboard::class)->name('admin');
     Route::get('dashboard', AdminDashboard::class)->name('admin.dashboard');
     Route::get('questions', \App\Livewire\Admin\Questions::class)->name('admin.questions');
     Route::get('exams-subjects', \App\Livewire\Admin\ExamsSubjects::class)->name('admin.exams-subjects');
@@ -101,16 +102,14 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::get('subscriptions', \App\Livewire\Admin\Subscriptions::class)->name('admin.subscriptions');
     Route::get('analytics', \App\Livewire\Admin\Analytics::class)->name('admin.analytics');
     Route::get('messages', \App\Livewire\Admin\Messages::class)->name('admin.messages');
+    Route::get('reports', AdminReportsIndex::class)->name('admin.reports');
+    Route::get('purchase-codes', AdminPurchaseCodes::class)->name('admin.purchase-codes');
     Route::get('bulk-seeder', \App\Livewire\Admin\BulkSeeder::class)->name('admin.bulk-seeder');
     Route::get('notifications', \App\Livewire\Admin\Notifications::class)->name('admin.notifications');
-    Route::get('purchase-codes', AdminPurchaseCodes::class)->name('admin.purchase-codes');
+    Route::get('settings', \App\Livewire\Admin\Settings::class)->name('admin.settings');
+    Route::get('activity-logs', \App\Livewire\Admin\ActivityLogs::class)->name('admin.activity-logs');
     Route::get('blog', \App\Livewire\Admin\BlogAdmin::class)->name('admin.blog');
     Route::get('affiliates', \App\Livewire\Admin\Affiliates::class)->name('admin.affiliates');
-});
-
-// Moderation/Reports Routing (Admins and Moderators)
-Route::middleware(['auth', 'role:admin,moderator'])->prefix('admin')->group(function () {
-    Route::get('reports', AdminReportsIndex::class)->name('admin.reports');
 });
 
 // SEO Landing Pages (e.g. /utme/english-language/2024)

@@ -4,6 +4,7 @@ namespace App\Livewire\Admin;
 
 use App\Models\Exam;
 use App\Models\Subject;
+use App\Services\AdminLogger;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Illuminate\Support\Str;
@@ -36,6 +37,7 @@ class ExamsSubjects extends Component
     public $subject_slug;
     public $subject_icon = '📚';
     public $subject_sort_order = 0;
+    public $subject_target_question_count = 200;
     public $subject_is_active = true;
 
     public function changeTab($tab)
@@ -81,6 +83,16 @@ class ExamsSubjects extends Component
         $this->exam_is_active = true;
     }
 
+    public function toggleExamStatus($id)
+    {
+        $exam = Exam::findOrFail($id);
+        $exam->is_active = !$exam->is_active;
+        $exam->save();
+
+        AdminLogger::log('exam.status_toggled', $exam, ['is_active' => $exam->is_active]);
+        session()->flash('message', "Exam '{$exam->name}' status toggled.");
+    }
+
     public function saveExam()
     {
         $this->exam_slug = Str::slug($this->exam_slug ?: $this->exam_name);
@@ -106,10 +118,13 @@ class ExamsSubjects extends Component
         ];
 
         if ($this->isEditMode) {
-            Exam::findOrFail($this->editingExamId)->update($data);
+            $exam = Exam::findOrFail($this->editingExamId);
+            $exam->update($data);
+            AdminLogger::log('exam.updated', $exam);
             session()->flash('message', 'Exam updated successfully.');
         } else {
-            Exam::create($data);
+            $exam = Exam::create($data);
+            AdminLogger::log('exam.created', $exam);
             session()->flash('message', 'Exam created successfully.');
         }
 
@@ -119,7 +134,9 @@ class ExamsSubjects extends Component
 
     public function deleteExam($id)
     {
-        Exam::findOrFail($id)->delete();
+        $exam = Exam::findOrFail($id);
+        AdminLogger::log('exam.deleted', $exam, ['name' => $exam->name]);
+        $exam->delete();
         session()->flash('message', 'Exam deleted successfully.');
     }
 
@@ -143,6 +160,7 @@ class ExamsSubjects extends Component
         $this->subject_slug = $subject->slug;
         $this->subject_icon = $subject->icon ?? '📚';
         $this->subject_sort_order = $subject->sort_order;
+        $this->subject_target_question_count = $subject->target_question_count ?? 200;
         $this->subject_is_active = $subject->is_active;
 
         $this->isEditMode = true;
@@ -157,7 +175,18 @@ class ExamsSubjects extends Component
         $this->subject_slug = '';
         $this->subject_icon = '📚';
         $this->subject_sort_order = 0;
+        $this->subject_target_question_count = 200;
         $this->subject_is_active = true;
+    }
+
+    public function toggleSubjectStatus($id)
+    {
+        $subject = Subject::findOrFail($id);
+        $subject->is_active = !$subject->is_active;
+        $subject->save();
+
+        AdminLogger::log('subject.status_toggled', $subject, ['is_active' => $subject->is_active]);
+        session()->flash('message', "Subject '{$subject->name}' status toggled.");
     }
 
     public function saveSubject()
@@ -170,6 +199,7 @@ class ExamsSubjects extends Component
             'subject_slug' => 'required|string|max:60|unique:subjects,slug,' . ($this->editingSubjectId ?? 'NULL') . ',id,exam_id,' . $this->subject_exam_id,
             'subject_icon' => 'nullable|string|max:10',
             'subject_sort_order' => 'required|integer|min:0',
+            'subject_target_question_count' => 'required|integer|min:1',
             'subject_is_active' => 'required|boolean',
         ];
 
@@ -181,14 +211,18 @@ class ExamsSubjects extends Component
             'slug' => $this->subject_slug,
             'icon' => $this->subject_icon,
             'sort_order' => $this->subject_sort_order,
+            'target_question_count' => $this->subject_target_question_count,
             'is_active' => $this->subject_is_active,
         ];
 
         if ($this->isEditMode) {
-            Subject::findOrFail($this->editingSubjectId)->update($data);
+            $subject = Subject::findOrFail($this->editingSubjectId);
+            $subject->update($data);
+            AdminLogger::log('subject.updated', $subject);
             session()->flash('message', 'Subject updated successfully.');
         } else {
-            Subject::create($data);
+            $subject = Subject::create($data);
+            AdminLogger::log('subject.created', $subject);
             session()->flash('message', 'Subject created successfully.');
         }
 
@@ -198,7 +232,9 @@ class ExamsSubjects extends Component
 
     public function deleteSubject($id)
     {
-        Subject::findOrFail($id)->delete();
+        $subject = Subject::findOrFail($id);
+        AdminLogger::log('subject.deleted', $subject, ['name' => $subject->name]);
+        $subject->delete();
         session()->flash('message', 'Subject deleted successfully.');
     }
 
@@ -207,8 +243,8 @@ class ExamsSubjects extends Component
         $examsCount = Exam::count();
         $subjectsCount = Subject::count();
 
-        $exams = Exam::withCount('subjects')->latest()->paginate(15);
-        $subjects = Subject::with('exam')->orderBy('exam_id')->orderBy('sort_order')->paginate(20);
+        $exams = Exam::withCount(['subjects', 'questions'])->latest()->paginate(15);
+        $subjects = Subject::with('exam')->withCount('questions')->orderBy('exam_id')->orderBy('sort_order')->paginate(20);
 
         return view('livewire.admin.exams-subjects', [
             'exams' => $exams,

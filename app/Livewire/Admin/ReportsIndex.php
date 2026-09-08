@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin;
 
 use App\Models\QuestionReport;
+use App\Services\AdminLogger;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -13,6 +14,9 @@ class ReportsIndex extends Component
 
     public $status = 'open'; // open, dismissed, fixed
     public $search = '';
+
+    public $viewingReport = null;
+    public $isViewModalOpen = false;
     
     protected $queryString = [
         'status' => ['except' => 'open'],
@@ -22,6 +26,23 @@ class ReportsIndex extends Component
     public function updatedSearch()
     {
         $this->resetPage();
+    }
+
+    public function updatedStatus()
+    {
+        $this->resetPage();
+    }
+
+    public function openReportModal($id)
+    {
+        $this->viewingReport = QuestionReport::with(['question.exam', 'question.subject', 'reporter'])->findOrFail($id);
+        $this->isViewModalOpen = true;
+    }
+
+    public function closeReportModal()
+    {
+        $this->isViewModalOpen = false;
+        $this->viewingReport = null;
     }
 
     public function dismissReport($reportId)
@@ -34,19 +55,19 @@ class ReportsIndex extends Component
             'reviewed_at' => now(),
         ]);
 
-        // Record audit log
-        \App\Models\AdminActivityLog::record(
-            Auth::id(),
+        AdminLogger::log(
             'report.dismissed',
-            QuestionReport::class,
-            $reportId,
+            $report,
             ['question_id' => $report->question_id]
         );
 
-        // Decrement reports count on question and auto unflag if needed
         $question = $report->question;
         if ($question && $question->reports_count > 0) {
             $question->decrement('reports_count');
+        }
+
+        if ($this->viewingReport && $this->viewingReport->id === $reportId) {
+            $this->closeReportModal();
         }
 
         session()->flash('message', 'Report marked as dismissed.');
@@ -62,31 +83,32 @@ class ReportsIndex extends Component
             'reviewed_at' => now(),
         ]);
 
-        // Record audit log
-        \App\Models\AdminActivityLog::record(
-            Auth::id(),
+        AdminLogger::log(
             'report.resolved',
-            QuestionReport::class,
-            $reportId,
+            $report,
             ['question_id' => $report->question_id]
         );
 
-        // Flag the question for edit
         if ($report->question) {
             $report->question->update(['is_flagged' => true]);
         }
 
-        session()->flash('message', 'Report marked as fixed. Question has been flagged for moderation.');
+        if ($this->viewingReport && $this->viewingReport->id === $reportId) {
+            $this->closeReportModal();
+        }
+
+        session()->flash('message', 'Report marked as resolved. Question has been flagged for moderation.');
     }
 
     public function render()
     {
-        // Totals counts for pills
-        $pendingCount = QuestionReport::where('status', 'open')->count();
+        $openCount = QuestionReport::where('status', 'open')->count();
+        $resolvedCount = QuestionReport::where('status', 'fixed')->count();
+        $dismissedCount = QuestionReport::where('status', 'dismissed')->count();
 
         $query = QuestionReport::query()
             ->where('status', $this->status)
-            ->with(['question', 'reporter']);
+            ->with(['question.exam', 'question.subject', 'reporter']);
 
         if (!empty($this->search)) {
             $query->where(function($q) {
@@ -102,7 +124,9 @@ class ReportsIndex extends Component
 
         return view('livewire.admin.reports-index', [
             'reports' => $reports,
-            'pendingCount' => $pendingCount,
+            'openCount' => $openCount,
+            'resolvedCount' => $resolvedCount,
+            'dismissedCount' => $dismissedCount,
         ])->layout('layouts.app');
     }
 }
