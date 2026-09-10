@@ -47,7 +47,7 @@ class BulkSeeder extends Component
 
         $this->logs[] = "[" . now()->toTimeString() . "] Starting bulk import for {$subjects->count()} subject(s). Batches: {$this->batches}. Dry run: " . ($this->dryRun ? 'YES' : 'NO');
 
-        $questionsPerBatch = 40;
+        $questionsPerBatch = 15;
 
         @set_time_limit(300);
 

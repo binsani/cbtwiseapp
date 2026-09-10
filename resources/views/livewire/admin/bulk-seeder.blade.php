@@ -67,10 +67,10 @@
                 <div>
                     <label class="block font-bold text-slate-700 mb-1.5">Batches per Subject</label>
                     <select wire:model="batches" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:ring-2 focus:ring-emerald-500 focus:bg-white outline-none">
-                        <option value="1">1 Batch (~40 questions)</option>
-                        <option value="2">2 Batches (~80 questions)</option>
-                        <option value="3">3 Batches (~120 questions)</option>
-                        <option value="5">5 Batches (~200 questions)</option>
+                        <option value="1">1 Batch (~15 questions)</option>
+                        <option value="2">2 Batches (~30 questions)</option>
+                        <option value="3">3 Batches (~45 questions)</option>
+                        <option value="5">5 Batches (~75 questions)</option>
                     </select>
                 </div>
             </div>

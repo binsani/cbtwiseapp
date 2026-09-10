@@ -52,7 +52,9 @@ class AlocApiClient
                 // Modern ALOC Station: headers x-api-key, X-ALOC-KEY
                 $endpoint = rtrim($this->baseUri, '/') . '/questions';
                 $slug = $this->normalizeSubjectSlug($subject);
-                $this->lastEndpoint = "{$endpoint}?subject={$slug}&limit=" . min($limit, 40);
+                // ALOC Station API allows a maximum limit of 15 questions per request
+                $clampedLimit = min($limit, 15);
+                $this->lastEndpoint = "{$endpoint}?subject={$slug}&limit={$clampedLimit}";
                 $response = Http::withHeaders([
                     'Accept' => 'application/json',
                     'x-api-key' => $this->token,
@@ -62,7 +64,7 @@ class AlocApiClient
                 ->retry($this->retry, 200)
                 ->get($endpoint, [
                     'subject' => $slug,
-                    'limit' => min($limit, 40),
+                    'limit' => $clampedLimit,
                 ]);
 
                 if ($response->successful()) {
@@ -71,7 +73,12 @@ class AlocApiClient
                     return $this->formatStationQuestions($items);
                 }
 
-                $this->lastError = "ALOC [{$response->status()}]: " . substr($response->body(), 0, 120);
+                $errJson = $response->json();
+                $msg = $errJson['message'] ?? $errJson['error'] ?? substr($response->body(), 0, 120);
+                if (isset($errJson['details'])) {
+                    $msg .= ': ' . json_encode($errJson['details']);
+                }
+                $this->lastError = "ALOC [{$response->status()}]: {$msg}";
                 Log::error("ALOC Station Error [{$response->status()} on {$this->lastEndpoint}]: " . $response->body());
             } else {
                 // Legacy ALOC API fallback
@@ -112,29 +119,26 @@ class AlocApiClient
             'english language' => 'english-language',
             'mathematics' => 'mathematics',
             'maths' => 'mathematics',
-            'further mathematics' => 'further-mathematics',
-            'furthermaths' => 'further-mathematics',
+            'further mathematics' => 'mathematics',
+            'furthermaths' => 'mathematics',
             'physics' => 'physics',
             'chemistry' => 'chemistry',
             'biology' => 'biology',
             'economics' => 'economics',
             'government' => 'government',
+            'history' => 'history',
+            'insurance' => 'insurance',
             'literature in english' => 'literature-in-english',
             'literature' => 'literature-in-english',
             'geography' => 'geography',
-            'agricultural science' => 'agricultural-science',
-            'agriculture' => 'agricultural-science',
             'commerce' => 'commerce',
-            'financial accounting' => 'financial-accounting',
-            'accounting' => 'financial-accounting',
+            'financial accounting' => 'accounting',
+            'accounting' => 'accounting',
             'civic education' => 'civic-education',
             'civic' => 'civic-education',
             'christian religious studies' => 'christian-religious-studies',
             'crk' => 'christian-religious-studies',
             'crs' => 'christian-religious-studies',
-            'islamic religious studies' => 'islamic-religious-studies',
-            'irk' => 'islamic-religious-studies',
-            'irs' => 'islamic-religious-studies',
         ];
 
         return $mapping[$subject] ?? str_replace(' ', '-', $subject);
