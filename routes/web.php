@@ -65,6 +65,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('practice/start', ExamSetup::class)->name('practice.start');
     Route::get('mock-exams', ExamSetup::class)->name('mock-exams');
 
+    // JAMB Course & Subject Combination Checker (Brochure Guide)
+    Route::get('jamb-checker', \App\Livewire\Tools\CourseChecker::class)->name('jamb.checker');
+    Route::get('tools/jamb-brochure', \App\Livewire\Tools\CourseChecker::class)->name('jamb.brochure');
+
     // Exam practice flow
     Route::get('exam/setup', ExamSetup::class)->name('exam.setup');
     

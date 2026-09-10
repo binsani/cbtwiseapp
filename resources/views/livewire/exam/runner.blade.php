@@ -20,12 +20,21 @@
             <span class="font-mono text-xl font-bold tracking-widest text-emerald-100" x-text="formatTime()">00:00:00</span>
         </div>
 
-        <div class="flex items-center space-x-4">
+        <div class="flex items-center space-x-3 sm:space-x-4">
+            <!-- Universal Calculator Toggle -->
+            <button type="button" 
+                    @click="showCalc = !showCalc" 
+                    class="px-3 sm:px-4 py-2 bg-emerald-800/80 hover:bg-emerald-600 active:bg-emerald-900 border border-emerald-500/30 rounded-xl text-xs sm:text-sm font-bold text-white flex items-center space-x-1.5 transition-all shadow-sm"
+                    title="Toggle JAMB On-Screen Calculator">
+                <svg class="w-4 h-4 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                <span class="hidden xs:inline">Calculator</span>
+            </button>
+
             <div class="text-right hidden sm:block">
                 <p class="text-xs text-emerald-200">Candidate Name</p>
                 <p class="text-sm font-bold">{{ Auth::user()->name }}</p>
             </div>
-            <button @click="confirmSubmit()" class="px-5 py-2 bg-rose-600 hover:bg-rose-700 active:bg-rose-800 rounded-xl font-bold text-sm shadow-md hover:shadow-lg transition-all duration-300">
+            <button @click="confirmSubmit()" class="px-4 sm:px-5 py-2 bg-rose-600 hover:bg-rose-700 active:bg-rose-800 rounded-xl font-bold text-xs sm:text-sm shadow-md hover:shadow-lg transition-all duration-300">
                 End Exam
             </button>
         </div>
@@ -193,7 +202,7 @@
         
         <!-- Header -->
         <div class="cursor-move bg-gray-900 px-4 py-2 flex justify-between items-center text-xs font-bold tracking-widest text-gray-400 select-none">
-            <span>SCIENTIFIC CALCULATOR</span>
+            <span>JAMB CBT CALCULATOR</span>
             <button @click="showCalc = false" class="text-rose-500 hover:text-rose-600 font-bold text-sm">&times;</button>
         </div>
 
@@ -291,6 +300,10 @@
                 },
 
                 handleKey(e) {
+                    // Do not trigger exam navigation/answering shortcuts if student is typing or calculator is open
+                    if (this.showCalc || ['input', 'textarea', 'select'].includes(document.activeElement?.tagName?.toLowerCase())) {
+                        return;
+                    }
                     let key = e.key.toLowerCase();
                     if (['a', 'b', 'c', 'd', 'e'].includes(key)) {
                         let activeId = @this.get('activeQuestion.id');

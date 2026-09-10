@@ -17,25 +17,26 @@ class Setup extends Component
     public $selectedSubjects = [];
     public $year = 'random'; // 'random' or specific year integer
     public $questionCount = 20; // 10, 20, 40
+    public $selectedCourse = '';
 
     public $currentStep = 1;
 
-    public function mount()
+    public function mount($exam = null, $course = null, $mode = null, $subject = null)
     {
         Cache::forget('active_exams');
 
-        // Support query parameters from dashboard quick links: ?exam=utme, ?mode=mock, ?subject=3
-        $examParam = request('exam');
+        // Support query parameters from dashboard quick links: ?exam=utme, ?mode=mock, ?subject=3, ?course=medicine-and-surgery
+        $examParam = $exam ?? request('exam');
         if ($examParam) {
-            $exam = is_numeric($examParam) ? Exam::find($examParam) : Exam::where('slug', $examParam)->first();
-            if ($exam) {
-                $this->selectedExamId = $exam->id;
-                $this->updatedSelectedExamId($exam->id);
+            $foundExam = is_numeric($examParam) ? Exam::find($examParam) : Exam::where('slug', $examParam)->first();
+            if ($foundExam) {
+                $this->selectedExamId = $foundExam->id;
+                $this->updatedSelectedExamId($foundExam->id);
                 $this->currentStep = 2;
             }
         }
 
-        $modeParam = request('mode');
+        $modeParam = $mode ?? request('mode');
         if (in_array($modeParam, ['practice', 'mock', 'study'])) {
             $this->mode = $modeParam;
         }
@@ -45,20 +46,47 @@ class Setup extends Component
             $this->mode = 'mock';
         }
 
-        $subjectParam = request('subject');
+        $subjectParam = $subject ?? request('subject');
         if ($subjectParam) {
-            $subject = is_numeric($subjectParam) ? Subject::find($subjectParam) : Subject::where('slug', $subjectParam)->first();
-            if ($subject) {
-                if (!$this->selectedExamId && $subject->exams()->exists()) {
-                    $exam = $subject->exams()->first();
+            $foundSubject = is_numeric($subjectParam) ? Subject::find($subjectParam) : Subject::where('slug', $subjectParam)->first();
+            if ($foundSubject) {
+                if (!$this->selectedExamId && $foundSubject->exams()->exists()) {
+                    $exam = $foundSubject->exams()->first();
                     $this->selectedExamId = $exam->id;
                     $this->updatedSelectedExamId($exam->id);
                 }
-                if (!in_array((string)$subject->id, $this->selectedSubjects)) {
-                    $this->selectedSubjects[] = (string)$subject->id;
+                if (!in_array((string)$foundSubject->id, $this->selectedSubjects)) {
+                    $this->selectedSubjects[] = (string)$foundSubject->id;
                 }
                 $this->currentStep = 3;
             }
+        }
+
+        $courseParam = $course ?? request('course');
+        if ($courseParam) {
+            if (!$this->selectedExamId) {
+                $utme = Exam::where('slug', 'utme')->first();
+                if ($utme) {
+                    $this->selectedExamId = $utme->id;
+                    $this->updatedSelectedExamId($utme->id);
+                }
+            }
+            $this->selectCoursePreset($courseParam);
+            $this->currentStep = 3;
+        }
+    }
+
+    public function selectCoursePreset(string $courseSlug)
+    {
+        $this->selectedCourse = $courseSlug;
+        if (!$courseSlug || !$this->selectedExamId) {
+            return;
+        }
+
+        $subjectIds = \App\Services\JambBrochureService::mapCourseToSubjectIds($courseSlug, (int) $this->selectedExamId);
+        if (!empty($subjectIds)) {
+            $this->selectedSubjects = $subjectIds;
+            $this->resetErrorBag('selectedSubjects');
         }
     }
 

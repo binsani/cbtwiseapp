@@ -141,7 +141,7 @@
         <!-- STEP 3: SELECT SUBJECTS -->
         @if($currentStep === 3)
             <div class="space-y-6">
-                <div class="flex justify-between items-start">
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
                     <div>
                         <h3 class="text-2xl font-bold text-gray-900 font-heading">Select Curriculum Subjects</h3>
                         <p class="text-gray-500 text-sm mt-1">
@@ -152,10 +152,68 @@
                             @endif
                         </p>
                     </div>
-                    <div class="px-4 py-2 bg-emerald-50 text-emerald-700 rounded-2xl font-bold text-sm">
-                        Selected: {{ count($selectedSubjects) }}
+                    <div class="flex items-center gap-3 self-start sm:self-auto">
+                        @if(($selectedExam?->slug ?? '') === 'utme')
+                            <a href="{{ route('jamb.checker') }}" target="_blank" 
+                               class="text-xs font-bold text-emerald-600 hover:text-emerald-700 bg-emerald-50 px-3 py-2 rounded-xl flex items-center gap-1">
+                                <span>📖 JAMB Brochure Guide</span>
+                                <span>↗</span>
+                            </a>
+                        @endif
+                        <div class="px-4 py-2 bg-emerald-50 text-emerald-700 rounded-2xl font-bold text-sm">
+                            Selected: {{ count($selectedSubjects) }} / {{ ($selectedExam?->slug ?? '') === 'utme' ? 4 : '1-9' }}
+                        </div>
                     </div>
                 </div>
+
+                @if(($selectedExam?->slug ?? '') === 'utme')
+                    <!-- Target Course Preset Quick-Select -->
+                    <div class="bg-gradient-to-r from-emerald-50 via-teal-50 to-blue-50 border border-emerald-200/80 rounded-2xl p-4 sm:p-5">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
+                            <div class="flex items-center gap-2">
+                                <span class="text-lg">🎯</span>
+                                <div>
+                                    <h4 class="text-xs font-black uppercase tracking-wider text-emerald-950">
+                                        Auto-Select by Career / Target Course
+                                    </h4>
+                                    <p class="text-xs text-emerald-800/80">
+                                        Pick your planned course to automatically configure the official JAMB 4-subject combination.
+                                    </p>
+                                </div>
+                            </div>
+                            <span class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-700 bg-white/80 px-2.5 py-1 rounded-full border border-emerald-200">
+                                One-Click Presets
+                            </span>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+                            @php
+                                $quickCourses = [
+                                    'medicine-and-surgery' => ['Medicine & Surgery', '🩺'],
+                                    'computer-science' => ['Computer Science', '💻'],
+                                    'mechanical-engineering' => ['Mechanical Eng.', '⚙️'],
+                                    'law' => ['Law (LL.B)', '⚖️'],
+                                    'accounting' => ['Accounting', '📊'],
+                                    'nursing-science' => ['Nursing Science', '💉'],
+                                    'pharmacy' => ['Pharmacy', '💊'],
+                                    'economics' => ['Economics', '📈'],
+                                ];
+                            @endphp
+                            @foreach($quickCourses as $cSlug => [$cTitle, $cIcon])
+                                <button type="button" 
+                                        wire:click="selectCoursePreset('{{ $cSlug }}')"
+                                        class="text-left px-3 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-between border
+                                        {{ $selectedCourse === $cSlug ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm' : 'bg-white text-slate-700 border-emerald-100 hover:border-emerald-300 hover:bg-emerald-50/50' }}">
+                                    <span class="flex items-center gap-1.5 truncate">
+                                        <span>{{ $cIcon }}</span>
+                                        <span class="truncate">{{ $cTitle }}</span>
+                                    </span>
+                                    <span class="text-[10px] opacity-70">&check;</span>
+                                </button>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
 
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                     @foreach($subjects as $subj)

@@ -216,7 +216,7 @@
             </a>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             <!-- UTME Tile -->
             <a href="{{ route('exam.setup', ['exam' => 'utme']) }}" 
                class="group p-5 rounded-2xl border border-slate-200/80 hover:border-emerald-500 bg-gradient-to-b from-white to-slate-50 hover:to-emerald-50/30 transition-all duration-300 flex flex-col justify-between">
@@ -259,12 +259,26 @@
                 </div>
             </a>
 
+            <!-- JAMB Brochure Checker Tile -->
+            <a href="{{ route('jamb.checker') }}" 
+               class="group p-5 rounded-2xl border border-emerald-200 hover:border-emerald-500 bg-gradient-to-b from-white to-emerald-50/40 transition-all duration-300 flex flex-col justify-between">
+                <div>
+                    <span class="text-2xl block mb-2">📖</span>
+                    <h4 class="font-black text-slate-900 text-sm font-heading group-hover:text-emerald-700">Course Checker</h4>
+                    <p class="text-[11px] text-slate-500 mt-1">JAMB brochure subject combinations & O'Level prerequisites</p>
+                </div>
+                <div class="mt-4 text-xs font-bold text-emerald-700 flex items-center gap-1">
+                    <span>Check Courses</span>
+                    <span>&rarr;</span>
+                </div>
+            </a>
+
             <!-- Mock Exam Tile -->
             <a href="{{ route('exam.setup', ['mode' => 'mock']) }}" 
                class="group p-5 rounded-2xl border border-amber-200 hover:border-amber-400 bg-gradient-to-b from-white to-amber-50/40 transition-all duration-300 flex flex-col justify-between">
                 <div>
                     <span class="text-2xl block mb-2">⚡</span>
-                    <h4 class="font-black text-slate-900 text-sm font-heading group-hover:text-amber-700">Timed Mock Exam</h4>
+                    <h4 class="font-black text-slate-900 text-sm font-heading group-hover:text-amber-700">Timed Mock</h4>
                     <p class="text-[11px] text-slate-500 mt-1">Full-length timed simulation under authentic exam pressure</p>
                 </div>
                 <div class="mt-4 text-xs font-bold text-amber-700 flex items-center gap-1">

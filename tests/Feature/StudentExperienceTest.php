@@ -113,4 +113,56 @@ class StudentExperienceTest extends TestCase
         $response->assertSee('Free Tier');
         $response->assertSee('Upgrade to Premium');
     }
+
+    public function test_jamb_course_checker_renders_and_searches_courses(): void
+    {
+        $response = $this->actingAs($this->student)->get('/jamb-checker');
+        $response->assertStatus(200);
+        $response->assertSee('JAMB Course and Subject Combination Checker');
+        $response->assertSee('Medicine and Surgery (MBBS)');
+        $response->assertSee('Computer Science / Information Technology');
+
+        \Livewire\Livewire::actingAs($this->student)
+            ->test(\App\Livewire\Tools\CourseChecker::class)
+            ->set('search', 'Medicine')
+            ->assertSee('Medicine and Surgery (MBBS)')
+            ->call('selectCourse', 'medicine-and-surgery')
+            ->assertSee('Compulsory JAMB UTME 4-Subject Combination')
+            ->assertSee('5 SSCE credit passes');
+    }
+
+    public function test_exam_setup_supports_course_presets_and_auto_selects_subjects(): void
+    {
+        $bio = Subject::create([
+            'exam_id' => $this->utme->id,
+            'name' => 'Biology',
+            'slug' => 'biology',
+            'is_active' => true,
+        ]);
+        $chem = Subject::create([
+            'exam_id' => $this->utme->id,
+            'name' => 'Chemistry',
+            'slug' => 'chemistry',
+            'is_active' => true,
+        ]);
+        $phy = Subject::create([
+            'exam_id' => $this->utme->id,
+            'name' => 'Physics',
+            'slug' => 'physics',
+            'is_active' => true,
+        ]);
+        $eng = Subject::create([
+            'exam_id' => $this->utme->id,
+            'name' => 'English Language',
+            'slug' => 'english-language',
+            'is_active' => true,
+        ]);
+
+        \Livewire\Livewire::actingAs($this->student)
+            ->withQueryParams(['exam' => 'utme', 'course' => 'medicine-and-surgery'])
+            ->test(\App\Livewire\Exam\Setup::class)
+            ->assertSet('selectedCourse', 'medicine-and-surgery')
+            ->assertCount('selectedSubjects', 4)
+            ->assertSee('Auto-Select by Career / Target Course');
+    }
 }

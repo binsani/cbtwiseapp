@@ -37,6 +37,9 @@ new class extends Component
                         <x-nav-link :href="route('exam.setup')" :active="request()->routeIs('exam.setup*')" wire:navigate class="text-emerald-600 font-bold">
                             {{ __('Practice CBT') }}
                         </x-nav-link>
+                        <x-nav-link :href="route('jamb.checker')" :active="request()->routeIs('jamb.*')" wire:navigate>
+                            {{ __('JAMB Checker') }}
+                        </x-nav-link>
                         <x-nav-link :href="route('dashboard.history')" :active="request()->routeIs('dashboard.history*')" wire:navigate>
                             {{ __('History') }}
                         </x-nav-link>
@@ -146,6 +149,9 @@ new class extends Component
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('exam.setup')" :active="request()->routeIs('exam.setup*')" wire:navigate class="text-emerald-600 font-bold">
                     {{ __('Practice CBT') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('jamb.checker')" :active="request()->routeIs('jamb.*')" wire:navigate>
+                    {{ __('JAMB Brochure Checker') }}
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('dashboard.history')" :active="request()->routeIs('dashboard.history*')" wire:navigate>
                     {{ __('Session History') }}
