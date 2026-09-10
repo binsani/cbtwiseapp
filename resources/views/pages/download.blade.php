@@ -87,7 +87,7 @@
                         <span>Download for Windows</span>
                     </a>
                     <p class="text-[11px] text-center text-slate-400 mt-2.5 font-medium">
-                        Setup .exe (~150MB) &bull; Verified Safe
+                        Offline Setup .exe (~476MB) &bull; Includes Offline Engine & Questions
                     </p>
                 </div>
             </div>
