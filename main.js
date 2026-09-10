@@ -150,12 +150,35 @@ function stopPhpServer() {
   }
 }
 
+function prepareOfflineDatabase(basePath) {
+  try {
+    const userDataDir = app.getPath('userData');
+    const userDbPath = path.join(userDataDir, 'database.sqlite');
+
+    if (!fs.existsSync(userDbPath)) {
+      const templateDb = path.join(basePath, 'database', 'database.sqlite');
+      if (fs.existsSync(templateDb)) {
+        fs.copyFileSync(templateDb, userDbPath);
+        console.log('Copied template database to user data directory:', userDbPath);
+      } else {
+        fs.writeFileSync(userDbPath, '');
+      }
+    }
+    return userDbPath;
+  } catch (err) {
+    console.error('Error preparing offline database:', err);
+    return path.join(basePath, 'database', 'database.sqlite');
+  }
+}
+
 async function startPhpServer() {
   if (phpProcess) return true;
 
   const basePath = getAppBasePath();
   const publicPath = path.join(basePath, 'public');
+  const routerScript = path.join(basePath, 'server.php');
   const phpExecutable = resolvePhpExecutable();
+  const dbPath = prepareOfflineDatabase(basePath);
 
   // If bundled binary wasn't found and fallback is 'php' which might not be installed
   if (phpExecutable === 'php' && process.platform === 'win32') {
@@ -176,12 +199,23 @@ async function startPhpServer() {
   }
 
   try {
+    const args = ['-S', `127.0.0.1:${PHP_PORT}`, '-t', publicPath];
+    if (fs.existsSync(routerScript)) {
+      args.push(routerScript);
+    }
+
     phpProcess = spawn(
       phpExecutable,
-      ['-S', `127.0.0.1:${PHP_PORT}`, '-t', publicPath],
+      args,
       {
         cwd: basePath,
         windowsHide: true,
+        env: {
+          ...process.env,
+          DB_DATABASE: dbPath,
+          APP_OFFLINE_DESKTOP: 'true',
+          APP_URL: `http://127.0.0.1:${PHP_PORT}`,
+        },
       }
     );
 

@@ -28,6 +28,7 @@
         },
         "files": [
             "main.js",
+            "server.php",
             ".env",
             "app/**/*",
             "bootstrap/**/*",
