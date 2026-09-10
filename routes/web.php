@@ -56,9 +56,14 @@ Route::post('webhooks/paystack', [PaystackWebhookController::class, 'handle'])
 
 // Authenticated User Panel & Practice Flow
 Route::middleware(['auth', 'verified'])->group(function () {
-    // User Dashboard
+    // User Dashboard & Aliases
     Route::get('dashboard', UserDashboard::class)->name('dashboard');
     Route::get('dashboard/history', ExamHistory::class)->name('dashboard.history');
+
+    // Practice and Mock Exams shortcuts
+    Route::get('practice', ExamSetup::class)->name('practice');
+    Route::get('practice/start', ExamSetup::class)->name('practice.start');
+    Route::get('mock-exams', ExamSetup::class)->name('mock-exams');
 
     // Exam practice flow
     Route::get('exam/setup', ExamSetup::class)->name('exam.setup');
@@ -73,21 +78,34 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('exam.results')
         ->whereNumber('session');
 
-    // Dashboard Subpages
+    // Result review aliases
+    Route::get('results/{session}', ExamResults::class)
+        ->name('results.show')
+        ->whereNumber('session');
+    Route::get('results', ExamHistory::class)->name('results');
+
+    // Dashboard Subpages & Aliases
     Route::get('dashboard/performance', \App\Livewire\Dashboard\Performance::class)->name('dashboard.performance');
+    Route::get('progress', \App\Livewire\Dashboard\Performance::class)->name('progress');
     Route::get('dashboard/history/{session}', \App\Livewire\Dashboard\SessionReview::class)->name('dashboard.session-review');
     Route::get('dashboard/bookmarks', \App\Livewire\Dashboard\Bookmarks::class)->name('dashboard.bookmarks');
+    Route::get('bookmarks', \App\Livewire\Dashboard\Bookmarks::class)->name('bookmarks');
     Route::get('dashboard/streak', \App\Livewire\Dashboard\StudyStreak::class)->name('dashboard.streak');
+    Route::get('streak', \App\Livewire\Dashboard\StudyStreak::class)->name('streak');
     Route::get('dashboard/leaderboard', \App\Livewire\Dashboard\Leaderboard::class)->name('dashboard.leaderboard');
     Route::get('dashboard/notifications', \App\Livewire\Dashboard\UserNotifications::class)->name('dashboard.notifications');
+    Route::get('notifications', \App\Livewire\Dashboard\UserNotifications::class)->name('notifications');
     Route::get('dashboard/referrals', \App\Livewire\Dashboard\Referrals::class)->name('dashboard.referrals');
 
-    // Account settings subpages
+    // Account settings subpages & Aliases
     Route::get('account/profile', \App\Livewire\Account\Profile::class)->name('account.profile');
     Route::get('profile', \App\Livewire\Account\Profile::class)->name('profile');
     Route::get('account/security', \App\Livewire\Account\Security::class)->name('account.security');
+    Route::get('settings', \App\Livewire\Account\Security::class)->name('settings');
     Route::get('account/subscription', \App\Livewire\Account\Subscription::class)->name('account.subscription');
+    Route::get('subscription', \App\Livewire\Account\Subscription::class)->name('subscription');
     Route::get('account/purchase-codes', \App\Livewire\Account\PurchaseCodes::class)->name('account.purchase-codes');
+    Route::get('purchase-code', \App\Livewire\Account\PurchaseCodes::class)->name('purchase-code');
     Route::get('account/affiliate', \App\Livewire\Account\Affiliate::class)->name('account.affiliate');
     Route::get('account/delete', \App\Livewire\Account\DeleteAccount::class)->name('account.delete');
 });

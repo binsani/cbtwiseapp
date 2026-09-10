@@ -40,6 +40,11 @@ class Setup extends Component
             $this->mode = $modeParam;
         }
 
+        // If direct mock exam route or ?mode=mock
+        if (request()->routeIs('mock-exams') || $modeParam === 'mock') {
+            $this->mode = 'mock';
+        }
+
         $subjectParam = request('subject');
         if ($subjectParam) {
             $subject = is_numeric($subjectParam) ? Subject::find($subjectParam) : Subject::where('slug', $subjectParam)->first();

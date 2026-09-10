@@ -11,11 +11,27 @@
     @endif
 
     <!-- Top Result Banner -->
-    <div class="text-center mb-10">
-        <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight font-heading">
-            CBT Exam <span class="bg-clip-text text-transparent bg-gradient-to-r from-emerald-600 to-blue-600">Results Report</span>
-        </h1>
-        <p class="mt-2 text-sm text-gray-600">Completed on {{ $examSession->submitted_at->format('M d, Y h:i A') }}</p>
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+        <div>
+            <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight font-heading">
+                CBT Exam <span class="bg-clip-text text-transparent bg-gradient-to-r from-emerald-600 to-blue-600">Results Report</span>
+            </h1>
+            <p class="mt-1 text-sm text-gray-600">Completed on {{ $examSession->submitted_at->format('M d, Y h:i A') }}</p>
+        </div>
+
+        <div class="flex items-center gap-2 print:hidden">
+            <button type="button" 
+                    onclick="window.print()" 
+                    class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 shadow-sm">
+                <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                <span>Print / Save PDF</span>
+            </button>
+            <a href="{{ route('exam.setup', ['exam' => $examSession->exam->slug]) }}" 
+               class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all shadow-sm flex items-center gap-1.5">
+                <span>Retake Exam</span>
+                <span>&rarr;</span>
+            </a>
+        </div>
     </div>
 
     <!-- Overall Statistics Cards -->

@@ -61,9 +61,12 @@
             @endif
 
             <!-- Page Content -->
-            <main>
+            <main class="pb-16 lg:pb-0">
                 {{ $slot }}
             </main>
+
+            <!-- Mobile Bottom Navigation for Authenticated Students -->
+            <x-student-bottom-nav />
         </div>
     </body>
 </html>

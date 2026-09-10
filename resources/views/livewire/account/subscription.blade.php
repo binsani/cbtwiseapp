@@ -49,15 +49,25 @@
                 <div class="bg-slate-50 border border-slate-100/60 rounded-3xl p-6">
                     <div class="flex items-center justify-between mb-4">
                         <div>
-                            <span class="inline-block px-3 py-1 bg-slate-200 text-slate-700 text-[10px] font-black uppercase tracking-wider rounded-full mb-2">Current Plan</span>
-                            <h4 class="text-2xl font-black text-slate-900">Free Tier</h4>
+                            <span class="inline-block px-3 py-1 {{ $planName === 'Premium' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-700' }} text-[10px] font-black uppercase tracking-wider rounded-full mb-2">Current Plan</span>
+                            <h4 class="text-2xl font-black text-slate-900">{{ $planName }} Tier</h4>
                         </div>
                         <div class="text-right">
-                            <span class="text-3xl font-black text-slate-900">₦0</span>
-                            <span class="text-slate-500 text-xs">/ forever</span>
+                            <span class="text-3xl font-black {{ $planName === 'Premium' ? 'text-emerald-600' : 'text-slate-900' }}">
+                                {{ $planName === 'Premium' ? 'PRO' : '₦0' }}
+                            </span>
+                            <span class="text-slate-500 text-xs block">
+                                {{ $expiresAt ? 'Expires: ' . $expiresAt : '/ forever' }}
+                            </span>
                         </div>
                     </div>
-                    <p class="text-xs text-slate-600 mb-6 font-medium">You are currently on the free plan which includes limited access to practice tests and basic analytics.</p>
+                    <p class="text-xs text-slate-600 mb-6 font-medium">
+                        @if($planName === 'Premium')
+                            You have unlimited access to all UTME, WAEC, and NECO past questions, AI tutor explanations, and full-length timed mock exams.
+                        @else
+                            You are currently on the free plan which includes limited daily practice (20 questions/day) and 3 monthly mock exams.
+                        @endif
+                    </p>
                     
                     <ul class="space-y-3 mb-8">
                         <li class="flex items-center gap-3 text-sm text-slate-700 font-medium">

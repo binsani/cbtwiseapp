@@ -91,97 +91,90 @@
         </div>
     @endif
 
-    <!-- Daily Goal & High-Impact Summary Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-        <!-- Daily Goal Card -->
-        <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm relative overflow-hidden flex flex-col justify-between">
-            <div>
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Daily Practice Goal</span>
-                    <span class="text-xs font-extrabold {{ $todayAnswered >= $dailyGoal ? 'text-emerald-600 bg-emerald-50' : 'text-slate-600 bg-slate-100' }} px-2 py-0.5 rounded-full">
-                        {{ $todayAnswered }} / {{ $dailyGoal }}
-                    </span>
-                </div>
-                <div class="mt-4">
-                    <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
-                        @php
-                            $goalPercent = min(100, $dailyGoal > 0 ? round(($todayAnswered / $dailyGoal) * 100) : 0);
-                        @endphp
-                        <div class="bg-gradient-to-r from-emerald-500 to-teal-500 h-full rounded-full transition-all duration-500" 
-                             style="width: {{ $goalPercent }}%"></div>
-                    </div>
-                </div>
+    <!-- Motivational Quote Banner -->
+    <div class="bg-amber-50/60 border border-amber-200/70 rounded-2xl p-4 flex items-center gap-3 text-amber-900 text-xs shadow-sm">
+        <div class="w-7 h-7 rounded-xl bg-amber-100 flex items-center justify-center text-amber-700 flex-shrink-0 text-base">
+            💡
+        </div>
+        <p class="font-semibold italic">
+            "Success is the sum of small efforts, repeated day in and day out." — Robert Collier
+        </p>
+    </div>
+
+    <!-- 4 High-Impact Summary Stat Cards -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Tests Taken -->
+        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex flex-col justify-between">
+            <span class="text-xs font-bold text-slate-500">Tests Taken</span>
+            <div class="mt-2">
+                <span class="text-3xl font-black text-slate-900 font-heading">{{ $totalTestsTaken }}</span>
             </div>
-            <p class="text-xs text-slate-500 mt-3">
-                @if($todayAnswered >= $dailyGoal)
-                    <span class="text-emerald-600 font-bold">🎉 Daily goal achieved!</span> Keep it going.
-                @else
-                    <span>{{ max(0, $dailyGoal - $todayAnswered) }} more questions to hit today's target.</span>
-                @endif
-            </p>
+            <span class="text-[11px] text-slate-400 mt-2">Completed CBTs</span>
         </div>
 
-        <!-- Study Streak Card -->
-        <a href="{{ route('dashboard.streak') }}" class="group bg-gradient-to-br from-amber-500 to-orange-600 rounded-3xl p-6 text-white shadow-lg relative overflow-hidden flex flex-col justify-between hover:shadow-orange-500/20 transition-all">
-            <div class="absolute -right-4 -bottom-4 opacity-15">
-                <svg class="w-28 h-28" fill="currentColor" viewBox="0 0 24 24"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
+        <!-- Avg. Score % -->
+        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex flex-col justify-between">
+            <span class="text-xs font-bold text-slate-500">Avg. Score</span>
+            <div class="mt-2">
+                <span class="text-3xl font-black text-emerald-600 font-heading">{{ $accuracy }}%</span>
             </div>
-            <div>
-                <span class="text-xs font-extrabold uppercase tracking-wider opacity-90 flex items-center justify-between">
-                    <span>Study Streak</span>
-                    <span>🔥</span>
-                </span>
-                <h3 class="text-3xl font-black font-heading mt-2">{{ $streakDays }} Days</h3>
-            </div>
-            <p class="text-xs opacity-90 mt-3 group-hover:underline flex items-center gap-1">
-                <span>View milestones & freezes</span>
-                <span>&rarr;</span>
-            </p>
-        </a>
-
-        <!-- Accuracy & Solved Card -->
-        <a href="{{ route('dashboard.performance') }}" class="group bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm relative overflow-hidden flex flex-col justify-between hover:border-emerald-200 transition-all">
-            <div>
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Overall Accuracy</span>
-                    <span class="text-xs font-extrabold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
-                        {{ $totalAnswered }} Solved
-                    </span>
-                </div>
-                <h3 class="text-3xl font-black text-slate-900 font-heading mt-2">{{ $accuracy }}%</h3>
-                <div class="w-full bg-slate-100 h-1.5 rounded-full mt-3 overflow-hidden">
-                    <div class="bg-emerald-500 h-full rounded-full" style="width: {{ $accuracy }}%"></div>
-                </div>
-            </div>
-            <p class="text-xs text-slate-500 mt-3 group-hover:text-emerald-600 flex items-center gap-1 font-semibold">
-                <span>Subject performance breakdown</span>
-                <span>&rarr;</span>
-            </p>
-        </a>
-
-        <!-- Leaderboard & Bookmarks Quick Card -->
-        <div class="bg-slate-900 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden flex flex-col justify-between">
-            <div>
-                <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center justify-between">
-                    <span>Scholar Rank</span>
-                    <span>🏆</span>
-                </span>
-                <div class="flex items-baseline gap-2 mt-2">
-                    <h3 class="text-3xl font-black font-heading">
-                        {{ $leaderboardRank ? '#' . $leaderboardRank : 'Unranked' }}
-                    </h3>
-                    <span class="text-xs text-slate-400">Nationwide</span>
-                </div>
-            </div>
-            <div class="flex items-center justify-between pt-3 border-t border-slate-800 text-xs text-slate-300">
-                <a href="{{ route('dashboard.bookmarks') }}" class="hover:text-white flex items-center gap-1 font-bold">
-                    <span>🔖 {{ $bookmarkCount }} Bookmarks</span>
-                </a>
-                <a href="{{ route('dashboard.leaderboard') }}" class="hover:text-emerald-400 font-bold">
-                    View Board &rarr;
-                </a>
-            </div>
+            <span class="text-[11px] text-slate-400 mt-2">Overall Accuracy</span>
         </div>
+
+        <!-- Study Streak -->
+        <a href="{{ route('dashboard.streak') }}" class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex flex-col justify-between hover:border-amber-400 transition-all group">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-500">Study Streak</span>
+                <span class="text-sm">🔥</span>
+            </div>
+            <div class="mt-2">
+                <span class="text-3xl font-black text-amber-600 font-heading">{{ $streakDays }} days</span>
+            </div>
+            <span class="text-[11px] text-slate-400 group-hover:text-amber-600 transition-colors mt-2">Keep it burning &rarr;</span>
+        </a>
+
+        <!-- Time Spent -->
+        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex flex-col justify-between">
+            <span class="text-xs font-bold text-slate-500">Time Spent</span>
+            <div class="mt-2">
+                <span class="text-3xl font-black text-slate-900 font-heading">{{ $totalTimeSpentHours }} hrs</span>
+            </div>
+            <span class="text-[11px] text-slate-400 mt-2">Practice sessions</span>
+        </div>
+    </div>
+
+    <!-- Free Plan Usage Banner (Shown for Free Tier Users) -->
+    @if(!$isPremium)
+        <div class="bg-amber-50/50 border border-amber-200/80 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shadow-sm">
+            <div class="flex items-center gap-3">
+                <span class="px-2.5 py-1 bg-amber-200/80 text-amber-900 rounded-lg text-xs font-black uppercase tracking-wider">Free Plan</span>
+                <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-700 font-bold">
+                    <span>Daily Questions: <strong class="text-slate-900 font-black">{{ $dailyQuestionsUsed }} / {{ $dailyGoal }}</strong></span>
+                    <span class="text-slate-300 hidden sm:inline">&bull;</span>
+                    <span>Monthly Mock Exams: <strong class="text-slate-900 font-black">{{ $monthlyMockUsed }} / 3</strong></span>
+                </div>
+            </div>
+            <a href="{{ route('pricing') }}" 
+               class="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl text-xs font-black shadow-sm transition-all whitespace-nowrap self-start sm:self-center">
+                <span>⚡ Upgrade</span>
+                <span>&rarr;</span>
+            </a>
+        </div>
+    @endif
+
+    <!-- Primary Action CTAs -->
+    <div class="flex flex-wrap items-center gap-3">
+        <a href="{{ route('exam.setup') }}" 
+           class="inline-flex items-center gap-2 px-6 py-3.5 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-sm font-black rounded-2xl transition-all shadow-md shadow-emerald-600/10 hover:shadow-lg">
+            <span>Continue Practicing</span>
+            <span>&rarr;</span>
+        </a>
+
+        <a href="{{ route('mock-exams') }}" 
+           class="inline-flex items-center gap-2 px-6 py-3.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-sm font-black rounded-2xl transition-all shadow-md shadow-blue-600/10 hover:shadow-lg">
+            <span>Take Mock Exam</span>
+            <span>⚡</span>
+        </a>
     </div>
 
     <!-- Diagnostic Weak Area Alert Banner (If Data Exists) -->
@@ -359,8 +352,62 @@
             </div>
         </div>
 
-        <!-- Right Col: AI Coach & Referral Sharing -->
+        <!-- Right Col: Focus Areas, Recommendation, AI Coach & Referral Sharing -->
         <div class="space-y-6">
+            <!-- Focus Areas Card -->
+            <div class="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-sm space-y-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-base font-black text-slate-900 font-heading">Focus Areas</h3>
+                        <p class="text-xs text-slate-500">Subjects needing your attention</p>
+                    </div>
+                    <span class="text-xs font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
+                        {{ count($subjectPerformance) }} tracked
+                    </span>
+                </div>
+
+                @if(!empty($subjectPerformance))
+                    <div class="space-y-3 pt-2">
+                        @foreach(array_slice($subjectPerformance, 0, 3, true) as $subjName => $acc)
+                            <div>
+                                <div class="flex justify-between items-center text-xs font-bold text-slate-700 mb-1">
+                                    <span class="truncate max-w-[180px]">{{ $subjName }}</span>
+                                    <span class="{{ $acc >= 75 ? 'text-emerald-600' : ($acc >= 50 ? 'text-amber-600' : 'text-rose-600') }}">{{ $acc }}%</span>
+                                </div>
+                                <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                                    <div class="h-full rounded-full transition-all {{ $acc >= 75 ? 'bg-emerald-500' : ($acc >= 50 ? 'bg-amber-500' : 'bg-rose-500') }}"
+                                         style="width: {{ $acc }}%"></div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <p class="text-xs text-slate-400 py-4 text-center">
+                        Take practice exams to reveal your weak subjects and focus areas.
+                    </p>
+                @endif
+            </div>
+
+            <!-- Recommendation Card -->
+            @if($weakestSubject)
+                <div class="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-3xl p-6 text-white shadow-lg space-y-3">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-black uppercase tracking-wider bg-white/20 px-2.5 py-0.5 rounded-full">Recommendation</span>
+                    </div>
+                    <h4 class="text-lg font-black font-heading leading-snug">
+                        Focus on {{ $weakestSubject['name'] }}
+                    </h4>
+                    <p class="text-xs text-emerald-100 leading-relaxed">
+                        Your current accuracy is {{ $weakestSubject['accuracy'] }}%. Practicing 20 questions in {{ $weakestSubject['name'] }} today can lift your score by up to 15 points.
+                    </p>
+                    <a href="{{ route('exam.setup', ['subject' => $weakestSubject['id']]) }}" 
+                       class="inline-flex items-center gap-1.5 px-4 py-2 bg-white text-emerald-800 hover:bg-emerald-50 rounded-xl text-xs font-black shadow-md transition-all">
+                        <span>Practice {{ $weakestSubject['name'] }}</span>
+                        <span>&rarr;</span>
+                    </a>
+                </div>
+            @endif
+
             <!-- AI Study Coach Card -->
             <div class="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-sm space-y-5">
                 <div class="flex items-center space-x-3">

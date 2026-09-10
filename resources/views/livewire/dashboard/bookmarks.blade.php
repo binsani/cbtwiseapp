@@ -21,6 +21,22 @@
         </div>
     @endif
 
+    <!-- Filter and Search Bar -->
+    <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col sm:flex-row items-center gap-3">
+        <div class="flex-1 w-full">
+            <input type="text" wire:model.live.debounce.300ms="search" placeholder="Search bookmarked questions..." 
+                   class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-emerald-500">
+        </div>
+        <div class="w-full sm:w-56">
+            <select wire:model.live="subjectFilter" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-emerald-500">
+                <option value="">All Subjects</option>
+                @foreach($availableSubjects as $subj)
+                    <option value="{{ $subj->id }}">{{ $subj->name }}</option>
+                @endforeach
+            </select>
+        </div>
+    </div>
+
     <!-- Bookmarks Grid -->
     <div class="space-y-6">
         @forelse($bookmarks as $bookmark)

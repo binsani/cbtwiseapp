@@ -19,6 +19,11 @@ class UserDashboard extends Component
     public $streakDays = 0;
     public $totalAnswered = 0;
     public $accuracy = 0;
+    public $totalTestsTaken = 0;
+    public $totalTimeSpentHours = 0.0;
+    public $dailyQuestionsUsed = 0;
+    public $monthlyMockUsed = 0;
+    public $isPremium = false;
     
     // New Feature States
     public $todayAnswered = 0;
@@ -45,6 +50,7 @@ class UserDashboard extends Component
         
         $this->streakDays = $user->study_streak_days;
         $this->referralCode = $user->referral_code;
+        $this->isPremium = $user->isPremium();
         
         // 1. Calculate general stats
         $sessions = ExamSession::where('user_id', $user->id)
@@ -53,6 +59,10 @@ class UserDashboard extends Component
             
         $sessionIds = $sessions->pluck('id');
         
+        $this->totalTestsTaken = $sessions->count();
+        $totalSeconds = $sessions->sum('duration_seconds');
+        $this->totalTimeSpentHours = round($totalSeconds / 3600, 1);
+
         $this->totalAnswered = ExamAnswer::whereIn('exam_session_id', $sessionIds)
             ->whereNotNull('selected_option')
             ->count();
@@ -63,11 +73,18 @@ class UserDashboard extends Component
         
         $this->accuracy = $this->totalAnswered > 0 ? round(($correct / $this->totalAnswered) * 100, 1) : 0;
 
-        // 2. Daily Goal & Activity
+        // 2. Daily Goal & Plan Limits
         $this->dailyGoal = config('cbtwise.free_daily_limit', 20);
+        $this->dailyQuestionsUsed = $user->daily_question_count ?? 0;
         $this->todayAnswered = ExamAnswer::whereIn('exam_session_id', $sessionIds)
             ->whereDate('updated_at', today())
             ->whereNotNull('selected_option')
+            ->count();
+
+        // Monthly mock exams used
+        $this->monthlyMockUsed = ExamSession::where('user_id', $user->id)
+            ->where('mode', 'mock')
+            ->where('created_at', '>=', now()->startOfMonth())
             ->count();
 
         // 3. Active in-progress session
@@ -97,7 +114,7 @@ class UserDashboard extends Component
             ->take(5)
             ->get();
             
-        // 7. Subject Performance for Chart.js
+        // 7. Subject Performance for Chart.js & Focus Areas
         $subAnswers = ExamAnswer::whereIn('exam_session_id', $sessionIds)
             ->join('questions', 'exam_answers.question_id', '=', 'questions.id')
             ->join('subjects', 'questions.subject_id', '=', 'subjects.id')

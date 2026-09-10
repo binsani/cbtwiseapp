@@ -37,10 +37,13 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-bold">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-black 
-                                    @if ($sess->score >= 70) bg-emerald-50 text-emerald-700 
-                                    @elseif ($sess->score >= 50) bg-amber-50 text-amber-700 
+                                    @php
+                                        $normalizedScore = $sess->exam->slug === 'utme' ? ($sess->score / 400) * 100 : $sess->score;
+                                    @endphp
+                                    @if ($normalizedScore >= 70) bg-emerald-50 text-emerald-700 
+                                    @elseif ($normalizedScore >= 50) bg-amber-50 text-amber-700 
                                     @else bg-rose-50 text-rose-700 @endif">
-                                    {{ $sess->score }}%
+                                    {{ round($sess->score) }}{{ $sess->exam->slug === 'utme' ? '/400' : '%' }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">

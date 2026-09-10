@@ -17,6 +17,11 @@ class Subscription extends Component
         $this->expiresAt = $user->premium_expires_at ? $user->premium_expires_at->format('M d, Y') : null;
     }
 
+    public function upgrade()
+    {
+        return redirect()->route('pricing');
+    }
+
     public function render()
     {
         return view('livewire.account.subscription')
