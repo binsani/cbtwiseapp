@@ -160,7 +160,7 @@ class BulkSeeder extends Component
     public function render()
     {
         $exams = Exam::all();
-        $subjects = Subject::orderBy('name')->get();
+        $subjects = Subject::with('exam')->orderBy('name')->get();
 
         // Subjects with very low coverage (< 50 questions)
         $lowCoverageSubjects = Subject::with('exam')
