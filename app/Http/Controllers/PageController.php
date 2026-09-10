@@ -70,7 +70,7 @@ class PageController extends Controller
             return response()->download($localPath, 'CBTwise-Setup.exe');
         }
 
-        return redirect('https://github.com/binsani/cbtwiseapp/releases');
+        return redirect('https://github.com/binsani/cbtwiseapp/releases/latest/download/CBTwise-Setup.exe');
     }
 
     public function refundPolicy()
