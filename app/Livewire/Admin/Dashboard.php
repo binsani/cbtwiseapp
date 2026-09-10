@@ -27,8 +27,6 @@ class Dashboard extends Component
     public $topExams = [];
     public $revenueData = [];
 
-    public $recentActivity = [];
-    public $questionCoverage = [];
     public $subjectsMap = [];
 
     public function mount()
@@ -53,19 +51,8 @@ class Dashboard extends Component
         $this->totalTestsTaken = ExamSession::where('status', 'submitted')->count();
         $this->flaggedQuestions = Question::where('is_flagged', true)->count();
 
-        // 3. Recent Activity & Question Coverage
-        $this->recentActivity = ExamSession::where('status', 'submitted')
-            ->with(['user', 'exam'])
-            ->latest('submitted_at')
-            ->take(8)
-            ->get();
-
+        // 3. Subjects Map
         $this->subjectsMap = \App\Models\Subject::pluck('name', 'id')->toArray();
-
-        $this->questionCoverage = \App\Models\Subject::with('exam')
-            ->withCount('questions')
-            ->orderBy('exam_id')
-            ->get();
 
         // 4. Top Exams
         $this->topExams = ExamSession::select('exams.name', DB::raw('count(*) as session_count'))
@@ -185,7 +172,20 @@ class Dashboard extends Component
 
     public function render()
     {
-        return view('livewire.admin.dashboard')
-            ->layout('layouts.app');
+        $recentActivity = ExamSession::where('status', 'submitted')
+            ->with(['user', 'exam'])
+            ->latest('submitted_at')
+            ->take(8)
+            ->get();
+
+        $questionCoverage = \App\Models\Subject::with('exam')
+            ->withCount('questions')
+            ->orderBy('exam_id')
+            ->get();
+
+        return view('livewire.admin.dashboard', [
+            'recentActivity' => $recentActivity,
+            'questionCoverage' => $questionCoverage,
+        ])->layout('layouts.app');
     }
 }
