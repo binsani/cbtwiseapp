@@ -76,7 +76,8 @@ class BulkSeeder extends Component
                 }
 
                 if (empty($alocQuestionsData)) {
-                    $this->logs[] = "[" . now()->toTimeString() . "] Notice: 0 questions returned from ALOC for {$subject->name} (slug: {$alocSubjectName}).";
+                    $reason = $alocClient->lastError ?: "No questions available for this subject slug";
+                    $this->logs[] = "[" . now()->toTimeString() . "] Notice: 0 questions for {$subject->name} ({$alocSubjectName}). Detail: {$reason}";
                     continue;
                 }
 

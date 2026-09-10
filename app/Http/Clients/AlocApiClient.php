@@ -12,6 +12,8 @@ class AlocApiClient
     protected float $timeout;
     protected int $retry;
 
+    public ?string $lastError = null;
+
     public function __construct()
     {
         $this->baseUri = config('cbtwise.aloc.base', 'https://dev.aloc.com.ng/api/v1');
@@ -26,8 +28,11 @@ class AlocApiClient
      */
     public function fetchQuestions(string $subject, int $limit = 20): array
     {
+        $this->lastError = null;
+
         if (empty($this->token)) {
-            Log::warning('ALOC API Token is not configured.');
+            $this->lastError = 'ALOC_API_TOKEN is empty in environment.';
+            Log::warning($this->lastError);
             return [];
         }
 
@@ -37,6 +42,7 @@ class AlocApiClient
             if ($isModern) {
                 // Modern ALOC Station: headers x-api-key, X-ALOC-KEY
                 $endpoint = rtrim($this->baseUri, '/') . '/questions';
+                $slug = $this->normalizeSubjectSlug($subject);
                 $response = Http::withHeaders([
                     'Accept' => 'application/json',
                     'x-api-key' => $this->token,
@@ -45,7 +51,7 @@ class AlocApiClient
                 ->timeout($this->timeout)
                 ->retry($this->retry, 200)
                 ->get($endpoint, [
-                    'subject' => $this->normalizeSubjectSlug($subject),
+                    'subject' => $slug,
                     'limit' => min($limit, 40),
                 ]);
 
@@ -55,6 +61,7 @@ class AlocApiClient
                     return $this->formatStationQuestions($items);
                 }
 
+                $this->lastError = "ALOC Error [{$response->status()}]: " . substr($response->body(), 0, 150);
                 Log::error('ALOC Station API Error: ' . $response->status() . ' - ' . $response->body());
             } else {
                 // Legacy ALOC API fallback
