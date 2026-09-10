@@ -33,9 +33,9 @@ return [
     // ── ALOC Questions API ────────────────────────────────────────────────────
     'aloc' => [
         'token'   => env('ALOC_API_TOKEN'),
-        'base'    => env('ALOC_API_BASE', 'https://questions.aloc.com.ng/api/v2'),
-        'timeout' => (float) env('ALOC_TIMEOUT', 3),
-        'retry'   => (int) env('ALOC_RETRY', 1),
+        'base'    => env('ALOC_API_BASE', 'https://dev.aloc.com.ng/api/v1'),
+        'timeout' => (float) env('ALOC_TIMEOUT', 10),
+        'retry'   => (int) env('ALOC_RETRY', 2),
     ],
 
     // ── Tawk.to Live Chat ─────────────────────────────────────────────────────
