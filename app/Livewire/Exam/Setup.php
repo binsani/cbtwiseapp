@@ -18,14 +18,15 @@ class Setup extends Component
     public $year = 'random'; // 'random' or specific year integer
     public $questionCount = 20; // 10, 20, 40
     public $selectedCourse = '';
+    public $selectedTopicId = null;
 
     public $currentStep = 1;
 
-    public function mount($exam = null, $course = null, $mode = null, $subject = null)
+    public function mount($exam = null, $course = null, $mode = null, $subject = null, $topic = null)
     {
         Cache::forget('active_exams');
 
-        // Support query parameters from dashboard quick links: ?exam=utme, ?mode=mock, ?subject=3, ?course=medicine-and-surgery
+        // Support query parameters from dashboard quick links: ?exam=utme, ?mode=mock, ?subject=3, ?course=medicine-and-surgery, ?topic=12
         $examParam = $exam ?? request('exam');
         if ($examParam) {
             $foundExam = is_numeric($examParam) ? Exam::find($examParam) : Exam::where('slug', $examParam)->first();
@@ -59,6 +60,25 @@ class Setup extends Component
                     $this->selectedSubjects[] = (string)$foundSubject->id;
                 }
                 $this->currentStep = 3;
+            }
+        }
+
+        $topicParam = $topic ?? request('topic');
+        if ($topicParam) {
+            $this->selectedTopicId = (int) $topicParam;
+            $foundTopic = \App\Models\Topic::find($this->selectedTopicId);
+            if ($foundTopic) {
+                $topicSubj = $foundTopic->subject;
+                if ($topicSubj) {
+                    if (!$this->selectedExamId) {
+                        $this->selectedExamId = $topicSubj->exam_id;
+                        $this->updatedSelectedExamId($topicSubj->exam_id);
+                    }
+                    if (!in_array((string)$topicSubj->id, $this->selectedSubjects)) {
+                        $this->selectedSubjects = [(string)$topicSubj->id];
+                    }
+                    $this->currentStep = 4;
+                }
             }
         }
 
@@ -210,6 +230,7 @@ class Setup extends Component
             'mode' => $this->mode,
             'subjects' => $this->selectedSubjects,
             'year' => $this->year === 'random' ? null : (int) $this->year,
+            'topic_id' => $this->selectedTopicId ? (int) $this->selectedTopicId : null,
             'total_questions' => $totalQuestions,
             'duration_seconds' => $durationSeconds,
             'started_at' => now(),
@@ -227,11 +248,20 @@ class Setup extends Component
         $subjects = $selectedExam ? $selectedExam->subjects : collect();
         $years = config('cbtwise.exam_years', range(now()->year, 2000));
 
+        // Available topics if single subject is selected in practice/study mode
+        $availableTopics = collect();
+        if (count($this->selectedSubjects) === 1) {
+            $availableTopics = \App\Models\Topic::where('subject_id', $this->selectedSubjects[0])
+                ->orderBy('sort_order')
+                ->get();
+        }
+
         return view('livewire.exam.setup', [
             'exams' => $exams,
             'selectedExam' => $selectedExam,
             'subjects' => $subjects,
             'years' => $years,
+            'availableTopics' => $availableTopics,
         ])->layout('layouts.app');
     }
 }

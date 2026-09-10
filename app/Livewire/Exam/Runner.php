@@ -15,6 +15,8 @@ class Runner extends Component
 {
     public $sessionId;
     public $mode;
+    public $topicId = null;
+    public $topicName = null;
     
     // Active Navigation state
     public $selectedSubjectId;
@@ -52,6 +54,8 @@ class Runner extends Component
         }
             
         $this->mode = $examSession->mode;
+        $this->topicId = $examSession->topic_id;
+        $this->topicName = $examSession->topic?->name;
         
         // Calculate remaining seconds
         $elapsed = now()->diffInSeconds($examSession->started_at);
@@ -91,7 +95,7 @@ class Runner extends Component
             $totalGenerated = 0;
             
             foreach ($subjects as $subject) {
-                $questions = $questionFetcher->fetch($exam, $subject, $questionsPerSubject, $examSession->year);
+                $questions = $questionFetcher->fetch($exam, $subject, $questionsPerSubject, $examSession->year, $examSession->topic_id);
                 
                 foreach ($questions as $q) {
                     ExamAnswer::create([

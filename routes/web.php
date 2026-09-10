@@ -69,6 +69,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('jamb-checker', \App\Livewire\Tools\CourseChecker::class)->name('jamb.checker');
     Route::get('tools/jamb-brochure', \App\Livewire\Tools\CourseChecker::class)->name('jamb.brochure');
 
+    // Practice by Topic (Syllabus Drill)
+    Route::get('topic-practice', \App\Livewire\Tools\TopicExplorer::class)->name('topic.practice');
+    Route::get('tools/topics', \App\Livewire\Tools\TopicExplorer::class)->name('topics.explorer');
+
     // Exam practice flow
     Route::get('exam/setup', ExamSetup::class)->name('exam.setup');
     

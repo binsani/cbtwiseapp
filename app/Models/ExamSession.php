@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class ExamSession extends Model
 {
     protected $fillable = [
-        'user_id', 'exam_id', 'mode', 'subjects', 'year',
+        'user_id', 'exam_id', 'mode', 'subjects', 'year', 'topic_id',
         'total_questions', 'duration_seconds', 'started_at', 'submitted_at',
         'score', 'correct_count', 'status', 'score_breakdown',
     ];
@@ -22,6 +22,7 @@ class ExamSession extends Model
             'started_at'      => 'datetime',
             'submitted_at'    => 'datetime',
             'score'           => 'decimal:2',
+            'topic_id'        => 'integer',
         ];
     }
 
@@ -33,6 +34,11 @@ class ExamSession extends Model
     public function exam(): BelongsTo
     {
         return $this->belongsTo(Exam::class);
+    }
+
+    public function topic(): BelongsTo
+    {
+        return $this->belongsTo(Topic::class);
     }
 
     public function answers(): HasMany

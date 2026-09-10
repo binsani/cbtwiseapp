@@ -20,14 +20,15 @@ class QuestionFetcher
     }
 
     /**
-     * Fetch questions for a given exam, subject, count, and optional year.
+     * Fetch questions for a given exam, subject, count, optional year, and optional topic.
      */
-    public function fetch(Exam $exam, Subject $subject, int $count, ?int $year = null): Collection
+    public function fetch(Exam $exam, Subject $subject, int $count, ?int $year = null, ?int $topicId = null): Collection
     {
         // 1. Fetch from local DB using weighted random
         $query = Question::query()
             ->forExam($exam->id)
             ->forSubject($subject->id)
+            ->forTopic($topicId)
             ->notFlagged();
 
         if ($year) {

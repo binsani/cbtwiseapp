@@ -88,6 +88,11 @@ class Question extends Model
         return $query->where('subject_id', $subjectId);
     }
 
+    public function scopeForTopic($query, ?int $topicId)
+    {
+        return $topicId ? $query->where('topic_id', $topicId) : $query;
+    }
+
     public function scopeForYear($query, ?int $year)
     {
         return $year ? $query->where('year', $year) : $query;

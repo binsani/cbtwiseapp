@@ -170,6 +170,12 @@
             <span>&rarr;</span>
         </a>
 
+        <a href="{{ route('topic.practice') }}" 
+           class="inline-flex items-center gap-2 px-5 py-3.5 bg-purple-600 hover:bg-purple-700 active:bg-purple-800 text-white text-sm font-black rounded-2xl transition-all shadow-md shadow-purple-600/10 hover:shadow-lg">
+            <span>Practice by Topic</span>
+            <span>🎯</span>
+        </a>
+
         <a href="{{ route('mock-exams') }}" 
            class="inline-flex items-center gap-2 px-6 py-3.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-sm font-black rounded-2xl transition-all shadow-md shadow-blue-600/10 hover:shadow-lg">
             <span>Take Mock Exam</span>

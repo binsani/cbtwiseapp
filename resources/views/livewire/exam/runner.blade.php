@@ -9,9 +9,14 @@
 
     <!-- Top Navigation Bar -->
     <header class="bg-gradient-to-r from-emerald-700 to-emerald-950 text-white px-6 py-4 flex justify-between items-center shadow-md flex-shrink-0">
-        <div class="flex items-center space-x-4">
-            <h2 class="text-xl font-extrabold tracking-wider font-heading">CBTWise Engine</h2>
-            <span class="px-3 py-1 bg-white/20 rounded-full text-xs font-bold uppercase tracking-widest">{{ $mode }} mode</span>
+        <div class="flex items-center space-x-3 sm:space-x-4">
+            <h2 class="text-lg sm:text-xl font-extrabold tracking-wider font-heading">CBTWise Engine</h2>
+            <span class="px-2.5 sm:px-3 py-1 bg-white/20 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-widest">{{ $mode }} mode</span>
+            @if($topicName)
+                <span class="hidden md:inline-flex items-center px-2.5 py-1 bg-amber-400/20 text-amber-200 border border-amber-400/30 rounded-full text-[10px] font-extrabold tracking-wide truncate max-w-xs" title="{{ $topicName }}">
+                    🎯 {{ $topicName }}
+                </span>
+            @endif
         </div>
         
         <!-- Timer -->
@@ -60,9 +65,22 @@
                     <div>
                         <!-- Header -->
                         <div class="flex justify-between items-center mb-6">
-                            <span class="text-xs font-bold text-emerald-600 uppercase tracking-widest">
-                                Question {{ $currentIndex + 1 }} of {{ $questionsList->count() }}
-                            </span>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-xs font-bold text-emerald-600 uppercase tracking-widest">
+                                    Question {{ $currentIndex + 1 }} of {{ $questionsList->count() }}
+                                </span>
+                                @if($topicName)
+                                    <span class="text-slate-300">&bull;</span>
+                                    <span class="text-xs font-semibold text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-md truncate max-w-[200px] sm:max-w-sm">
+                                        {{ $topicName }}
+                                    </span>
+                                @elseif($activeQuestion->topic)
+                                    <span class="text-slate-300">&bull;</span>
+                                    <span class="text-xs font-semibold text-slate-600 bg-slate-100 px-2.5 py-0.5 rounded-md truncate max-w-[200px] sm:max-w-sm">
+                                        {{ $activeQuestion->topic->name }}
+                                    </span>
+                                @endif
+                            </div>
                             
                             <!-- Toggle Scientific Calculator -->
                             @php

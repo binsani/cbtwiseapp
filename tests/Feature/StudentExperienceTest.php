@@ -165,4 +165,30 @@ class StudentExperienceTest extends TestCase
             ->assertCount('selectedSubjects', 4)
             ->assertSee('Auto-Select by Career / Target Course');
     }
+
+    public function test_topic_explorer_and_topic_practice_session(): void
+    {
+        $topic = \App\Models\Topic::create([
+            'subject_id' => $this->math->id,
+            'name' => 'Calculus: Differentiation & Integration',
+            'sort_order' => 1,
+        ]);
+
+        $response = $this->actingAs($this->student)->get('/topic-practice');
+        $response->assertStatus(200);
+        $response->assertSee('Practice By Topic');
+        $response->assertSee('Calculus: Differentiation');
+
+        \Livewire\Livewire::actingAs($this->student)
+            ->withQueryParams(['exam' => 'utme', 'subject' => $this->math->id, 'topic' => $topic->id])
+            ->test(\App\Livewire\Exam\Setup::class)
+            ->assertSet('selectedTopicId', $topic->id)
+            ->assertSet('currentStep', 4)
+            ->assertSee('Practice by Topic (Syllabus)')
+            ->call('startExam');
+
+        $session = \App\Models\ExamSession::where('user_id', $this->student->id)->latest()->first();
+        $this->assertNotNull($session);
+        $this->assertEquals($topic->id, $session->topic_id);
+    }
 }

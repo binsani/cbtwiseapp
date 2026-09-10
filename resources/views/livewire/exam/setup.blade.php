@@ -248,17 +248,44 @@
                 <h3 class="text-2xl font-bold text-gray-900 font-heading">Finalize Session Settings</h3>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <!-- Left: Year Setup -->
-                    <div class="space-y-4">
-                        <label class="block text-sm font-bold text-gray-700 uppercase tracking-wide">Select Exam Year</label>
-                        <p class="text-xs text-gray-500">Pick a specific past year's questions, or randomise for an adaptive test.</p>
-                        
-                        <select wire:model="year" class="block w-full border-gray-200 rounded-2xl shadow-sm focus:border-emerald-500 focus:ring focus:ring-emerald-200 focus:ring-opacity-50 text-base py-3 px-4 transition-all duration-300">
-                            <option value="random">Adaptive/Random (All Years)</option>
-                            @foreach($years as $yr)
-                                <option value="{{ $yr }}">{{ $yr }} Past Questions</option>
-                            @endforeach
-                        </select>
+                    <!-- Left: Year Setup & Topic Filter -->
+                    <div class="space-y-6">
+                        <div class="space-y-4">
+                            <label class="block text-sm font-bold text-gray-700 uppercase tracking-wide">Select Exam Year</label>
+                            <p class="text-xs text-gray-500">Pick a specific past year's questions, or randomise for an adaptive test.</p>
+                            
+                            <select wire:model="year" class="block w-full border-gray-200 rounded-2xl shadow-sm focus:border-emerald-500 focus:ring focus:ring-emerald-200 focus:ring-opacity-50 text-base py-3 px-4 transition-all duration-300">
+                                <option value="random">Adaptive/Random (All Years)</option>
+                                @foreach($years as $yr)
+                                    <option value="{{ $yr }}">{{ $yr }} Past Questions</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        @if($mode !== 'mock' && count($availableTopics) > 0)
+                            <div class="space-y-4 pt-2 border-t border-gray-100">
+                                <div class="flex items-center justify-between">
+                                    <label class="block text-sm font-bold text-gray-700 uppercase tracking-wide">
+                                        🎯 Practice by Topic (Syllabus)
+                                    </label>
+                                    @if($selectedTopicId)
+                                        <button type="button" wire:click="$set('selectedTopicId', null)" class="text-xs text-rose-600 font-bold hover:underline">
+                                            Clear Topic Filter
+                                        </button>
+                                    @endif
+                                </div>
+                                <p class="text-xs text-gray-500">
+                                    Zero in on a specific curriculum topic or mastery area for focused study.
+                                </p>
+                                
+                                <select wire:model="selectedTopicId" class="block w-full border-gray-200 rounded-2xl shadow-sm focus:border-emerald-500 focus:ring focus:ring-emerald-200 focus:ring-opacity-50 text-base py-3 px-4 transition-all duration-300">
+                                    <option value="">All Topics (Entire Subject Syllabus)</option>
+                                    @foreach($availableTopics as $topic)
+                                        <option value="{{ $topic->id }}">Topic {{ $topic->sort_order }}: {{ $topic->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        @endif
                     </div>
 
                     <!-- Right: Size Selection (Hidden in Mock Mode) -->
