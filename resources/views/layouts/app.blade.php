@@ -49,7 +49,9 @@
     </head>
     <body class="font-sans antialiased">
         <div class="min-h-screen bg-gray-100">
-            <livewire:layout.navigation />
+            @if(!request()->is('admin*'))
+                <livewire:layout.navigation />
+            @endif
 
             <!-- Page Heading -->
             @if (isset($header))
