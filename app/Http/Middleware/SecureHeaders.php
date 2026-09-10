@@ -41,12 +41,12 @@ class SecureHeaders
         $wsScheme    = $reverbScheme === 'https' ? 'wss' : 'ws';
 
         $csp = "default-src 'self'; "
-             . "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://js.tawk.to https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/ https://checkout.paystack.com; "
-             . "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.bunny.net; "
+             . "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://js.tawk.to https://embed.tawk.to https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/ https://checkout.paystack.com; "
+             . "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.bunny.net https://embed.tawk.to; "
              . "font-src 'self' data: https://fonts.gstatic.com https://fonts.bunny.net; "
-             . "img-src 'self' data: https://questions.aloc.com.ng https://lh3.googleusercontent.com; "
-             . "connect-src 'self' https://api.paystack.co https://api.openai.com {$wsScheme}://{$reverbHost}:{$reverbPort}; "
-             . "frame-src 'self' https://checkout.paystack.com https://www.google.com/recaptcha/; "
+             . "img-src 'self' data: https://questions.aloc.com.ng https://lh3.googleusercontent.com https://*.tawk.to https://tawk.link; "
+             . "connect-src 'self' https://api.paystack.co https://api.openai.com wss://*.tawk.to https://*.tawk.to {$wsScheme}://{$reverbHost}:{$reverbPort}; "
+             . "frame-src 'self' https://checkout.paystack.com https://www.google.com/recaptcha/ https://embed.tawk.to https://*.tawk.to; "
              . "worker-src 'self' blob:;";
 
         $response->headers->set('Content-Security-Policy', $csp);

@@ -68,5 +68,6 @@
             <!-- Mobile Bottom Navigation for Authenticated Students -->
             <x-student-bottom-nav />
         </div>
+        <x-tawk-chat />
     </body>
 </html>

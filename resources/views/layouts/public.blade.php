@@ -158,5 +158,6 @@
                 </div>
             </div>
         </footer>
+        <x-tawk-chat />
     </body>
 </html>
