@@ -13,12 +13,21 @@ class AlocApiClient
     protected int $retry;
 
     public ?string $lastError = null;
+    public ?string $lastEndpoint = null;
 
     public function __construct()
     {
-        $this->baseUri = config('cbtwise.aloc.base', 'https://dev.aloc.com.ng/api/v1');
         $this->token = config('cbtwise.aloc.token');
-        $this->timeout = (float) config('cbtwise.aloc.timeout', 10.0);
+        $base = config('cbtwise.aloc.base', 'https://dev.aloc.com.ng/api/v1');
+
+        // Any token starting with aloc_ is strictly an ALOC Station API token
+        // Legacy questions.aloc.com.ng/api/v2 rejects these keys with 406
+        if (!empty($this->token) && str_starts_with($this->token, 'aloc_')) {
+            $base = 'https://dev.aloc.com.ng/api/v1';
+        }
+
+        $this->baseUri = $base;
+        $this->timeout = (float) config('cbtwise.aloc.timeout', 15.0);
         $this->retry = (int) config('cbtwise.aloc.retry', 2);
     }
 
@@ -43,6 +52,7 @@ class AlocApiClient
                 // Modern ALOC Station: headers x-api-key, X-ALOC-KEY
                 $endpoint = rtrim($this->baseUri, '/') . '/questions';
                 $slug = $this->normalizeSubjectSlug($subject);
+                $this->lastEndpoint = "{$endpoint}?subject={$slug}&limit=" . min($limit, 40);
                 $response = Http::withHeaders([
                     'Accept' => 'application/json',
                     'x-api-key' => $this->token,
@@ -61,8 +71,8 @@ class AlocApiClient
                     return $this->formatStationQuestions($items);
                 }
 
-                $this->lastError = "ALOC Error [{$response->status()}]: " . substr($response->body(), 0, 150);
-                Log::error('ALOC Station API Error: ' . $response->status() . ' - ' . $response->body());
+                $this->lastError = "ALOC [{$response->status()}]: " . substr($response->body(), 0, 120);
+                Log::error("ALOC Station Error [{$response->status()} on {$this->lastEndpoint}]: " . $response->body());
             } else {
                 // Legacy ALOC API fallback
                 $endpoint = rtrim($this->baseUri, '/') . '/q';

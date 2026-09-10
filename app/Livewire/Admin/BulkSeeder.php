@@ -47,23 +47,12 @@ class BulkSeeder extends Component
 
         $this->logs[] = "[" . now()->toTimeString() . "] Starting bulk import for {$subjects->count()} subject(s). Batches: {$this->batches}. Dry run: " . ($this->dryRun ? 'YES' : 'NO');
 
-        $subjectMapping = [
-            'english language' => 'english',
-            'christian religious studies' => 'crk',
-            'islamic religious studies' => 'irk',
-            'further mathematics' => 'furthermaths',
-        ];
-
         $questionsPerBatch = 40;
 
         @set_time_limit(300);
 
         foreach ($subjects as $subject) {
-            $alocSubjectName = strtolower($subject->name);
-            if (isset($subjectMapping[$alocSubjectName])) {
-                $alocSubjectName = $subjectMapping[$alocSubjectName];
-            }
-
+            $alocSubjectName = $subject->name;
             $subjectCreated = 0;
             $subjectDupes = 0;
 
@@ -76,8 +65,9 @@ class BulkSeeder extends Component
                 }
 
                 if (empty($alocQuestionsData)) {
-                    $reason = $alocClient->lastError ?: "No questions available for this subject slug";
-                    $this->logs[] = "[" . now()->toTimeString() . "] Notice: 0 questions for {$subject->name} ({$alocSubjectName}). Detail: {$reason}";
+                    $reason = $alocClient->lastError ?: "No questions returned";
+                    $ep = $alocClient->lastEndpoint ? " [{$alocClient->lastEndpoint}]" : "";
+                    $this->logs[] = "[" . now()->toTimeString() . "] Notice: 0 questions for {$subject->name} ({$alocSubjectName}){$ep}. Detail: {$reason}";
                     continue;
                 }
 
