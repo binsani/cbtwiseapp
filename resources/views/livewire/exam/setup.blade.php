@@ -1,20 +1,20 @@
-<div class="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+<div class="max-w-4xl mx-auto py-6 sm:py-12 px-4 sm:px-6 lg:px-8">
     <!-- Progress Header -->
-    <div class="mb-10 text-center">
-        <h1 class="text-4xl font-extrabold text-gray-900 tracking-tight font-heading">
+    <div class="mb-8 sm:mb-10 text-center">
+        <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-gray-900 tracking-tight font-heading">
             Configure Your <span class="bg-clip-text text-transparent bg-gradient-to-r from-emerald-600 to-blue-600">Practice Exam</span>
         </h1>
-        <p class="mt-2 text-lg text-gray-600">Customize your CBT experience to fit your study goals.</p>
+        <p class="mt-2 text-sm sm:text-lg text-gray-600">Customize your CBT experience to fit your study goals.</p>
 
         <!-- Stepper -->
-        <div class="mt-8 relative max-w-xl mx-auto">
+        <div class="mt-6 sm:mt-8 relative max-w-xl mx-auto">
             <div class="absolute inset-0 flex items-center" aria-hidden="true">
                 <div class="w-full bg-gray-200 h-1 rounded"></div>
             </div>
             <div class="relative flex justify-between">
                 @foreach([1 => 'Exam', 2 => 'Mode', 3 => 'Subjects', 4 => 'Finalize'] as $step => $label)
                     <div class="flex flex-col items-center">
-                        <div class="w-10 h-10 flex items-center justify-center rounded-full transition-all duration-300 font-semibold text-sm z-10 
+                        <div class="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-full transition-all duration-300 font-semibold text-sm z-10
                             {{ $currentStep == $step ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white ring-4 ring-emerald-100 scale-110 shadow-lg' : ($currentStep > $step ? 'bg-emerald-600 text-white' : 'bg-white border-2 border-gray-200 text-gray-400') }}">
                             @if($currentStep > $step)
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
@@ -22,7 +22,7 @@
                                 {{ $step }}
                             @endif
                         </div>
-                        <span class="mt-2 text-xs font-semibold {{ $currentStep == $step ? 'text-emerald-600' : 'text-gray-500' }}">{{ $label }}</span>
+                        <span class="mt-1.5 text-[10px] sm:text-xs font-semibold {{ $currentStep == $step ? 'text-emerald-600' : 'text-gray-500' }} hidden xs:block sm:block">{{ $label }}</span>
                     </div>
                 @endforeach
             </div>
@@ -30,7 +30,7 @@
     </div>
 
     <!-- Main Wizard Card -->
-    <div class="bg-white/80 backdrop-blur-md border border-gray-100 rounded-3xl shadow-xl overflow-hidden p-8 sm:p-10 transition-all duration-300">
+    <div class="bg-white/80 backdrop-blur-md border border-gray-100 rounded-3xl shadow-xl overflow-hidden p-5 sm:p-8 lg:p-10 transition-all duration-300">
         <!-- Error & Alert Messages -->
         @if (session()->has('error'))
             <div class="mb-6 p-4 bg-rose-50 border-l-4 border-rose-500 text-rose-700 rounded-r-xl flex items-start space-x-3 shadow-sm animate-shake">
@@ -42,10 +42,10 @@
         <!-- STEP 1: SELECT EXAM -->
         @if($currentStep === 1)
             <div class="space-y-6">
-                <h3 class="text-2xl font-bold text-gray-900 font-heading">Choose an Examination Board</h3>
+                <h3 class="text-xl sm:text-2xl font-bold text-gray-900 font-heading">Choose an Examination Board</h3>
                 <p class="text-gray-500 text-sm">Select the specific exam curriculum you wish to practice.</p>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
                     @foreach($exams as $exam)
                         @php
                             if (is_string($exam)) {
@@ -54,18 +54,18 @@
                         @endphp
                         @if($exam)
                             <div wire:click="$set('selectedExamId', {{ $exam->id }})"
-                                 class="group relative border-2 rounded-2xl p-6 cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between h-48
+                                 class="group relative border-2 rounded-2xl p-5 sm:p-6 cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between min-h-[9rem] sm:h-48
                                  {{ $selectedExamId == $exam->id ? 'border-emerald-500 bg-emerald-50/40 ring-4 ring-emerald-50' : 'border-gray-200 bg-white hover:border-emerald-200' }}">
-                                
+
                                 <div>
                                     <span class="text-xs font-bold uppercase tracking-widest px-3 py-1 bg-gray-100 rounded-full text-gray-500 group-hover:bg-emerald-100 group-hover:text-emerald-700 transition-colors duration-300">
                                         {{ $exam->slug }}
                                     </span>
-                                    <h4 class="text-xl font-bold text-gray-900 mt-4 group-hover:text-emerald-800 transition-colors duration-300">{{ $exam->name }}</h4>
+                                    <h4 class="text-lg sm:text-xl font-bold text-gray-900 mt-3 sm:mt-4 group-hover:text-emerald-800 transition-colors duration-300">{{ $exam->name }}</h4>
                                     <p class="text-sm text-gray-500 mt-1 line-clamp-2">{{ $exam->description }}</p>
                                 </div>
 
-                                <div class="flex justify-end">
+                                <div class="flex justify-end mt-3">
                                     <span class="w-8 h-8 rounded-full flex items-center justify-center border-2 border-gray-200 group-hover:border-emerald-500 group-hover:bg-emerald-500 group-hover:text-white transition-all duration-300">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                                     </span>
@@ -83,56 +83,62 @@
         <!-- STEP 2: SELECT MODE -->
         @if($currentStep === 2)
             <div class="space-y-6">
-                <h3 class="text-2xl font-bold text-gray-900 font-heading">Select Practice Mode</h3>
+                <h3 class="text-xl sm:text-2xl font-bold text-gray-900 font-heading">Select Practice Mode</h3>
                 <p class="text-gray-500 text-sm">Choose the session format that fits your learning state.</p>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
                     <!-- Practice Mode -->
                     <div wire:click="$set('mode', 'practice')"
-                         class="border-2 rounded-2xl p-6 cursor-pointer hover:shadow-lg transition-all duration-300 flex flex-col justify-between h-52
+                         class="border-2 rounded-2xl p-5 sm:p-6 cursor-pointer hover:shadow-lg transition-all duration-300 flex flex-col justify-between min-h-[10rem] sm:h-52
                          {{ $mode === 'practice' ? 'border-emerald-500 bg-emerald-50/40 ring-4 ring-emerald-50' : 'border-gray-200 bg-white hover:border-emerald-200' }}">
-                        <div>
-                            <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600 mb-4">
+                        <div class="flex sm:block items-center gap-4">
+                            <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600 flex-shrink-0">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
                             </div>
-                            <h4 class="text-lg font-bold text-gray-900">Standard Practice</h4>
-                            <p class="text-sm text-gray-500 mt-1">Untimed session with customizable sizes. Great for revision.</p>
+                            <div class="sm:mt-4">
+                                <h4 class="text-base sm:text-lg font-bold text-gray-900">Standard Practice</h4>
+                                <p class="text-sm text-gray-500 mt-0.5 sm:mt-1">Untimed session with customizable sizes. Great for revision.</p>
+                            </div>
                         </div>
-                        <span class="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full self-start">Free Access</span>
+                        <span class="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full self-start mt-3 sm:mt-0">Free Access</span>
                     </div>
 
                     <!-- Study Mode -->
                     <div wire:click="$set('mode', 'study')"
-                         class="border-2 rounded-2xl p-6 cursor-pointer hover:shadow-lg transition-all duration-300 flex flex-col justify-between h-52
+                         class="border-2 rounded-2xl p-5 sm:p-6 cursor-pointer hover:shadow-lg transition-all duration-300 flex flex-col justify-between min-h-[10rem] sm:h-52
                          {{ $mode === 'study' ? 'border-emerald-500 bg-emerald-50/40 ring-4 ring-emerald-50' : 'border-gray-200 bg-white hover:border-emerald-200' }}">
-                        <div>
-                            <div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600 mb-4">
+                        <div class="flex sm:block items-center gap-4">
+                            <div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600 flex-shrink-0">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
                             </div>
-                            <h4 class="text-lg font-bold text-gray-900">Study Mode</h4>
-                            <p class="text-sm text-gray-500 mt-1">Provides instant explanations after answering each question.</p>
+                            <div class="sm:mt-4">
+                                <h4 class="text-base sm:text-lg font-bold text-gray-900">Study Mode</h4>
+                                <p class="text-sm text-gray-500 mt-0.5 sm:mt-1">Provides instant explanations after answering each question.</p>
+                            </div>
                         </div>
-                        <span class="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full self-start">Free Access</span>
+                        <span class="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full self-start mt-3 sm:mt-0">Free Access</span>
                     </div>
 
                     <!-- Mock Mode -->
                     <div wire:click="$set('mode', 'mock')"
-                         class="relative border-2 rounded-2xl p-6 cursor-pointer hover:shadow-lg transition-all duration-300 flex flex-col justify-between h-52
+                         class="relative border-2 rounded-2xl p-5 sm:p-6 cursor-pointer hover:shadow-lg transition-all duration-300 flex flex-col justify-between min-h-[10rem] sm:h-52
                          {{ $mode === 'mock' ? 'border-emerald-500 bg-emerald-50/40 ring-4 ring-emerald-50' : 'border-gray-200 bg-white hover:border-emerald-200' }}">
-                        
+
                         <!-- Premium Badge -->
                         <span class="absolute -top-3 -right-3 px-3 py-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] font-extrabold uppercase tracking-wider rounded-full shadow-md">
                             Premium
                         </span>
 
-                        <div>
-                            <div class="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center text-indigo-600 mb-4">
+                        <div class="flex sm:block items-center gap-4">
+                            <div class="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center text-indigo-600 flex-shrink-0">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                             </div>
-                            <h4 class="text-lg font-bold text-gray-900">Timed Exam Mock</h4>
-                            <p class="text-sm text-gray-500 mt-1">Simulates real exam board environment. Full-duration countdown.</p>
+                            <div class="sm:mt-4">
+                                <h4 class="text-base sm:text-lg font-bold text-gray-900">Timed Exam Mock</h4>
+                                <p class="text-sm text-gray-500 mt-0.5 sm:mt-1">Simulates real exam board environment. Full-duration countdown.</p>
+                            </div>
                         </div>
-                        <span class="text-xs font-semibold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full self-start">Requires Premium</span>
+                        <span class="text-xs font-semibold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full self-start mt-3 sm:mt-0">Requires Premium</span>
                     </div>
                 </div>
             </div>

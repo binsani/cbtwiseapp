@@ -42,7 +42,7 @@
                     </span>
                 </a>
 
-                <!-- Desktop Navigation -->
+                <!-- Desktop Navigation — shown from md (768px)+ -->
                 <nav class="hidden md:flex items-center gap-7 text-sm font-medium text-slate-600">
                     <a href="{{ url('/') }}" class="hover:text-emerald-600 transition-colors {{ request()->is('/') ? 'text-emerald-600 font-semibold' : '' }}">Home</a>
                     <a href="{{ route('pricing') }}" class="hover:text-emerald-600 transition-colors {{ request()->routeIs('pricing') ? 'text-emerald-600 font-semibold' : '' }}">Pricing</a>
@@ -56,8 +56,8 @@
                     <a href="{{ route('contact') }}" class="hover:text-emerald-600 transition-colors {{ request()->routeIs('contact') ? 'text-emerald-600 font-semibold' : '' }}">Contact</a>
                 </nav>
 
-                <!-- Desktop CTA -->
-                <div class="hidden sm:flex items-center gap-5">
+                <!-- Desktop CTA — shown from md (768px)+ -->
+                <div class="hidden md:flex items-center gap-5">
                     @auth
                         <a href="{{ route('dashboard') }}" class="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold rounded-full transition-all shadow-sm">
                             Dashboard
@@ -72,8 +72,8 @@
                     @endauth
                 </div>
 
-                <!-- Mobile Hamburger Button -->
-                <div class="flex items-center sm:hidden">
+                <!-- Mobile Hamburger Button — shown below md (768px) -->
+                <div class="flex items-center md:hidden">
                     <button @click="mobileOpen = ! mobileOpen" class="p-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 focus:outline-none" aria-label="Toggle Menu">
                         <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                             <path :class="{'hidden': mobileOpen, 'inline-flex': ! mobileOpen }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -83,7 +83,7 @@
                 </div>
             </div>
 
-            <!-- Mobile Menu Dropdown -->
+            <!-- Mobile Menu Dropdown — visible below md (768px) -->
             <div x-show="mobileOpen" x-cloak class="md:hidden border-b border-slate-200 bg-white px-4 pt-2 pb-6 space-y-2">
                 <a href="{{ url('/') }}" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700 hover:bg-slate-50 hover:text-emerald-600">Home</a>
                 <a href="{{ route('pricing') }}" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700 hover:bg-slate-50 hover:text-emerald-600">Pricing</a>

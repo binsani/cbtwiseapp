@@ -8,38 +8,38 @@
      @keydown.window="handleKey($event)">
 
     <!-- Top Navigation Bar -->
-    <header class="bg-gradient-to-r from-emerald-700 to-emerald-950 text-white px-6 py-4 flex justify-between items-center shadow-md flex-shrink-0">
-        <div class="flex items-center space-x-3 sm:space-x-4">
-            <h2 class="text-lg sm:text-xl font-extrabold tracking-wider font-heading">CBTWise Engine</h2>
-            <span class="px-2.5 sm:px-3 py-1 bg-white/20 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-widest">{{ $mode }} mode</span>
+    <header class="bg-gradient-to-r from-emerald-700 to-emerald-950 text-white px-3 sm:px-6 py-3 flex justify-between items-center shadow-md flex-shrink-0 gap-2">
+        <div class="flex items-center gap-2 sm:gap-4 min-w-0">
+            <h2 class="text-sm sm:text-xl font-extrabold tracking-wider font-heading whitespace-nowrap">CBT<span class="hidden sm:inline">Wise</span></h2>
+            <span class="px-2 py-0.5 sm:px-3 sm:py-1 bg-white/20 rounded-full text-[9px] sm:text-xs font-bold uppercase tracking-widest whitespace-nowrap">{{ $mode }}</span>
             @if($topicName)
-                <span class="hidden md:inline-flex items-center px-2.5 py-1 bg-amber-400/20 text-amber-200 border border-amber-400/30 rounded-full text-[10px] font-extrabold tracking-wide truncate max-w-xs" title="{{ $topicName }}">
+                <span class="hidden lg:inline-flex items-center px-2.5 py-1 bg-amber-400/20 text-amber-200 border border-amber-400/30 rounded-full text-[10px] font-extrabold tracking-wide truncate max-w-xs" title="{{ $topicName }}">
                     🎯 {{ $topicName }}
                 </span>
             @endif
         </div>
-        
-        <!-- Timer -->
-        <div class="flex items-center space-x-3 bg-white/10 px-5 py-2 rounded-2xl border border-white/10 shadow-inner">
-            <svg class="w-5 h-5 text-emerald-300 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            <span class="font-mono text-xl font-bold tracking-widest text-emerald-100" x-text="formatTime()">00:00:00</span>
+
+        <!-- Timer — full hh:mm:ss on md+, compact mm:ss on mobile -->
+        <div class="flex items-center gap-1.5 sm:gap-3 bg-white/10 px-3 sm:px-5 py-1.5 sm:py-2 rounded-2xl border border-white/10 shadow-inner flex-shrink-0">
+            <svg class="w-4 h-4 sm:w-5 sm:h-5 text-emerald-300 animate-pulse flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <span class="font-mono text-base sm:text-xl font-bold tracking-widest text-emerald-100 tabular-nums" x-text="formatTime()">00:00</span>
         </div>
 
-        <div class="flex items-center space-x-3 sm:space-x-4">
-            <!-- Universal Calculator Toggle -->
-            <button type="button" 
-                    @click="showCalc = !showCalc" 
-                    class="px-3 sm:px-4 py-2 bg-emerald-800/80 hover:bg-emerald-600 active:bg-emerald-900 border border-emerald-500/30 rounded-xl text-xs sm:text-sm font-bold text-white flex items-center space-x-1.5 transition-all shadow-sm"
-                    title="Toggle JAMB On-Screen Calculator">
+        <div class="flex items-center gap-2 sm:gap-4 flex-shrink-0">
+            <!-- Calculator toggle — icon only on mobile -->
+            <button type="button"
+                    @click="showCalc = !showCalc"
+                    class="p-2 sm:px-4 sm:py-2 bg-emerald-800/80 hover:bg-emerald-600 active:bg-emerald-900 border border-emerald-500/30 rounded-xl text-xs font-bold text-white flex items-center gap-1.5 transition-all shadow-sm"
+                    title="Toggle Calculator">
                 <svg class="w-4 h-4 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-                <span class="hidden xs:inline">Calculator</span>
+                <span class="hidden sm:inline">Calculator</span>
             </button>
 
-            <div class="text-right hidden sm:block">
-                <p class="text-xs text-emerald-200">Candidate Name</p>
-                <p class="text-sm font-bold">{{ Auth::user()->name }}</p>
+            <div class="text-right hidden md:block">
+                <p class="text-xs text-emerald-200">Candidate</p>
+                <p class="text-sm font-bold truncate max-w-[120px]">{{ Auth::user()->name }}</p>
             </div>
-            <button @click="confirmSubmit()" class="px-4 sm:px-5 py-2 bg-rose-600 hover:bg-rose-700 active:bg-rose-800 rounded-xl font-bold text-xs sm:text-sm shadow-md hover:shadow-lg transition-all duration-300">
+            <button @click="confirmSubmit()" class="px-3 sm:px-5 py-2 bg-rose-600 hover:bg-rose-700 active:bg-rose-800 rounded-xl font-bold text-xs sm:text-sm shadow-md hover:shadow-lg transition-all duration-300 whitespace-nowrap">
                 End Exam
             </button>
         </div>
@@ -56,27 +56,65 @@
         @endforeach
     </div>
 
+    <!-- Mobile: Slide-up Question Palette Drawer -->
+    <div x-show="showPalette"
+         x-cloak
+         @click.self="showPalette = false"
+         class="fixed inset-0 z-50 bg-black/50 lg:hidden flex items-end">
+        <div class="w-full bg-white rounded-t-3xl max-h-[70vh] flex flex-col overflow-hidden shadow-2xl">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100 flex-shrink-0">
+                <h3 class="text-base font-black text-slate-900">Question Navigator</h3>
+                <button @click="showPalette = false" class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-600">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <!-- Legend -->
+            <div class="px-5 py-2 flex items-center gap-4 text-xs text-slate-500 flex-shrink-0 border-b border-slate-50">
+                <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-emerald-500 rounded-sm"></span>Answered</span>
+                <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-amber-500 rounded-sm"></span>Flagged</span>
+                <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-slate-200 rounded-sm"></span>Unanswered</span>
+            </div>
+            <!-- Grid -->
+            <div class="p-4 overflow-y-auto grid grid-cols-6 sm:grid-cols-8 gap-2">
+                @foreach($questionsList as $idx => $q)
+                    <button @click="currentIndex = {{ $idx }}; showPalette = false"
+                            class="h-10 rounded-xl flex items-center justify-center font-bold text-sm transition-all duration-200 border-2
+                            {{ $currentIndex == $idx ? 'border-emerald-600 scale-105 shadow-sm' : 'border-transparent' }}
+                            {{ $flagged[$q->id] ?? false ? 'bg-amber-500 text-white' : (($answers[$q->id] ?? null) ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200') }}">
+                        {{ $idx + 1 }}
+                    </button>
+                @endforeach
+            </div>
+            <!-- Submit -->
+            <div class="px-4 pb-6 pt-2 flex-shrink-0 border-t border-slate-100">
+                <button @click="confirmSubmit()" class="w-full py-3.5 bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-700 hover:to-blue-700 text-white font-extrabold rounded-2xl shadow-lg transition-all">
+                    Submit Exam Sheet
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Main Workspace -->
     <div class="flex-1 flex overflow-hidden">
         <!-- Left Column: Question & Options -->
-        <div class="flex-1 flex flex-col p-6 overflow-y-auto min-w-0">
+        <div class="flex-1 flex flex-col p-3 sm:p-6 overflow-y-auto min-w-0 pb-20 lg:pb-6">
             @if($activeQuestion)
-                <div class="bg-white rounded-3xl border border-gray-100 shadow-sm p-8 flex-1 flex flex-col justify-between">
+                <div class="bg-white rounded-3xl border border-gray-100 shadow-sm p-4 sm:p-8 flex-1 flex flex-col justify-between">
                     <div>
                         <!-- Header -->
-                        <div class="flex justify-between items-center mb-6">
-                            <div class="flex items-center space-x-2">
-                                <span class="text-xs font-bold text-emerald-600 uppercase tracking-widest">
-                                    Question {{ $currentIndex + 1 }} of {{ $questionsList->count() }}
+                        <div class="flex justify-between items-center mb-4 sm:mb-6">
+                            <div class="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                                <span class="text-xs font-bold text-emerald-600 uppercase tracking-widest whitespace-nowrap">
+                                    Q {{ $currentIndex + 1 }} / {{ $questionsList->count() }}
                                 </span>
                                 @if($topicName)
-                                    <span class="text-slate-300">&bull;</span>
-                                    <span class="text-xs font-semibold text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-md truncate max-w-[200px] sm:max-w-sm">
+                                    <span class="text-slate-300 hidden sm:inline">&bull;</span>
+                                    <span class="text-xs font-semibold text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-md truncate max-w-[120px] sm:max-w-sm hidden sm:inline">
                                         {{ $topicName }}
                                     </span>
                                 @elseif($activeQuestion->topic)
-                                    <span class="text-slate-300">&bull;</span>
-                                    <span class="text-xs font-semibold text-slate-600 bg-slate-100 px-2.5 py-0.5 rounded-md truncate max-w-[200px] sm:max-w-sm">
+                                    <span class="text-slate-300 hidden sm:inline">&bull;</span>
+                                    <span class="text-xs font-semibold text-slate-600 bg-slate-100 px-2.5 py-0.5 rounded-md truncate max-w-[120px] sm:max-w-sm hidden sm:inline">
                                         {{ $activeQuestion->topic->name }}
                                     </span>
                                 @endif
@@ -135,37 +173,47 @@
                             <span>Previous</span>
                         </button>
 
-                        <div class="flex items-center space-x-2">
-                            <button type="button" wire:click="toggleFlag({{ $activeQuestion->id }})"
-                                    class="px-4 py-3 border rounded-2xl font-bold flex items-center space-x-2 transition-all duration-300
-                                    {{ $flagged[$activeQuestion->id] ?? false ? 'border-amber-500 bg-amber-50 text-amber-700' : 'border-gray-300 text-gray-700 hover:bg-gray-50' }}">
-                                <svg class="w-4 h-4 {{ $flagged[$activeQuestion->id] ?? false ? 'fill-amber-500 text-amber-500' : 'text-gray-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
-                                <span class="hidden sm:inline">Flag</span>
+                        <!-- Bottom Nav Actions — visible on sm+ inside the card -->
+                        <div class="mt-6 sm:mt-10 pt-4 sm:pt-6 border-t border-gray-100 hidden sm:flex justify-between items-center">
+                            <button type="button" @click="prevQuestion()"
+                                    class="px-5 py-3 border border-gray-300 text-gray-700 font-bold rounded-2xl hover:bg-gray-50 transition-colors flex items-center space-x-2 disabled:opacity-40"
+                                    :disabled="currentIndex === 0">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                                <span>Previous</span>
                             </button>
 
-                            <button type="button" wire:click="toggleBookmark({{ $activeQuestion->id }})"
-                                    class="px-4 py-3 border rounded-2xl font-bold flex items-center space-x-2 transition-all duration-300
-                                    {{ $bookmarked[$activeQuestion->id] ?? false ? 'border-indigo-500 bg-indigo-50 text-indigo-700' : 'border-gray-300 text-gray-700 hover:bg-gray-50' }}"
-                                    title="Save question to bookmarks">
-                                <span>🔖</span>
-                                <span class="hidden sm:inline">{{ $bookmarked[$activeQuestion->id] ?? false ? 'Saved' : 'Bookmark' }}</span>
-                            </button>
+                            <div class="flex items-center space-x-2">
+                                <button type="button" wire:click="toggleFlag({{ $activeQuestion->id }})"
+                                        class="px-4 py-3 border rounded-2xl font-bold flex items-center space-x-2 transition-all duration-300
+                                        {{ $flagged[$activeQuestion->id] ?? false ? 'border-amber-500 bg-amber-50 text-amber-700' : 'border-gray-300 text-gray-700 hover:bg-gray-50' }}">
+                                    <svg class="w-4 h-4 {{ $flagged[$activeQuestion->id] ?? false ? 'fill-amber-500 text-amber-500' : 'text-gray-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
+                                    <span>Flag</span>
+                                </button>
 
-                            <button type="button" 
-                                    wire:click="$dispatch('openReportModal', { questionId: {{ $activeQuestion->id }} })"
-                                    class="px-3 py-3 border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-2xl font-bold flex items-center space-x-1.5 transition-all text-xs"
-                                    title="Report issue with this question">
-                                <svg class="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                                <span class="hidden sm:inline">Report</span>
+                                <button type="button" wire:click="toggleBookmark({{ $activeQuestion->id }})"
+                                        class="px-4 py-3 border rounded-2xl font-bold flex items-center space-x-2 transition-all duration-300
+                                        {{ $bookmarked[$activeQuestion->id] ?? false ? 'border-indigo-500 bg-indigo-50 text-indigo-700' : 'border-gray-300 text-gray-700 hover:bg-gray-50' }}"
+                                        title="Save question to bookmarks">
+                                    <span>🔖</span>
+                                    <span>{{ $bookmarked[$activeQuestion->id] ?? false ? 'Saved' : 'Bookmark' }}</span>
+                                </button>
+
+                                <button type="button"
+                                        wire:click="$dispatch('openReportModal', { questionId: {{ $activeQuestion->id }} })"
+                                        class="px-3 py-3 border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-2xl font-bold flex items-center space-x-1.5 transition-all text-xs"
+                                        title="Report issue with this question">
+                                    <svg class="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                    <span>Report</span>
+                                </button>
+                            </div>
+
+                            <button type="button" @click="nextQuestion({{ $questionsList->count() }})"
+                                    class="px-5 py-3 bg-emerald-600 text-white font-bold rounded-2xl hover:bg-emerald-700 transition-colors flex items-center space-x-2 disabled:opacity-40"
+                                    :disabled="currentIndex === {{ $questionsList->count() - 1 }}">
+                                <span>Next</span>
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                             </button>
                         </div>
-
-                        <button type="button" @click="nextQuestion({{ $questionsList->count() }})"
-                                class="px-5 py-3 bg-emerald-600 text-white font-bold rounded-2xl hover:bg-emerald-700 transition-colors flex items-center space-x-2 disabled:opacity-40"
-                                :disabled="currentIndex === {{ $questionsList->count() - 1 }}">
-                            <span>Next</span>
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                        </button>
                     </div>
                 </div>
             @else
@@ -174,6 +222,50 @@
                 </div>
             @endif
         </div>
+
+        <!-- Mobile: Sticky Bottom Action Bar (hidden on lg+) -->
+        @if($activeQuestion)
+        <div class="fixed bottom-0 left-0 right-0 z-30 lg:hidden bg-white border-t border-slate-200 px-2 py-2 shadow-2xl pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+            <div class="flex items-center gap-1">
+                <!-- Prev -->
+                <button type="button" @click="prevQuestion()"
+                        class="flex-1 flex flex-col items-center justify-center py-2 rounded-xl font-bold text-slate-600 hover:bg-slate-100 disabled:opacity-30 transition-colors"
+                        :disabled="currentIndex === 0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+                    <span class="text-[9px] font-black">Prev</span>
+                </button>
+
+                <!-- Flag -->
+                <button type="button" wire:click="toggleFlag({{ $activeQuestion->id }})"
+                        class="flex-1 flex flex-col items-center justify-center py-2 rounded-xl font-bold transition-colors {{ $flagged[$activeQuestion->id] ?? false ? 'text-amber-600 bg-amber-50' : 'text-slate-500 hover:bg-slate-100' }}">
+                    <svg class="w-5 h-5 {{ $flagged[$activeQuestion->id] ?? false ? 'fill-amber-500' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
+                    <span class="text-[9px] font-black">Flag</span>
+                </button>
+
+                <!-- Q Counter — opens drawer -->
+                <button type="button" @click="showPalette = true"
+                        class="flex-[1.5] flex flex-col items-center justify-center py-2 rounded-xl bg-emerald-600 text-white font-bold transition-colors active:bg-emerald-700">
+                    <span class="text-sm font-black leading-tight" x-text="(currentIndex + 1) + '/' + {{ $questionsList->count() }}"></span>
+                    <span class="text-[9px] font-black">Palette ↑</span>
+                </button>
+
+                <!-- Bookmark -->
+                <button type="button" wire:click="toggleBookmark({{ $activeQuestion->id }})"
+                        class="flex-1 flex flex-col items-center justify-center py-2 rounded-xl font-bold transition-colors {{ $bookmarked[$activeQuestion->id] ?? false ? 'text-indigo-600 bg-indigo-50' : 'text-slate-500 hover:bg-slate-100' }}">
+                    <span class="text-lg leading-none">🔖</span>
+                    <span class="text-[9px] font-black">Save</span>
+                </button>
+
+                <!-- Next -->
+                <button type="button" @click="nextQuestion({{ $questionsList->count() }})"
+                        class="flex-1 flex flex-col items-center justify-center py-2 rounded-xl font-bold text-slate-600 hover:bg-slate-100 disabled:opacity-30 transition-colors"
+                        :disabled="currentIndex === {{ $questionsList->count() - 1 }}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                    <span class="text-[9px] font-black">Next</span>
+                </button>
+            </div>
+        </div>
+        @endif
 
         <!-- Right Column: Navigation Palette -->
         <aside class="w-80 bg-white border-l border-gray-200 p-6 overflow-y-auto hidden lg:flex flex-col justify-between flex-shrink-0">
@@ -276,6 +368,7 @@
                 currentIndex: config.currentIndex,
                 selectedSubjectId: config.selectedSubjectId,
                 showCalc: false,
+                showPalette: false,
 
                 init() {
                     // Update timer on intervals

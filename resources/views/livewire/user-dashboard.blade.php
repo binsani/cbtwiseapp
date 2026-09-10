@@ -163,21 +163,21 @@
     @endif
 
     <!-- Primary Action CTAs -->
-    <div class="flex flex-wrap items-center gap-3">
-        <a href="{{ route('exam.setup') }}" 
-           class="inline-flex items-center gap-2 px-6 py-3.5 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-sm font-black rounded-2xl transition-all shadow-md shadow-emerald-600/10 hover:shadow-lg">
+    <div class="grid grid-cols-1 sm:flex sm:flex-wrap items-center gap-3">
+        <a href="{{ route('exam.setup') }}"
+           class="flex items-center justify-center gap-2 px-6 py-3.5 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-sm font-black rounded-2xl transition-all shadow-md shadow-emerald-600/10 hover:shadow-lg">
             <span>Continue Practicing</span>
             <span>&rarr;</span>
         </a>
 
-        <a href="{{ route('topic.practice') }}" 
-           class="inline-flex items-center gap-2 px-5 py-3.5 bg-purple-600 hover:bg-purple-700 active:bg-purple-800 text-white text-sm font-black rounded-2xl transition-all shadow-md shadow-purple-600/10 hover:shadow-lg">
+        <a href="{{ route('topic.practice') }}"
+           class="flex items-center justify-center gap-2 px-5 py-3.5 bg-purple-600 hover:bg-purple-700 active:bg-purple-800 text-white text-sm font-black rounded-2xl transition-all shadow-md shadow-purple-600/10 hover:shadow-lg">
             <span>Practice by Topic</span>
             <span>🎯</span>
         </a>
 
-        <a href="{{ route('mock-exams') }}" 
-           class="inline-flex items-center gap-2 px-6 py-3.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-sm font-black rounded-2xl transition-all shadow-md shadow-blue-600/10 hover:shadow-lg">
+        <a href="{{ route('mock-exams') }}"
+           class="flex items-center justify-center gap-2 px-6 py-3.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-sm font-black rounded-2xl transition-all shadow-md shadow-blue-600/10 hover:shadow-lg">
             <span>Take Mock Exam</span>
             <span>⚡</span>
         </a>
@@ -222,7 +222,7 @@
             </a>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
             <!-- UTME Tile -->
             <a href="{{ route('exam.setup', ['exam' => 'utme']) }}" 
                class="group p-5 rounded-2xl border border-slate-200/80 hover:border-emerald-500 bg-gradient-to-b from-white to-slate-50 hover:to-emerald-50/30 transition-all duration-300 flex flex-col justify-between">
