@@ -56,6 +56,8 @@ class BulkSeeder extends Component
 
         $questionsPerBatch = 40;
 
+        @set_time_limit(300);
+
         foreach ($subjects as $subject) {
             $alocSubjectName = strtolower($subject->name);
             if (isset($subjectMapping[$alocSubjectName])) {
@@ -74,6 +76,7 @@ class BulkSeeder extends Component
                 }
 
                 if (empty($alocQuestionsData)) {
+                    $this->logs[] = "[" . now()->toTimeString() . "] Notice: 0 questions returned from ALOC for {$subject->name} (slug: {$alocSubjectName}).";
                     continue;
                 }
 
