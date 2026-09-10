@@ -57,6 +57,7 @@ class AlocApiClient
                 $this->lastEndpoint = "{$endpoint}?subject={$slug}&limit={$clampedLimit}";
                 $response = Http::withHeaders([
                     'Accept' => 'application/json',
+                    'X-API-Key' => $this->token,
                     'x-api-key' => $this->token,
                     'X-ALOC-KEY' => $this->token,
                 ])
