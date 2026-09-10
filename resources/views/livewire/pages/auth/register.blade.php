@@ -30,7 +30,12 @@ new #[Layout('layouts.guest')] class extends Component
         $validated['email_verified_at'] = now();
 
         $user = User::create($validated);
-        $user->assignRole('user');
+        if (\Spatie\Permission\Models\Role::where('name', 'user')->where('guard_name', 'web')->exists()) {
+            $user->assignRole('user');
+        } else {
+            $role = \Spatie\Permission\Models\Role::findOrCreate('user', 'web');
+            $user->assignRole($role);
+        }
 
         event(new Registered($user));
 

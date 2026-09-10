@@ -165,9 +165,10 @@ class BulkSeeder extends Component
         // Subjects with very low coverage (< 50 questions)
         $lowCoverageSubjects = Subject::with('exam')
             ->withCount('questions')
-            ->having('questions_count', '<', 50)
-            ->orderBy('questions_count')
-            ->get();
+            ->get()
+            ->filter(fn($subject) => $subject->questions_count < 50)
+            ->sortBy('questions_count')
+            ->values();
 
         return view('livewire.admin.bulk-seeder', [
             'exams' => $exams,

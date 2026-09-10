@@ -32,13 +32,13 @@
             <!-- Pending Badge Filter -->
             <div class="flex items-center gap-2">
                 <button wire:click="$set('status', 'open')" class="px-4 py-2 rounded-2xl text-xs font-bold transition-all {{ $status === 'open' ? 'bg-slate-800 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
-                    {{ $pendingCount }} pending
+                    {{ $openCount }} pending
                 </button>
                 <button wire:click="$set('status', 'fixed')" class="px-4 py-2 rounded-2xl text-xs font-bold transition-all {{ $status === 'fixed' ? 'bg-slate-800 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
-                    Resolved
+                    Resolved ({{ $resolvedCount }})
                 </button>
                 <button wire:click="$set('status', 'dismissed')" class="px-4 py-2 rounded-2xl text-xs font-bold transition-all {{ $status === 'dismissed' ? 'bg-slate-800 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
-                    Dismissed
+                    Dismissed ({{ $dismissedCount }})
                 </button>
             </div>
         </div>
