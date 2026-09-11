@@ -1,7 +1,9 @@
 <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 space-y-8"
      x-data="{
          status: @entangle('studyPlanStatus'),
-         initChart() {
+         useFallback: false,
+         chartInstance: null,
+         initChart(attempts = 0) {
              const data = @json($subjectPerformance);
              const labels = Object.keys(data);
              const values = Object.values(data);
@@ -11,38 +13,55 @@
              const ctx = document.getElementById('subjectChart');
              if (!ctx) return;
 
-             new Chart(ctx, {
-                 type: 'bar',
-                 data: {
-                     labels: labels,
-                     datasets: [{
-                         label: 'Accuracy %',
-                         data: values,
-                         backgroundColor: values.map(v => v >= 75 ? 'rgba(16, 185, 129, 0.8)' : (v >= 50 ? 'rgba(245, 158, 11, 0.8)' : 'rgba(239, 68, 68, 0.8)')),
-                         borderRadius: 8,
-                         borderSkipped: false,
-                     }]
-                 },
-                 options: {
-                     responsive: true,
-                     maintainAspectRatio: false,
-                     scales: {
-                         y: {
-                             beginAtZero: true,
-                             max: 100,
-                             ticks: { callback: v => v + '%' },
-                             grid: { color: 'rgba(241, 245, 249, 1)' }
-                         },
-                         x: { grid: { display: false } }
-                     },
-                     plugins: {
-                         legend: { display: false }
-                     }
+             if (typeof Chart === 'undefined') {
+                 if (attempts < 5) {
+                     setTimeout(() => this.initChart(attempts + 1), 200);
+                 } else {
+                     this.useFallback = true;
                  }
-             });
+                 return;
+             }
+
+             try {
+                 if (this.chartInstance) {
+                     this.chartInstance.destroy();
+                 }
+                 this.chartInstance = new Chart(ctx, {
+                     type: 'bar',
+                     data: {
+                         labels: labels,
+                         datasets: [{
+                             label: 'Accuracy %',
+                             data: values,
+                             backgroundColor: values.map(v => v >= 75 ? 'rgba(16, 185, 129, 0.85)' : (v >= 50 ? 'rgba(245, 158, 11, 0.85)' : 'rgba(239, 68, 68, 0.85)')),
+                             borderRadius: 8,
+                             borderSkipped: false,
+                         }]
+                     },
+                     options: {
+                         responsive: true,
+                         maintainAspectRatio: false,
+                         scales: {
+                             y: {
+                                 beginAtZero: true,
+                                 max: 100,
+                                 ticks: { callback: v => v + '%' },
+                                 grid: { color: 'rgba(241, 245, 249, 1)' }
+                             },
+                             x: { grid: { display: false } }
+                         },
+                         plugins: {
+                             legend: { display: false }
+                         }
+                     }
+                 });
+             } catch (e) {
+                 console.warn('Chart init fallback:', e);
+                 this.useFallback = true;
+             }
          }
      }"
-     x-init="setTimeout(() => initChart(), 150)">
+     x-init="$nextTick(() => initChart())">
 
     <!-- Navigation Tabs -->
     <x-dashboard-nav />
@@ -311,14 +330,31 @@
                         View Trends &rarr;
                     </a>
                 </div>
-                <div class="relative h-64">
+                <div class="relative min-h-[16rem]">
                     @if (empty($subjectPerformance))
-                        <div class="absolute inset-0 flex flex-col items-center justify-center text-slate-400 text-xs">
+                        <div class="h-64 flex flex-col items-center justify-center text-slate-400 text-xs text-center px-4">
                             <span class="text-3xl mb-2">📊</span>
                             <span>Complete practice exams to unlock your subject accuracy breakdown.</span>
                         </div>
                     @else
-                        <canvas id="subjectChart"></canvas>
+                        <div x-show="!useFallback" class="h-64">
+                            <canvas id="subjectChart"></canvas>
+                        </div>
+                        <!-- Native CSS Bar Chart Fallback (Offline Electron / Low-bandwidth 3G / Adblocked) -->
+                        <div x-show="useFallback" class="space-y-3.5 py-2">
+                            @foreach($subjectPerformance as $subjectName => $score)
+                                <div>
+                                    <div class="flex justify-between text-xs font-bold mb-1">
+                                        <span class="text-slate-700 truncate pr-2">{{ $subjectName }}</span>
+                                        <span class="{{ $score >= 75 ? 'text-emerald-600' : ($score >= 50 ? 'text-amber-600' : 'text-rose-600') }}">{{ $score }}%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                                        <div class="h-full rounded-full transition-all duration-500 {{ $score >= 75 ? 'bg-emerald-500' : ($score >= 50 ? 'bg-amber-500' : 'bg-rose-500') }}"
+                                             style="width: {{ max(4, min(100, $score)) }}%"></div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
                     @endif
                 </div>
             </div>

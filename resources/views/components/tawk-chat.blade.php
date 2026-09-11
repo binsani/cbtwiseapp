@@ -1,4 +1,4 @@
-@if(!request()->routeIs('exam.runner') && !request()->routeIs('exam.review'))
+@if(!request()->routeIs('exam.run*') && !request()->routeIs('exam.runner*') && !request()->routeIs('exam.review*'))
 <!--Start of Tawk.to Script-->
 <script type="text/javascript">
 var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();

@@ -1,5 +1,5 @@
 @auth
-@if(!request()->is('admin*'))
+@if(!request()->is('admin*') && !request()->routeIs('exam.run*'))
 <div class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 px-3 py-2 shadow-2xl backdrop-blur-md bg-white/95 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
     <div class="max-w-md mx-auto grid grid-cols-5 gap-1 items-center text-center">
         <!-- Home / Overview -->

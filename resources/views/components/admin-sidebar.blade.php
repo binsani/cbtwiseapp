@@ -2,196 +2,112 @@
     $openReportsCount = \App\Models\QuestionReport::where('status', 'open')->count();
     $unreadNotificationsCount = \App\Models\AdminNotification::where('is_read', false)->count();
     $totalMessagesCount = \App\Models\ContactMessage::where('status', 'new')->count();
+    $totalAlertsCount = $openReportsCount + $totalMessagesCount;
 @endphp
 
-<aside class="w-full lg:w-64 bg-white border-r border-slate-200/80 flex-shrink-0 p-5 space-y-6 font-sans">
-    
-    <!-- Brand / Header -->
-    <div class="flex items-center justify-between px-2">
-        <div class="flex items-center gap-2.5">
-            <img src="/logo.png" alt="CBTWise" class="w-7 h-7 rounded-xl shadow-sm">
-            <span class="text-sm font-black tracking-tight font-heading bg-clip-text text-transparent bg-gradient-to-r from-emerald-600 to-teal-600">
-                Admin Panel
-            </span>
+<div x-data="{ mobileOpen: false }">
+    <!-- Mobile Sticky Top App Bar (Visible below lg) -->
+    <div class="lg:hidden sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/80 px-4 py-3 flex items-center justify-between shadow-sm">
+        <div class="flex items-center gap-3">
+            <button @click="mobileOpen = true" 
+                    type="button"
+                    class="p-2 -ml-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 focus:outline-none relative"
+                    aria-label="Open Admin Menu">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+                @if($totalAlertsCount > 0)
+                    <span class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-rose-500 rounded-full ring-2 ring-white animate-pulse"></span>
+                @endif
+            </button>
+
+            <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2">
+                <img src="/logo.png" alt="CBTWise" class="w-7 h-7 rounded-lg shadow-sm">
+                <span class="text-base font-black tracking-tight font-heading text-slate-900">
+                    CBT<span class="text-emerald-600">Wise</span>
+                    <span class="text-xs font-bold text-emerald-700 bg-emerald-100/80 px-2 py-0.5 rounded-full ml-1 uppercase tracking-wider">Admin</span>
+                </span>
+            </a>
         </div>
-        <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-black rounded-full uppercase tracking-wider">Staff</span>
+
+        <div class="flex items-center gap-2">
+            <a href="{{ route('dashboard') }}" 
+               class="text-xs font-bold text-slate-600 hover:text-emerald-600 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-xl transition-colors flex items-center gap-1">
+                <span>Student App</span>
+                <span class="text-[10px]">&rarr;</span>
+            </a>
+        </div>
     </div>
 
-    <!-- Main Navigation Items -->
-    <nav class="space-y-1">
+    <!-- Mobile Slide-Over Backdrop -->
+    <div x-show="mobileOpen" 
+         x-cloak 
+         @click="mobileOpen = false"
+         x-transition:enter="transition-opacity ease-linear duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition-opacity ease-linear duration-300"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 lg:hidden"></div>
+
+    <!-- Mobile Slide-Over Drawer -->
+    <div x-show="mobileOpen" 
+         x-cloak 
+         x-transition:enter="transition ease-in-out duration-300 transform"
+         x-transition:enter-start="-translate-x-full"
+         x-transition:enter-end="translate-x-0"
+         x-transition:leave="transition ease-in-out duration-300 transform"
+         x-transition:leave-start="translate-x-0"
+         x-transition:leave-end="-translate-x-full"
+         class="fixed inset-y-0 left-0 max-w-xs w-full bg-white z-50 shadow-2xl flex flex-col lg:hidden">
         
-        <!-- 1. Dashboard -->
-        <a href="{{ route('admin.dashboard') }}" 
-           class="flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all {{ request()->routeIs('admin.dashboard') ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
-            <div class="flex items-center gap-3">
-                <svg class="w-4 h-4 {{ request()->routeIs('admin.dashboard') ? 'text-white' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z"/></svg>
-                <span>Dashboard</span>
-            </div>
-        </a>
-
-        <!-- 2. Questions -->
-        <a href="{{ route('admin.questions') }}" 
-           class="flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all {{ request()->routeIs('admin.questions') ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
-            <div class="flex items-center gap-3">
-                <svg class="w-4 h-4 {{ request()->routeIs('admin.questions') ? 'text-white' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                <span>Questions</span>
-            </div>
-        </a>
-
-        <!-- 3. Exams & Subjects -->
-        <a href="{{ route('admin.exams-subjects') }}" 
-           class="flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all {{ request()->routeIs('admin.exams-subjects') ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
-            <div class="flex items-center gap-3">
-                <svg class="w-4 h-4 {{ request()->routeIs('admin.exams-subjects') ? 'text-white' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-                <span>Exams & Subjects</span>
-            </div>
-        </a>
-
-        <!-- 4. Users -->
-        <a href="{{ route('admin.users') }}" 
-           class="flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all {{ request()->routeIs('admin.users') ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
-            <div class="flex items-center gap-3">
-                <svg class="w-4 h-4 {{ request()->routeIs('admin.users') ? 'text-white' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-                <span>Users</span>
-            </div>
-        </a>
-
-        <!-- 5. Subscriptions -->
-        <a href="{{ route('admin.subscriptions') }}" 
-           class="flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all {{ request()->routeIs('admin.subscriptions') ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
-            <div class="flex items-center gap-3">
-                <svg class="w-4 h-4 {{ request()->routeIs('admin.subscriptions') ? 'text-white' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
-                <span>Subscriptions</span>
-            </div>
-        </a>
-
-        <!-- 6. Analytics -->
-        <a href="{{ route('admin.analytics') }}" 
-           class="flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all {{ request()->routeIs('admin.analytics') ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
-            <div class="flex items-center gap-3">
-                <svg class="w-4 h-4 {{ request()->routeIs('admin.analytics') ? 'text-white' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 00-2-2h-2a2 2 0 00-2 2v14"/></svg>
-                <span>Analytics</span>
-            </div>
-        </a>
-
-        <!-- 7. Messages -->
-        <a href="{{ route('admin.messages') }}" 
-           class="flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all {{ request()->routeIs('admin.messages') ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
-            <div class="flex items-center gap-3">
-                <svg class="w-4 h-4 {{ request()->routeIs('admin.messages') ? 'text-white' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0a2 2 0 01-2 2H6a2 2 0 01-2-2m16 0V9a2 2 0 00-2-2H6a2 2 0 00-2 2v5m16 0a2 2 0 00-2-2H6a2 2 0 00-2 2v5m16 0a2 2 0 01-2 2H6a2 2 0 01-2-2"/></svg>
-                <span>Messages</span>
-            </div>
-            @if($totalMessagesCount > 0)
-                <span class="px-1.5 py-0.5 text-[10px] font-bold rounded-full {{ request()->routeIs('admin.messages') ? 'bg-white text-emerald-800' : 'bg-emerald-100 text-emerald-700' }}">
-                    {{ $totalMessagesCount }}
-                </span>
-            @endif
-        </a>
-
-        <!-- 8. Reports -->
-        <a href="{{ route('admin.reports') }}" 
-           class="flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all {{ request()->routeIs('admin.reports') ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
-            <div class="flex items-center gap-3">
-                <svg class="w-4 h-4 {{ request()->routeIs('admin.reports') ? 'text-white' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                <span>Reports</span>
-            </div>
-            @if($openReportsCount > 0)
-                <span class="px-1.5 py-0.5 text-[10px] font-black rounded-full {{ request()->routeIs('admin.reports') ? 'bg-white text-emerald-800' : 'bg-rose-500 text-white animate-pulse' }}">
-                    {{ $openReportsCount }}
-                </span>
-            @endif
-        </a>
-
-        <!-- 9. Purchase Codes -->
-        <a href="{{ route('admin.purchase-codes') }}" 
-           class="flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all {{ request()->routeIs('admin.purchase-codes') ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
-            <div class="flex items-center gap-3">
-                <svg class="w-4 h-4 {{ request()->routeIs('admin.purchase-codes') ? 'text-white' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m-5-3a2 2 0 00-2 2v7a2 2 0 002 2h5a2 2 0 002-2V9a2 2 0 00-2-2h-5z"/></svg>
-                <span>Purchase Codes</span>
-            </div>
-        </a>
-
-        <!-- 10. Bulk Seeder -->
-        <a href="{{ route('admin.bulk-seeder') }}" 
-           class="flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all {{ request()->routeIs('admin.bulk-seeder') ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
-            <div class="flex items-center gap-3">
-                <svg class="w-4 h-4 {{ request()->routeIs('admin.bulk-seeder') ? 'text-white' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 4.79M9 11h.01M15 11h.01M9 15h6"/></svg>
-                <span>Bulk Seeder</span>
-            </div>
-        </a>
-
-        <!-- 11. Notifications -->
-        <a href="{{ route('admin.notifications') }}" 
-           class="flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all {{ request()->routeIs('admin.notifications') ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
-            <div class="flex items-center gap-3">
-                <svg class="w-4 h-4 {{ request()->routeIs('admin.notifications') ? 'text-white' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
-                <span>Notifications</span>
-            </div>
-            @if($unreadNotificationsCount > 0)
-                <span class="px-1.5 py-0.5 text-[10px] font-black rounded-full {{ request()->routeIs('admin.notifications') ? 'bg-white text-emerald-800' : 'bg-rose-500 text-white' }}">
-                    {{ $unreadNotificationsCount }}
-                </span>
-            @endif
-        </a>
-
-    </nav>
-
-    <!-- Secondary Navigation: Settings & Logs -->
-    <div class="pt-4 border-t border-slate-100 space-y-1">
-        <p class="px-3 text-[10px] font-black uppercase tracking-wider text-slate-400 mb-2">Administration</p>
-
-        <!-- Blog Management -->
-        <a href="{{ route('admin.blog') }}" 
-           class="flex items-center gap-3 px-3.5 py-2 rounded-2xl text-xs font-bold transition-all {{ request()->routeIs('admin.blog*') ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
-            <svg class="w-4 h-4 {{ request()->routeIs('admin.blog*') ? 'text-white' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>
-            <span>Blog</span>
-        </a>
-
-        <!-- Affiliates Management -->
-        <a href="{{ route('admin.affiliates') }}" 
-           class="flex items-center gap-3 px-3.5 py-2 rounded-2xl text-xs font-bold transition-all {{ request()->routeIs('admin.affiliates*') ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
-            <svg class="w-4 h-4 {{ request()->routeIs('admin.affiliates*') ? 'text-white' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-            <span>Affiliates</span>
-        </a>
-
-        <!-- Settings -->
-        <a href="{{ route('admin.settings') }}" 
-           class="flex items-center gap-3 px-3.5 py-2 rounded-2xl text-xs font-bold transition-all {{ request()->routeIs('admin.settings') ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
-            <svg class="w-4 h-4 {{ request()->routeIs('admin.settings') ? 'text-white' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-            <span>Settings</span>
-        </a>
-
-        <!-- Activity Logs -->
-        <a href="{{ route('admin.activity-logs') }}" 
-           class="flex items-center gap-3 px-3.5 py-2 rounded-2xl text-xs font-bold transition-all {{ request()->routeIs('admin.activity-logs') ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
-            <svg class="w-4 h-4 {{ request()->routeIs('admin.activity-logs') ? 'text-white' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-            <span>Activity Logs</span>
-        </a>
-    </div>
-
-    <!-- Bottom Actions -->
-    <div class="pt-4 border-t border-slate-100 space-y-2">
-        <a href="{{ route('dashboard') }}" class="flex items-center gap-3 px-3.5 py-2 hover:bg-slate-50 text-slate-600 hover:text-slate-900 font-bold rounded-2xl text-xs transition-all">
-            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-            <span>Back to Student App</span>
-        </a>
-
-        <div class="p-3 bg-slate-50 rounded-2xl flex items-center justify-between">
+        <!-- Mobile Drawer Header -->
+        <div class="px-5 py-4 border-b border-slate-200 flex items-center justify-between">
             <div class="flex items-center gap-2.5">
-                <div class="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-black text-xs">
-                    {{ strtoupper(substr(auth()->user()->name ?? 'A', 0, 1)) }}
-                </div>
-                <div class="truncate max-w-[100px]">
-                    <div class="font-bold text-slate-900 text-xs truncate">{{ auth()->user()->name ?? 'Administrator' }}</div>
-                    <div class="text-[10px] text-slate-400 capitalize">{{ auth()->user()->getRoleNames()->first() ?? 'Staff' }}</div>
-                </div>
+                <img src="/logo.png" alt="CBTWise" class="w-7 h-7 rounded-xl shadow-sm">
+                <span class="text-sm font-black font-heading text-slate-900">Admin Control Center</span>
             </div>
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit" title="Logout" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-                </button>
-            </form>
+            <button @click="mobileOpen = false" class="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+
+        <!-- Mobile Drawer Navigation Items -->
+        <div class="flex-1 overflow-y-auto px-4 py-4 space-y-6">
+            @include('components.admin-nav-links')
+        </div>
+
+        <!-- Mobile Drawer Footer -->
+        <div class="p-4 border-t border-slate-200 bg-slate-50">
+            @include('components.admin-user-card')
         </div>
     </div>
-</aside>
+
+    <!-- Desktop Permanent Sidebar (Visible on lg+) -->
+    <aside class="hidden lg:flex lg:flex-col w-64 bg-white border-r border-slate-200/80 flex-shrink-0 sticky top-0 h-screen overflow-y-auto p-5 space-y-6 font-sans">
+        <!-- Brand / Header -->
+        <div class="flex items-center justify-between px-2 pt-1">
+            <div class="flex items-center gap-2.5">
+                <img src="/logo.png" alt="CBTWise" class="w-8 h-8 rounded-xl shadow-sm">
+                <div>
+                    <span class="text-base font-black tracking-tight font-heading text-slate-900 block leading-tight">
+                        CBT<span class="text-emerald-600">Wise</span>
+                    </span>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Administration</span>
+                </div>
+            </div>
+            <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-black rounded-full uppercase tracking-wider">Staff</span>
+        </div>
+
+        <!-- Desktop Navigation Items -->
+        <div class="flex-1 space-y-6 overflow-y-auto pr-1 scrollbar-thin">
+            @include('components.admin-nav-links')
+        </div>
+
+        <!-- Desktop Sidebar Footer -->
+        <div class="pt-4 border-t border-slate-100">
+            @include('components.admin-user-card')
+        </div>
+    </aside>
+</div>

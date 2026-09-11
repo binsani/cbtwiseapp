@@ -2,7 +2,7 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
         <title>@yield('title', 'CBTWise — Nigeria\'s Premium Exam CBT Simulator')</title>
         <link rel="icon" type="image/png" href="/favicon.png">
         <meta name="description" content="@yield('meta_description', 'Prepare for JAMB UTME, WAEC, and NECO with our realistic computer-based test engines, AI tutoring, and personalized analytics.')">

@@ -1,4 +1,4 @@
-<div class="flex flex-col lg:flex-row min-h-screen bg-slate-50/50 -mt-8 -mx-4 sm:-mx-6 lg:-mx-8">
+<div class="flex flex-col lg:flex-row min-h-screen bg-slate-50/50">
     
     <!-- Sidebar Navigation -->
     <x-admin-sidebar />

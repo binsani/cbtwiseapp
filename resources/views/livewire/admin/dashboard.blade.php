@@ -1,19 +1,19 @@
-<div class="flex flex-col lg:flex-row min-h-screen bg-slate-50/50 -mt-8 -mx-4 sm:-mx-6 lg:-mx-8">
+<div class="flex flex-col lg:flex-row min-h-screen bg-slate-50/50">
     
     <!-- Sidebar Navigation -->
     <x-admin-sidebar />
 
     <!-- Main Content Area -->
-    <main class="flex-1 p-6 sm:p-8 space-y-8 overflow-x-hidden font-sans max-w-7xl">
+    <main class="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 overflow-x-hidden font-sans max-w-7xl">
         
         @if (session()->has('message'))
-            <div class="p-4 bg-emerald-50 border-l-4 border-emerald-500 text-emerald-800 rounded-r-2xl text-xs font-bold shadow-sm">
+            <div class="p-4 bg-emerald-50 border-l-4 border-emerald-500 text-emerald-800 rounded-r-2xl text-xs sm:text-sm font-bold shadow-sm">
                 {{ session('message') }}
             </div>
         @endif
 
         <!-- Top Header & Breadcrumb / Quick Actions -->
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-slate-200/60">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-200/70">
             <div>
                 <div class="flex items-center gap-2 text-[11px] font-bold text-slate-400 uppercase tracking-widest">
                     <span>Control Center</span>
@@ -23,86 +23,113 @@
                 <h1 class="text-2xl sm:text-3xl font-black text-slate-950 font-heading tracking-tight mt-0.5">Admin Dashboard</h1>
             </div>
             
-            <div class="flex flex-wrap items-center gap-2.5">
+            <div class="flex flex-wrap items-center gap-2 sm:gap-2.5">
                 <button wire:click="clearSystemCache" 
                         wire:confirm="Clear all view, application, and route caches?"
-                        class="px-3.5 py-2 border border-slate-200 hover:border-slate-300 rounded-xl text-xs font-bold text-slate-700 bg-white hover:bg-slate-50 shadow-sm transition-all flex items-center gap-1.5"
+                        class="px-3 py-2 border border-slate-200 hover:border-slate-300 rounded-xl text-xs font-bold text-slate-700 bg-white hover:bg-slate-50 shadow-sm transition-all flex items-center gap-1.5"
                         title="Clear view & route cache">
                     <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 4.79M9 11h.01M15 11h.01M9 15h6"/></svg>
                     <span>Clear Cache</span>
                 </button>
-                <button wire:click="exportUsers" class="px-3.5 py-2 border border-slate-200 hover:border-slate-300 rounded-xl text-xs font-bold text-slate-700 bg-white hover:bg-slate-50 shadow-sm transition-all flex items-center gap-1.5">
+                <button wire:click="exportUsers" class="px-3 py-2 border border-slate-200 hover:border-slate-300 rounded-xl text-xs font-bold text-slate-700 bg-white hover:bg-slate-50 shadow-sm transition-all flex items-center gap-1.5">
                     <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                     <span>Users CSV</span>
                 </button>
-                <button wire:click="exportPayments" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-sm shadow-emerald-600/10 transition-all flex items-center gap-1.5">
+                <button wire:click="exportPayments" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-sm shadow-emerald-600/10 transition-all flex items-center gap-1.5">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                     <span>Payments CSV</span>
                 </button>
             </div>
         </div>
 
-        <!-- Section 1: Platform & Academic Metric Cards -->
+        <!-- Section 1: Top 4 Commercial KPIs -->
         <div>
-            <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-                <!-- Total Users -->
-                <div class="bg-white border border-slate-200/70 p-5 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
-                    <div class="flex items-center justify-between mb-3">
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
+                <!-- 1. Total Registered Users -->
+                <div class="bg-white border border-slate-200/70 p-4 sm:p-5 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+                    <div class="flex items-center justify-between mb-2 sm:mb-3">
                         <span class="text-xs font-bold text-slate-500">Total Users</span>
                         <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                         </div>
                     </div>
-                    <h3 class="text-2xl sm:text-3xl font-black text-slate-900 font-heading leading-tight">{{ number_format($totalUsers) }}</h3>
+                    <h3 class="text-xl sm:text-3xl font-black text-slate-900 font-heading leading-tight">{{ number_format($totalUsers) }}</h3>
                     <p class="text-[11px] text-slate-400 mt-1 font-medium">Registered accounts</p>
                 </div>
 
-                <!-- Active Subscribers -->
-                <div class="bg-white border border-slate-200/70 p-5 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
-                    <div class="flex items-center justify-between mb-3">
-                        <span class="text-xs font-bold text-slate-500">Subscribers</span>
+                <!-- 2. Active Paid Subscribers -->
+                <div class="bg-white border border-slate-200/70 p-4 sm:p-5 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+                    <div class="flex items-center justify-between mb-2 sm:mb-3">
+                        <span class="text-xs font-bold text-slate-500">Active Paid</span>
                         <div class="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
                         </div>
                     </div>
-                    <h3 class="text-2xl sm:text-3xl font-black text-slate-900 font-heading leading-tight">{{ number_format($subscribersCount) }}</h3>
-                    <p class="text-[11px] text-slate-400 mt-1 font-medium">Active paid plans</p>
+                    <h3 class="text-xl sm:text-3xl font-black text-slate-900 font-heading leading-tight">{{ number_format($subscribersCount) }}</h3>
+                    <p class="text-[11px] text-slate-400 mt-1 font-medium">Premium subscribers</p>
                 </div>
 
-                <!-- Questions in Bank -->
-                <div class="bg-white border border-slate-200/70 p-5 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
-                    <div class="flex items-center justify-between mb-3">
-                        <span class="text-xs font-bold text-slate-500">Questions</span>
-                        <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <!-- 3. Gross Revenue -->
+                <div class="bg-white border border-slate-200/70 p-4 sm:p-5 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+                    <div class="flex items-center justify-between mb-2 sm:mb-3">
+                        <span class="text-xs font-bold text-slate-500">Gross Revenue</span>
+                        <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-black text-xs">
+                            ₦
                         </div>
                     </div>
-                    <h3 class="text-2xl sm:text-3xl font-black text-slate-900 font-heading leading-tight">{{ number_format($totalQuestions) }}</h3>
-                    <p class="text-[11px] text-slate-400 mt-1 font-medium">In local database</p>
+                    <h3 class="text-xl sm:text-3xl font-black text-slate-900 font-heading leading-tight">₦{{ number_format($totalRevenue, 0) }}</h3>
+                    <p class="text-[11px] text-slate-400 mt-1 font-medium">Lifetime collections</p>
                 </div>
 
-                <!-- Tests Taken -->
-                <div class="bg-white border border-slate-200/70 p-5 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
-                    <div class="flex items-center justify-between mb-3">
-                        <span class="text-xs font-bold text-slate-500">Tests Taken</span>
+                <!-- 4. Tests Completed -->
+                <div class="bg-white border border-slate-200/70 p-4 sm:p-5 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+                    <div class="flex items-center justify-between mb-2 sm:mb-3">
+                        <span class="text-xs font-bold text-slate-500">Tests Completed</span>
                         <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         </div>
                     </div>
-                    <h3 class="text-2xl sm:text-3xl font-black text-slate-900 font-heading leading-tight">{{ number_format($totalTestsTaken) }}</h3>
-                    <p class="text-[11px] text-slate-400 mt-1 font-medium">Completed sessions</p>
+                    <h3 class="text-xl sm:text-3xl font-black text-slate-900 font-heading leading-tight">{{ number_format($totalTestsTaken) }}</h3>
+                    <p class="text-[11px] text-slate-400 mt-1 font-medium">Student exam sessions</p>
+                </div>
+            </div>
+
+            <!-- Secondary Operational Metric Bar -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mt-3 sm:mt-4">
+                <!-- Question Bank Size -->
+                <div class="bg-slate-100/70 border border-slate-200/50 p-3.5 rounded-xl flex items-center justify-between">
+                    <div>
+                        <span class="text-[11px] font-bold text-slate-500 block">Questions Bank</span>
+                        <span class="text-lg font-black text-slate-800">{{ number_format($totalQuestions) }}</span>
+                    </div>
+                    <a href="{{ route('admin.questions') }}" class="text-[11px] font-bold text-emerald-700 hover:text-emerald-800">Manage &rarr;</a>
                 </div>
 
-                <!-- Contact Messages -->
-                <div class="bg-white border border-slate-200/70 p-5 rounded-2xl shadow-sm hover:shadow-md transition-shadow col-span-2 md:col-span-1">
-                    <div class="flex items-center justify-between mb-3">
-                        <span class="text-xs font-bold text-slate-500">Messages</span>
-                        <div class="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
-                        </div>
+                <!-- Flagged Reports -->
+                <div class="bg-slate-100/70 border border-slate-200/50 p-3.5 rounded-xl flex items-center justify-between">
+                    <div>
+                        <span class="text-[11px] font-bold text-slate-500 block">Flagged Questions</span>
+                        <span class="text-lg font-black {{ $flaggedQuestions > 0 ? 'text-amber-600' : 'text-slate-800' }}">{{ number_format($flaggedQuestions) }}</span>
                     </div>
-                    <h3 class="text-2xl sm:text-3xl font-black text-slate-900 font-heading leading-tight">{{ number_format(\App\Models\ContactMessage::count()) }}</h3>
-                    <p class="text-[11px] text-slate-400 mt-1 font-medium">Inquiries received</p>
+                    <a href="{{ route('admin.reports') }}" class="text-[11px] font-bold text-emerald-700 hover:text-emerald-800">Review &rarr;</a>
+                </div>
+
+                <!-- Daily / Monthly Active -->
+                <div class="bg-slate-100/70 border border-slate-200/50 p-3.5 rounded-xl flex items-center justify-between">
+                    <div>
+                        <span class="text-[11px] font-bold text-slate-500 block">DAU / MAU</span>
+                        <span class="text-lg font-black text-slate-800">{{ $dau }} <span class="text-xs text-slate-400 font-medium">/ {{ $mau }}</span></span>
+                    </div>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase">Active</span>
+                </div>
+
+                <!-- Messages -->
+                <div class="bg-slate-100/70 border border-slate-200/50 p-3.5 rounded-xl flex items-center justify-between">
+                    <div>
+                        <span class="text-[11px] font-bold text-slate-500 block">Inquiries</span>
+                        <span class="text-lg font-black text-slate-800">{{ number_format(\App\Models\ContactMessage::count()) }}</span>
+                    </div>
+                    <a href="{{ route('admin.messages') }}" class="text-[11px] font-bold text-emerald-700 hover:text-emerald-800">Inbox &rarr;</a>
                 </div>
             </div>
         </div>

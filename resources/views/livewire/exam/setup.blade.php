@@ -221,7 +221,7 @@
                     </div>
                 @endif
 
-                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
                     @foreach($subjects as $subj)
                         <div wire:click="toggleSubject({{ $subj->id }})"
                              class="group border-2 rounded-2xl p-4 cursor-pointer flex items-center space-x-3 transition-all duration-300 hover:shadow-md

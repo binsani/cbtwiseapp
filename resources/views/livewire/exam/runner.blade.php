@@ -134,7 +134,7 @@
                         </div>
 
                         <!-- Question Body -->
-                        <div class="prose max-w-none text-gray-800 text-lg mb-8 leading-relaxed">
+                        <div class="prose max-w-none text-gray-800 text-base sm:text-lg mb-6 sm:mb-8 leading-relaxed overflow-x-auto break-words">
                             {!! $activeQuestion->question_text !!}
                             
                             @if($activeQuestion->question_image)
@@ -293,61 +293,66 @@
         </aside>
     </div>
 
-    <!-- Alpine.js Draggable Scientific Calculator -->
+    <!-- Alpine.js Scientific Calculator Modal / Dialog -->
     <div x-show="showCalc" 
-         x-drag
-         class="absolute z-50 bg-gray-800 text-white rounded-2xl shadow-2xl overflow-hidden border border-gray-700 w-72" 
-         style="left: 100px; top: 150px; display: none;"
-         x-data="calculator()"
-         @click.away="showCalc = false">
+         x-cloak
+         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm sm:bg-transparent sm:backdrop-blur-none sm:p-0 sm:fixed sm:top-20 sm:left-24 sm:w-auto" 
+         @keydown.escape.window="showCalc = false">
         
-        <!-- Header -->
-        <div class="cursor-move bg-gray-900 px-4 py-2 flex justify-between items-center text-xs font-bold tracking-widest text-gray-400 select-none">
-            <span>JAMB CBT CALCULATOR</span>
-            <button @click="showCalc = false" class="text-rose-500 hover:text-rose-600 font-bold text-sm">&times;</button>
-        </div>
+        <div class="bg-gray-800 text-white rounded-2xl shadow-2xl overflow-hidden border border-gray-700 w-80 max-w-full sm:w-72"
+             x-data="calculator()"
+             @click.away="showCalc = false">
+            
+            <!-- Header -->
+            <div class="cursor-move bg-gray-900 px-4 py-3 sm:py-2 flex justify-between items-center text-xs font-bold tracking-widest text-gray-300 select-none border-b border-gray-700">
+                <span class="flex items-center gap-1.5">
+                    <span class="text-emerald-400">🔢</span> JAMB CBT CALCULATOR
+                </span>
+                <button @click="showCalc = false" class="p-1 rounded-lg hover:bg-gray-700 text-rose-400 hover:text-rose-300 font-bold text-lg leading-none">&times;</button>
+            </div>
 
-        <!-- Display -->
-        <div class="p-4 bg-gray-950 text-right">
-            <div class="text-[10px] text-gray-500 font-mono min-h-[15px]" x-text="expression"></div>
-            <div class="text-2xl font-bold font-mono tracking-wider truncate text-emerald-400" x-text="display">0</div>
-        </div>
+            <!-- Display -->
+            <div class="p-4 bg-gray-950 text-right">
+                <div class="text-[11px] text-gray-500 font-mono min-h-[16px]" x-text="expression"></div>
+                <div class="text-2xl font-bold font-mono tracking-wider truncate text-emerald-400" x-text="display">0</div>
+            </div>
 
-        <!-- Keys Grid -->
-        <div class="grid grid-cols-5 gap-1 p-2 bg-gray-900 text-xs font-semibold">
-            <!-- Row 1 -->
-            <button @click="clear()" class="py-2.5 bg-gray-700 hover:bg-gray-600 rounded">C</button>
-            <button @click="op('(')" class="py-2.5 bg-gray-700 hover:bg-gray-600 rounded">(</button>
-            <button @click="op(')')" class="py-2.5 bg-gray-700 hover:bg-gray-600 rounded">)</button>
-            <button @click="backspace()" class="py-2.5 bg-gray-700 hover:bg-gray-600 rounded">DEL</button>
-            <button @click="op('/')" class="py-2.5 bg-amber-600 hover:bg-amber-500 rounded">/</button>
+            <!-- Keys Grid -->
+            <div class="grid grid-cols-5 gap-1.5 p-3 bg-gray-900 text-xs font-semibold">
+                <!-- Row 1 -->
+                <button @click="clear()" class="py-3 sm:py-2.5 bg-gray-700 hover:bg-gray-600 rounded-lg text-rose-300 font-bold">C</button>
+                <button @click="op('(')" class="py-3 sm:py-2.5 bg-gray-700 hover:bg-gray-600 rounded-lg">(</button>
+                <button @click="op(')')" class="py-3 sm:py-2.5 bg-gray-700 hover:bg-gray-600 rounded-lg">)</button>
+                <button @click="backspace()" class="py-3 sm:py-2.5 bg-gray-700 hover:bg-gray-600 rounded-lg">DEL</button>
+                <button @click="op('/')" class="py-3 sm:py-2.5 bg-amber-600 hover:bg-amber-500 text-white rounded-lg">/</button>
 
-            <!-- Row 2 -->
-            <button @click="func('sin')" class="py-2.5 bg-gray-800 hover:bg-gray-700 rounded text-[10px]">sin</button>
-            <button @click="num('7')" class="py-2.5 bg-gray-600 hover:bg-gray-500 rounded">7</button>
-            <button @click="num('8')" class="py-2.5 bg-gray-600 hover:bg-gray-500 rounded">8</button>
-            <button @click="num('9')" class="py-2.5 bg-gray-600 hover:bg-gray-500 rounded">9</button>
-            <button @click="op('*')" class="py-2.5 bg-amber-600 hover:bg-amber-500 rounded">*</button>
+                <!-- Row 2 -->
+                <button @click="func('sin')" class="py-3 sm:py-2.5 bg-gray-800 hover:bg-gray-700 rounded-lg text-[10px]">sin</button>
+                <button @click="num('7')" class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg">7</button>
+                <button @click="num('8')" class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg">8</button>
+                <button @click="num('9')" class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg">9</button>
+                <button @click="op('*')" class="py-3 sm:py-2.5 bg-amber-600 hover:bg-amber-500 text-white rounded-lg">&times;</button>
 
-            <!-- Row 3 -->
-            <button @click="func('cos')" class="py-2.5 bg-gray-800 hover:bg-gray-700 rounded text-[10px]">cos</button>
-            <button @click="num('4')" class="py-2.5 bg-gray-600 hover:bg-gray-500 rounded">4</button>
-            <button @click="num('5')" class="py-2.5 bg-gray-600 hover:bg-gray-500 rounded">5</button>
-            <button @click="num('6')" class="py-2.5 bg-gray-600 hover:bg-gray-500 rounded">6</button>
-            <button @click="op('-')" class="py-2.5 bg-amber-600 hover:bg-amber-500 rounded">-</button>
+                <!-- Row 3 -->
+                <button @click="func('cos')" class="py-3 sm:py-2.5 bg-gray-800 hover:bg-gray-700 rounded-lg text-[10px]">cos</button>
+                <button @click="num('4')" class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg">4</button>
+                <button @click="num('5')" class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg">5</button>
+                <button @click="num('6')" class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg">6</button>
+                <button @click="op('-')" class="py-3 sm:py-2.5 bg-amber-600 hover:bg-amber-500 text-white rounded-lg">-</button>
 
-            <!-- Row 4 -->
-            <button @click="func('tan')" class="py-2.5 bg-gray-800 hover:bg-gray-700 rounded text-[10px]">tan</button>
-            <button @click="num('1')" class="py-2.5 bg-gray-600 hover:bg-gray-500 rounded">1</button>
-            <button @click="num('2')" class="py-2.5 bg-gray-600 hover:bg-gray-500 rounded">2</button>
-            <button @click="num('3')" class="py-2.5 bg-gray-600 hover:bg-gray-500 rounded">3</button>
-            <button @click="op('+')" class="py-2.5 bg-amber-600 hover:bg-amber-500 rounded">+</button>
+                <!-- Row 4 -->
+                <button @click="func('tan')" class="py-3 sm:py-2.5 bg-gray-800 hover:bg-gray-700 rounded-lg text-[10px]">tan</button>
+                <button @click="num('1')" class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg">1</button>
+                <button @click="num('2')" class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg">2</button>
+                <button @click="num('3')" class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg">3</button>
+                <button @click="op('+')" class="py-3 sm:py-2.5 bg-amber-600 hover:bg-amber-500 text-white rounded-lg">+</button>
 
-            <!-- Row 5 -->
-            <button @click="func('sqrt')" class="py-2.5 bg-gray-800 hover:bg-gray-700 rounded text-[10px]">&radic;</button>
-            <button @click="num('0')" class="py-2.5 bg-gray-600 hover:bg-gray-500 rounded col-span-2">0</button>
-            <button @click="num('.')" class="py-2.5 bg-gray-600 hover:bg-gray-500 rounded">.</button>
-            <button @click="calculate()" class="py-2.5 bg-emerald-600 hover:bg-emerald-500 rounded">=</button>
+                <!-- Row 5 -->
+                <button @click="func('sqrt')" class="py-3 sm:py-2.5 bg-gray-800 hover:bg-gray-700 rounded-lg text-[10px]">&radic;</button>
+                <button @click="num('0')" class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg col-span-2">0</button>
+                <button @click="num('.')" class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg">.</button>
+                <button @click="calculate()" class="py-3 sm:py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg">=</button>
+            </div>
         </div>
     </div>
 
