@@ -4,7 +4,7 @@
     <x-admin-sidebar />
 
     <!-- Main Content Area -->
-    <main class="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 overflow-x-hidden font-sans max-w-7xl">
+    <main class="flex-1 w-full min-w-0 p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 overflow-x-hidden font-sans">
         
         @if (session()->has('message'))
             <div class="p-4 bg-emerald-50 border-l-4 border-emerald-500 text-emerald-800 rounded-r-2xl text-xs sm:text-sm font-bold shadow-sm">
@@ -135,61 +135,55 @@
         </div>
 
         <!-- Section 2: Quick Management Actions & Recent Candidate Activity -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
             
             <!-- Quick Actions (5 cols) -->
-            <div class="lg:col-span-5 bg-white border border-slate-200/70 p-6 rounded-3xl shadow-sm flex flex-col justify-between">
+            <div class="lg:col-span-5 self-start w-full bg-white border border-slate-200/70 p-4 sm:p-5 rounded-3xl shadow-sm">
                 <div>
                     <h3 class="text-base font-extrabold text-slate-900 font-heading mb-1">Quick Actions</h3>
                     <p class="text-xs text-slate-400 mb-5">Frequently accessed administrative modules</p>
                     
-                    <div class="grid grid-cols-2 gap-3">
-                        <a href="{{ route('admin.questions') }}" class="flex flex-col p-3.5 rounded-2xl border border-slate-100 hover:border-emerald-300 hover:bg-emerald-50/40 transition-all group">
-                            <span class="w-8 h-8 rounded-xl bg-emerald-100/70 text-emerald-700 flex items-center justify-center text-sm font-bold mb-2 group-hover:scale-105 transition-transform">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        <a href="{{ route('admin.questions') }}" class="flex items-center gap-3 p-3 rounded-2xl border border-slate-100 hover:border-emerald-300 hover:bg-emerald-50/40 transition-all group">
+                            <span class="w-9 h-9 shrink-0 rounded-xl bg-emerald-100/70 text-emerald-700 flex items-center justify-center text-sm font-bold group-hover:scale-105 transition-transform">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                             </span>
-                            <span class="text-xs font-bold text-slate-800">Questions</span>
-                            <span class="text-[10px] text-slate-400">Curate & import</span>
+                            <span><span class="block text-xs font-bold text-slate-800">Questions</span><span class="block text-[10px] text-slate-400">Curate & import</span></span>
                         </a>
 
-                        <a href="{{ route('admin.bulk-seeder') }}" class="flex flex-col p-3.5 rounded-2xl border border-slate-100 hover:border-amber-300 hover:bg-amber-50/40 transition-all group">
-                            <span class="w-8 h-8 rounded-xl bg-amber-100/70 text-amber-700 flex items-center justify-center text-sm font-bold mb-2 group-hover:scale-105 transition-transform">
+                        <a href="{{ route('admin.bulk-seeder') }}" class="flex items-center gap-3 p-3 rounded-2xl border border-slate-100 hover:border-amber-300 hover:bg-amber-50/40 transition-all group">
+                            <span class="w-9 h-9 shrink-0 rounded-xl bg-amber-100/70 text-amber-700 flex items-center justify-center text-sm font-bold group-hover:scale-105 transition-transform">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                             </span>
-                            <span class="text-xs font-bold text-slate-800">Bulk Seeder</span>
-                            <span class="text-[10px] text-slate-400">ALOC API auto-fetch</span>
+                            <span><span class="block text-xs font-bold text-slate-800">Bulk Seeder</span><span class="block text-[10px] text-slate-400">ALOC API auto-fetch</span></span>
                         </a>
 
-                        <a href="{{ route('admin.exams-subjects') }}" class="flex flex-col p-3.5 rounded-2xl border border-slate-100 hover:border-blue-300 hover:bg-blue-50/40 transition-all group">
-                            <span class="w-8 h-8 rounded-xl bg-blue-100/70 text-blue-700 flex items-center justify-center text-sm font-bold mb-2 group-hover:scale-105 transition-transform">
+                        <a href="{{ route('admin.exams-subjects') }}" class="flex items-center gap-3 p-3 rounded-2xl border border-slate-100 hover:border-blue-300 hover:bg-blue-50/40 transition-all group">
+                            <span class="w-9 h-9 shrink-0 rounded-xl bg-blue-100/70 text-blue-700 flex items-center justify-center text-sm font-bold group-hover:scale-105 transition-transform">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
                             </span>
-                            <span class="text-xs font-bold text-slate-800">Exams & Subjects</span>
-                            <span class="text-[10px] text-slate-400">Tiers & syllabus</span>
+                            <span><span class="block text-xs font-bold text-slate-800">Exams & Subjects</span><span class="block text-[10px] text-slate-400">Tiers & syllabus</span></span>
                         </a>
 
-                        <a href="{{ route('admin.users') }}" class="flex flex-col p-3.5 rounded-2xl border border-slate-100 hover:border-purple-300 hover:bg-purple-50/40 transition-all group">
-                            <span class="w-8 h-8 rounded-xl bg-purple-100/70 text-purple-700 flex items-center justify-center text-sm font-bold mb-2 group-hover:scale-105 transition-transform">
+                        <a href="{{ route('admin.users') }}" class="flex items-center gap-3 p-3 rounded-2xl border border-slate-100 hover:border-purple-300 hover:bg-purple-50/40 transition-all group">
+                            <span class="w-9 h-9 shrink-0 rounded-xl bg-purple-100/70 text-purple-700 flex items-center justify-center text-sm font-bold group-hover:scale-105 transition-transform">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
                             </span>
-                            <span class="text-xs font-bold text-slate-800">Users</span>
-                            <span class="text-[10px] text-slate-400">Accounts & roles</span>
+                            <span><span class="block text-xs font-bold text-slate-800">Users</span><span class="block text-[10px] text-slate-400">Accounts & roles</span></span>
                         </a>
 
-                        <a href="{{ route('admin.subscriptions') }}" class="flex flex-col p-3.5 rounded-2xl border border-slate-100 hover:border-teal-300 hover:bg-teal-50/40 transition-all group">
-                            <span class="w-8 h-8 rounded-xl bg-teal-100/70 text-teal-700 flex items-center justify-center text-sm font-bold mb-2 group-hover:scale-105 transition-transform">
+                        <a href="{{ route('admin.subscriptions') }}" class="flex items-center gap-3 p-3 rounded-2xl border border-slate-100 hover:border-teal-300 hover:bg-teal-50/40 transition-all group">
+                            <span class="w-9 h-9 shrink-0 rounded-xl bg-teal-100/70 text-teal-700 flex items-center justify-center text-sm font-bold group-hover:scale-105 transition-transform">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
                             </span>
-                            <span class="text-xs font-bold text-slate-800">Subscriptions</span>
-                            <span class="text-[10px] text-slate-400">Payments & plans</span>
+                            <span><span class="block text-xs font-bold text-slate-800">Subscriptions</span><span class="block text-[10px] text-slate-400">Payments & plans</span></span>
                         </a>
 
-                        <a href="{{ route('admin.analytics') }}" class="flex flex-col p-3.5 rounded-2xl border border-slate-100 hover:border-rose-300 hover:bg-rose-50/40 transition-all group">
-                            <span class="w-8 h-8 rounded-xl bg-rose-100/70 text-rose-700 flex items-center justify-center text-sm font-bold mb-2 group-hover:scale-105 transition-transform">
+                        <a href="{{ route('admin.analytics') }}" class="flex items-center gap-3 p-3 rounded-2xl border border-slate-100 hover:border-rose-300 hover:bg-rose-50/40 transition-all group">
+                            <span class="w-9 h-9 shrink-0 rounded-xl bg-rose-100/70 text-rose-700 flex items-center justify-center text-sm font-bold group-hover:scale-105 transition-transform">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14"/></svg>
                             </span>
-                            <span class="text-xs font-bold text-slate-800">Analytics</span>
-                            <span class="text-[10px] text-slate-400">Metrics & revenue</span>
+                            <span><span class="block text-xs font-bold text-slate-800">Analytics</span><span class="block text-[10px] text-slate-400">Metrics & revenue</span></span>
                         </a>
                     </div>
                 </div>
