@@ -1,13 +1,13 @@
-<div class="max-w-4xl mx-auto py-4 px-4 sm:px-6 lg:px-8 font-sans space-y-8">
+<div class="dashboard-shell max-w-5xl font-sans space-y-6 sm:space-y-8">
     
     <!-- Navigation Tabs -->
     <x-dashboard-nav />
 
     <!-- Header -->
-    <div class="flex justify-between items-center border-b border-slate-100 pb-4">
+    <div class="dashboard-page-header">
         <div>
-            <h1 class="text-3xl font-black text-slate-900 font-heading">Notifications</h1>
-            <p class="text-slate-500 text-sm mt-1">Stay updated with study alerts, achievements, and upgrades.</p>
+            <h1 class="dashboard-page-title font-heading">Notifications</h1>
+            <p class="dashboard-page-subtitle">Stay updated with study alerts, achievements, and upgrades.</p>
         </div>
         <div class="flex items-center gap-3">
             <button 

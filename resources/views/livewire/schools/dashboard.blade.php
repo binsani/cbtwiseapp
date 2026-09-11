@@ -1,8 +1,8 @@
 <div>
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="dashboard-shell">
         
         {{-- Header Banner --}}
-        <div class="bg-gradient-to-r from-emerald-600 to-teal-700 rounded-3xl p-6 sm:p-8 text-white shadow-lg mb-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div class="bg-gradient-to-r from-emerald-700 to-teal-700 rounded-3xl p-5 sm:p-7 text-white shadow-lg mb-6 flex flex-col md:flex-row md:items-center justify-between gap-5">
             <div>
                 <span class="inline-flex px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-white/20 text-white mb-2">
                     {{ strtoupper($school->tier) }} {{ __('PORTAL') }}
@@ -25,7 +25,7 @@
         </div>
 
         {{-- Tabs Selector --}}
-        <div class="flex border-b border-slate-100 mb-8 overflow-x-auto whitespace-nowrap">
+        <div class="dashboard-panel flex border-0 mb-6 overflow-x-auto whitespace-nowrap touch-scroll px-1">
             <button 
                 wire:click="$set('activeTab', 'roster')"
                 class="px-6 py-3 border-b-2 text-sm font-black transition-colors {{ $activeTab === 'roster' ? 'border-emerald-600 text-emerald-700' : 'border-transparent text-slate-400 hover:text-slate-600' }}"

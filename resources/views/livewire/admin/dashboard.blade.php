@@ -13,14 +13,14 @@
         @endif
 
         <!-- Top Header & Breadcrumb / Quick Actions -->
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-200/70">
+        <div class="dashboard-page-header">
             <div>
                 <div class="flex items-center gap-2 text-[11px] font-bold text-slate-400 uppercase tracking-widest">
                     <span>Control Center</span>
                     <span>&bull;</span>
                     <span class="text-emerald-600">Live Overview</span>
                 </div>
-                <h1 class="text-2xl sm:text-3xl font-black text-slate-950 font-heading tracking-tight mt-0.5">Admin Dashboard</h1>
+                <h1 class="dashboard-page-title font-heading mt-0.5">Admin Dashboard</h1>
             </div>
             
             <div class="flex flex-wrap items-center gap-2 sm:gap-2.5">
@@ -46,7 +46,7 @@
         <div>
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
                 <!-- 1. Total Registered Users -->
-                <div class="bg-white border border-slate-200/70 p-4 sm:p-5 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+                <div class="dashboard-stat hover:shadow-md transition-shadow">
                     <div class="flex items-center justify-between mb-2 sm:mb-3">
                         <span class="text-xs font-bold text-slate-500">Total Users</span>
                         <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
@@ -58,7 +58,7 @@
                 </div>
 
                 <!-- 2. Active Paid Subscribers -->
-                <div class="bg-white border border-slate-200/70 p-4 sm:p-5 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+                <div class="dashboard-stat hover:shadow-md transition-shadow">
                     <div class="flex items-center justify-between mb-2 sm:mb-3">
                         <span class="text-xs font-bold text-slate-500">Active Paid</span>
                         <div class="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
@@ -70,7 +70,7 @@
                 </div>
 
                 <!-- 3. Gross Revenue -->
-                <div class="bg-white border border-slate-200/70 p-4 sm:p-5 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+                <div class="dashboard-stat hover:shadow-md transition-shadow">
                     <div class="flex items-center justify-between mb-2 sm:mb-3">
                         <span class="text-xs font-bold text-slate-500">Gross Revenue</span>
                         <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-black text-xs">
@@ -82,7 +82,7 @@
                 </div>
 
                 <!-- 4. Tests Completed -->
-                <div class="bg-white border border-slate-200/70 p-4 sm:p-5 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+                <div class="dashboard-stat hover:shadow-md transition-shadow">
                     <div class="flex items-center justify-between mb-2 sm:mb-3">
                         <span class="text-xs font-bold text-slate-500">Tests Completed</span>
                         <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">

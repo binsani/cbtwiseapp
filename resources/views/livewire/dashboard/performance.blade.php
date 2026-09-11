@@ -1,13 +1,13 @@
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 space-y-8 font-sans">
+<div class="dashboard-shell space-y-6 sm:space-y-8 font-sans">
     
     <!-- Navigation Tabs -->
     <x-dashboard-nav />
 
     <!-- Header -->
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div class="dashboard-page-header">
         <div>
-            <h1 class="text-3xl font-black text-slate-900 font-heading">Performance Dashboard</h1>
-            <p class="text-slate-500 text-sm mt-1">Detailed statistical insights into your exam preparation progress.</p>
+            <h1 class="dashboard-page-title font-heading">Performance Dashboard</h1>
+            <p class="dashboard-page-subtitle">Detailed statistical insights into your exam preparation progress.</p>
         </div>
         <a href="{{ route('dashboard') }}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-extrabold rounded-2xl transition-all shadow-md">
             &larr; Back to Dashboard
@@ -15,8 +15,8 @@
     </div>
 
     <!-- Quick Stats Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col justify-between">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div class="dashboard-stat flex flex-col justify-between">
             <div class="text-slate-400 text-xs font-bold uppercase tracking-wider">Overall Accuracy</div>
             <div class="mt-4 flex items-baseline gap-2">
                 <span class="text-4xl font-black text-slate-900 font-heading">{{ $overallAccuracy }}%</span>
@@ -24,7 +24,7 @@
             <div class="text-slate-400 text-xs mt-2">Across all practiced subjects</div>
         </div>
 
-        <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col justify-between">
+        <div class="dashboard-stat flex flex-col justify-between">
             <div class="text-slate-400 text-xs font-bold uppercase tracking-wider">Total Practice Sessions</div>
             <div class="mt-4 flex items-baseline gap-2">
                 <span class="text-4xl font-black text-slate-900 font-heading">{{ $totalSessions }}</span>
@@ -32,7 +32,7 @@
             <div class="text-slate-400 text-xs mt-2">Completed CBT simulations</div>
         </div>
 
-        <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col justify-between">
+        <div class="dashboard-stat flex flex-col justify-between">
             <div class="text-slate-400 text-xs font-bold uppercase tracking-wider">Strongest Subject</div>
             <div class="mt-4">
                 <span class="text-xl font-black text-emerald-600 font-heading block truncate">
@@ -44,7 +44,7 @@
             </div>
         </div>
 
-        <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col justify-between">
+        <div class="dashboard-stat flex flex-col justify-between">
             <div class="text-slate-400 text-xs font-bold uppercase tracking-wider">Weakest Subject</div>
             <div class="mt-4">
                 <span class="text-xl font-black text-red-600 font-heading block truncate">

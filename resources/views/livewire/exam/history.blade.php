@@ -1,11 +1,13 @@
-<div class="max-w-5xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+<div class="dashboard-shell max-w-6xl">
     <x-dashboard-nav />
 
-    <div class="mb-8">
-        <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight font-heading">
+    <div class="dashboard-page-header mb-6">
+        <div>
+        <h1 class="dashboard-page-title font-heading">
             Practice Session History
         </h1>
-        <p class="text-sm text-slate-600 mt-1">Review your scores, detailed explanations, or retake previous practice exams.</p>
+        <p class="dashboard-page-subtitle">Review your scores, detailed explanations, or retake previous practice exams.</p>
+        </div>
     </div>
 
     @if (session()->has('error'))

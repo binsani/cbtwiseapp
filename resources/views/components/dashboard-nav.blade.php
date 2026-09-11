@@ -4,13 +4,13 @@
     $streakDays = auth()->user()?->study_streak_days ?? 0;
 @endphp
 
-<div class="bg-white border-b border-slate-200/80 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 mb-8 sticky top-0 z-20 backdrop-blur-md bg-white/95 shadow-sm">
-    <div class="max-w-7xl mx-auto flex items-center justify-between gap-2 py-2.5">
+<div class="dashboard-panel mb-6 sticky top-2 z-20 bg-white/95 px-2 shadow-lg shadow-slate-900/5 backdrop-blur-md sm:px-3">
+    <div class="flex items-center justify-between gap-2 py-2">
         <!-- Tab bar with right-fade scroll indicator -->
         <div class="relative flex-1 min-w-0">
             <!-- Right-fade gradient — signals more tabs via scroll on mobile -->
             <div class="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white/95 to-transparent z-10 pointer-events-none sm:hidden"></div>
-            <nav class="flex items-center space-x-1 text-xs font-bold whitespace-nowrap overflow-x-auto scrollbar-none pr-6 sm:pr-0">
+            <nav class="flex items-center space-x-1 text-xs font-bold whitespace-nowrap overflow-x-auto scrollbar-none touch-scroll pr-6 sm:pr-0">
                 <!-- Overview -->
                 <a href="{{ route('dashboard') }}"
                    class="px-3 py-2 rounded-xl transition-all flex items-center gap-1.5 {{ request()->routeIs('dashboard') ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' }}">

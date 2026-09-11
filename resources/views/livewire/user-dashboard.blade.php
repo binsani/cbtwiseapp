@@ -1,4 +1,4 @@
-<div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 space-y-8"
+<div class="dashboard-shell space-y-6 sm:space-y-8"
      x-data="{
          status: @entangle('studyPlanStatus'),
          useFallback: false,
@@ -111,7 +111,7 @@
     @endif
 
     <!-- Motivational Quote Banner -->
-    <div class="bg-amber-50/60 border border-amber-200/70 rounded-2xl p-4 flex items-center gap-3 text-amber-900 text-xs shadow-sm">
+    <div class="dashboard-panel bg-amber-50/60 border-amber-200/70 p-4 flex items-center gap-3 text-amber-900 text-xs">
         <div class="w-7 h-7 rounded-xl bg-amber-100 flex items-center justify-center text-amber-700 flex-shrink-0 text-base">
             💡
         </div>
@@ -121,9 +121,9 @@
     </div>
 
     <!-- 4 High-Impact Summary Stat Cards -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <!-- Tests Taken -->
-        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex flex-col justify-between">
+        <div class="dashboard-stat flex flex-col justify-between">
             <span class="text-xs font-bold text-slate-500">Tests Taken</span>
             <div class="mt-2">
                 <span class="text-3xl font-black text-slate-900 font-heading">{{ $totalTestsTaken }}</span>
@@ -132,7 +132,7 @@
         </div>
 
         <!-- Avg. Score % -->
-        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex flex-col justify-between">
+        <div class="dashboard-stat flex flex-col justify-between">
             <span class="text-xs font-bold text-slate-500">Avg. Score</span>
             <div class="mt-2">
                 <span class="text-3xl font-black text-emerald-600 font-heading">{{ $accuracy }}%</span>
@@ -141,7 +141,7 @@
         </div>
 
         <!-- Study Streak -->
-        <a href="{{ route('dashboard.streak') }}" class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex flex-col justify-between hover:border-amber-400 transition-all group">
+        <a href="{{ route('dashboard.streak') }}" class="dashboard-stat flex flex-col justify-between hover:border-amber-400 transition-all group">
             <div class="flex items-center justify-between">
                 <span class="text-xs font-bold text-slate-500">Study Streak</span>
                 <span class="text-sm">🔥</span>
@@ -153,7 +153,7 @@
         </a>
 
         <!-- Time Spent -->
-        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex flex-col justify-between">
+        <div class="dashboard-stat flex flex-col justify-between">
             <span class="text-xs font-bold text-slate-500">Time Spent</span>
             <div class="mt-2">
                 <span class="text-3xl font-black text-slate-900 font-heading">{{ $totalTimeSpentHours }} hrs</span>
