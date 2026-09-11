@@ -4,7 +4,7 @@
     <x-admin-sidebar />
 
     <!-- Main Content Area -->
-    <main class="flex-1 p-8 space-y-6 overflow-x-hidden font-sans">
+    <main class="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 overflow-x-hidden font-sans">
         
         <!-- Header -->
         <div class="flex items-center justify-between">
@@ -197,4 +197,3 @@
         </div>
     </main>
 </div>
-

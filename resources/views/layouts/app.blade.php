@@ -48,7 +48,7 @@
         @yield('json_ld')
     </head>
     <body class="font-sans antialiased text-slate-900 bg-slate-50 selection:bg-emerald-500 selection:text-white">
-        <div class="min-h-screen bg-slate-50 overflow-x-hidden flex flex-col">
+        <div class="min-h-dvh bg-slate-50 overflow-x-hidden flex flex-col">
             @if(!request()->is('admin*') && !request()->routeIs('exam.run*'))
                 <livewire:layout.navigation />
             @endif

@@ -34,7 +34,7 @@
     <body class="font-sans antialiased text-slate-900 bg-slate-50/50">
         <!-- Navigation Header -->
         <header x-data="{ mobileOpen: false }" class="sticky top-0 z-50 backdrop-blur-xl bg-white/90 border-b border-slate-100">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between">
                 <a href="{{ url('/') }}" class="flex items-center gap-2.5">
                     <img src="/logo.png" alt="CBTWise Logo" class="h-9 w-auto">
                     <span class="text-2xl font-bold tracking-tight text-slate-900 font-heading">
@@ -74,7 +74,7 @@
 
                 <!-- Mobile Hamburger Button — shown below md (768px) -->
                 <div class="flex items-center md:hidden">
-                    <button @click="mobileOpen = ! mobileOpen" class="p-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 focus:outline-none" aria-label="Toggle Menu">
+                    <button @click="mobileOpen = ! mobileOpen" class="min-w-11 min-h-11 p-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 focus:outline-none" aria-label="Toggle Menu" :aria-expanded="mobileOpen.toString()" aria-controls="public-mobile-menu">
                         <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                             <path :class="{'hidden': mobileOpen, 'inline-flex': ! mobileOpen }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                             <path :class="{'hidden': ! mobileOpen, 'inline-flex': mobileOpen }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -84,7 +84,7 @@
             </div>
 
             <!-- Mobile Menu Dropdown — visible below md (768px) -->
-            <div x-show="mobileOpen" x-cloak class="md:hidden border-b border-slate-200 bg-white px-4 pt-2 pb-6 space-y-2">
+            <div id="public-mobile-menu" x-show="mobileOpen" x-cloak x-transition class="md:hidden border-b border-slate-200 bg-white px-4 pt-2 pb-6 space-y-2 max-h-[calc(100dvh-4rem)] overflow-y-auto touch-scroll">
                 <a href="{{ url('/') }}" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700 hover:bg-slate-50 hover:text-emerald-600">Home</a>
                 <a href="{{ route('pricing') }}" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700 hover:bg-slate-50 hover:text-emerald-600">Pricing</a>
                 <a href="{{ route('download') }}" class="flex items-center justify-between px-3 py-2 rounded-lg text-base font-bold text-emerald-700 bg-emerald-50/60 hover:bg-emerald-50">

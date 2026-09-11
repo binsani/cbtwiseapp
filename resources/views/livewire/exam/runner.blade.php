@@ -1,4 +1,4 @@
-<div class="h-screen flex flex-col bg-gray-50 select-none overflow-hidden" 
+<div class="h-dvh flex flex-col bg-gray-50 select-none overflow-hidden"
      x-data="examRunner({
         timeRemaining: @entangle('timeRemaining'),
         currentIndex: @entangle('currentIndex'),
@@ -46,10 +46,10 @@
     </header>
 
     <!-- Subject Tabs -->
-    <div class="bg-white border-b border-gray-200 px-6 py-3 flex space-x-2 overflow-x-auto flex-shrink-0 scrollbar-none">
+    <div class="bg-white border-b border-gray-200 px-3 sm:px-6 py-3 flex space-x-2 overflow-x-auto flex-shrink-0 scrollbar-none touch-scroll">
         @foreach($subjectList as $subj)
             <button wire:click="selectSubject({{ $subj['id'] }})"
-                    class="px-5 py-2.5 rounded-xl font-bold text-sm tracking-wide transition-all duration-300 flex items-center space-x-2 flex-shrink-0
+                    class="px-4 sm:px-5 py-2.5 rounded-xl font-bold text-sm tracking-wide transition-all duration-300 flex items-center space-x-2 flex-shrink-0
                     {{ $selectedSubjectId == $subj['id'] ? 'bg-emerald-600 text-white shadow-md' : 'text-gray-600 bg-gray-100 hover:bg-gray-200' }}">
                 <span>{{ $subj['name'] }}</span>
             </button>
@@ -148,7 +148,7 @@
                         <div class="space-y-4">
                             @foreach($activeQuestion->getOptions() as $key => $text)
                                 <div wire:click="selectOption({{ $activeQuestion->id }}, '{{ $key }}')"
-                                     class="group border-2 rounded-2xl p-5 cursor-pointer flex items-center space-x-4 transition-all duration-300 hover:shadow-sm
+                                    class="group border-2 rounded-2xl p-4 sm:p-5 cursor-pointer flex items-center space-x-3 sm:space-x-4 transition-all duration-300 hover:shadow-sm
                                      {{ ($answers[$activeQuestion->id] ?? null) === $key ? 'border-emerald-500 bg-emerald-50/20' : 'border-gray-100 bg-white hover:border-emerald-100' }}">
                                     
                                     <!-- Option Key Badge -->
@@ -158,7 +158,7 @@
                                     </span>
                                     
                                     <!-- Option Content -->
-                                    <span class="text-gray-700 font-medium leading-relaxed group-hover:text-emerald-950">{!! $text !!}</span>
+                                    <span class="min-w-0 break-words text-gray-700 font-medium leading-relaxed group-hover:text-emerald-950">{!! $text !!}</span>
                                 </div>
                             @endforeach
                         </div>

@@ -4,7 +4,7 @@
     <x-admin-sidebar />
 
     <!-- Main Content Area -->
-    <main class="flex-1 p-8 space-y-8 overflow-x-hidden font-sans">
+    <main class="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 overflow-x-hidden font-sans">
         
         @if (session()->has('message'))
             <div class="p-4 bg-emerald-50 border-l-4 border-emerald-500 text-emerald-800 rounded-r-2xl text-xs font-bold shadow-sm flex items-center justify-between">

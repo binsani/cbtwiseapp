@@ -15,7 +15,7 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans antialiased text-slate-900 bg-slate-50 min-h-screen selection:bg-emerald-500 selection:text-white">
+    <body class="font-sans antialiased text-slate-900 bg-slate-50 min-h-dvh selection:bg-emerald-500 selection:text-white">
         {{ $slot }}
         <x-tawk-chat />
     </body>
