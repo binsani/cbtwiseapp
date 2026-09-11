@@ -11,22 +11,30 @@ use Symfony\Component\HttpFoundation\Response;
 class OfflineDesktopAuth
 {
     /**
-     * In offline standalone desktop mode (e.g. localhost/127.0.0.1 or APP_OFFLINE_DESKTOP=true),
-     * automatically authenticate a local user so all dashboard pages, practice screens,
-     * history, analytics, and exams work seamlessly without requiring internet/login barriers.
+     * In offline standalone desktop mode (bundled with Electron and local SQLite),
+     * automatically authenticate a local candidate so all practice screens work offline.
+     *
+     * Strict Security Controls:
+     * 1. Disabled in production environments.
+     * 2. Requires config('app.offline_desktop') to be explicitly true.
+     * 3. Requires client IP to be local loopback.
+     * 4. Authenticates only dedicated offline student, never administrative users.
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $isLocalEngine = in_array($request->getHost(), ['127.0.0.1', 'localhost']) || env('APP_OFFLINE_DESKTOP', false);
+        if (app()->isProduction()) {
+            return $next($request);
+        }
 
-        if ($isLocalEngine && !Auth::check()) {
-            // Find existing local candidate or default user
-            $user = User::where('email', 'student@cbtwise.com')
-                ->orWhere('email', 'admin@cbtwise.com.ng')
-                ->first() ?? User::first();
+        $isOfflineDesktopEnabled = (bool) config('app.offline_desktop', false);
+        $isLoopbackIp = in_array($request->ip(), ['127.0.0.1', '::1'], true);
+
+        if ($isOfflineDesktopEnabled && $isLoopbackIp && !Auth::check()) {
+            // Retrieve or provision dedicated offline candidate
+            $user = User::where('email', 'student@cbtwise.com')->first();
 
             if (!$user) {
-                // Seed a dedicated offline practice student if none exists
+                // Provision a dedicated offline student profile with standard user role
                 $user = User::create([
                     'name' => 'Offline Candidate',
                     'email' => 'student@cbtwise.com',
@@ -35,12 +43,20 @@ class OfflineDesktopAuth
                     'state' => 'Abuja',
                     'school' => 'CBTwise Academy',
                     'exam_year' => now()->year,
-                    'plan' => 'premium', // Grant full access offline
+                    'plan' => 'premium', // Grant full local practice capabilities
                     'email_verified_at' => now(),
                 ]);
+
+                if (method_exists($user, 'assignRole')) {
+                    try {
+                        $user->assignRole('user');
+                    } catch (\Throwable $e) {
+                        // Role might not be seeded yet on clean install
+                    }
+                }
             }
 
-            // Ensure user has verified email and full practice capabilities offline
+            // Ensure candidate has verified status offline
             if (!$user->email_verified_at) {
                 $user->email_verified_at = now();
                 $user->save();

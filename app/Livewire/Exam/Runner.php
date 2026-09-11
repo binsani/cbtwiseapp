@@ -8,6 +8,7 @@ use App\Models\ExamSession;
 use App\Models\Question;
 use App\Models\Subject;
 use App\Services\QuestionFetcher;
+use App\Services\ExamGradingService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
@@ -231,79 +232,20 @@ class Runner extends Component
     public function submit()
     {
         $examSession = ExamSession::where('user_id', Auth::id())
-            ->where('status', 'in_progress')
             ->find($this->sessionId);
             
         if (!$examSession) {
             return redirect()->route('dashboard');
         }
-        
-        // 1. Grade the exam
-        $answers = ExamAnswer::where('exam_session_id', $examSession->id)->get();
-        $totalQuestions = $answers->count();
-        $correctCount = 0;
-        
-        $subjectCorrects = [];
-        $subjectTotals = [];
-        
-        foreach ($answers as $ans) {
-            // Check correctness again to be absolute
-            $question = Question::find($ans->question_id);
-            $isCorrect = $question && $question->correct_option === $ans->selected_option;
-            
-            if ($isCorrect) {
-                $correctCount++;
-                $ans->update(['is_correct' => true]);
-                $question->incrementCorrect();
-            } else {
-                $ans->update(['is_correct' => false]);
-            }
-            
-            // subject-wise breakdown
-            $subId = $question->subject_id;
-            $subjectTotals[$subId] = ($subjectTotals[$subId] ?? 0) + 1;
-            if ($isCorrect) {
-                $subjectCorrects[$subId] = ($subjectCorrects[$subId] ?? 0) + 1;
-            }
+
+        // If session is already finalized, redirect directly to results without regrading
+        if ($examSession->status === 'submitted') {
+            return redirect()->route('exam.results', ['session' => $examSession->id]);
         }
-        
-        // Build score breakdown
-        $breakdown = [];
-        foreach ($subjectTotals as $subId => $total) {
-            $correct = $subjectCorrects[$subId] ?? 0;
-            $subModel = Subject::find($subId);
-            $breakdown[$subId] = [
-                'subject_name' => $subModel->name,
-                'correct' => $correct,
-                'total' => $total,
-                'percentage' => $total > 0 ? round(($correct / $total) * 100, 2) : 0,
-            ];
-        }
-        
-        // 2. Score scale
-        $exam = $examSession->exam;
-        $score = 0;
-        
-        if ($exam->slug === 'utme') {
-            // Scaled to 400
-            $score = $totalQuestions > 0 ? round(($correctCount / $totalQuestions) * 400, 2) : 0;
-        } else {
-            // WAEC/NECO is simple average percent
-            $score = $totalQuestions > 0 ? round(($correctCount / $totalQuestions) * 100, 2) : 0;
-        }
-        
-        // Update ExamSession
-        $examSession->update([
-            'status' => 'submitted',
-            'submitted_at' => now(),
-            'correct_count' => $correctCount,
-            'score' => $score,
-            'score_breakdown' => $breakdown,
-        ]);
-        
-        // Update user study streak
-        Auth::user()->updateStreak();
-        
+
+        // Atomically grade session, update stats, and eliminate N+1 queries
+        app(ExamGradingService::class)->grade($examSession);
+
         return redirect()->route('exam.results', ['session' => $examSession->id]);
     }
     

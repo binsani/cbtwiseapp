@@ -14,7 +14,21 @@ class EnsureRole
      */
     public function handle(Request $request, Closure $next, ...$roles): Response
     {
-        if (!Auth::check() || !Auth::user()->hasAnyRole($roles)) {
+        if (!Auth::check()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $parsedRoles = [];
+        foreach ($roles as $role) {
+            foreach (explode('|', (string) $role) as $r) {
+                $trimmed = trim($r);
+                if ($trimmed !== '') {
+                    $parsedRoles[] = $trimmed;
+                }
+            }
+        }
+
+        if (empty($parsedRoles) || !Auth::user()->hasAnyRole($parsedRoles)) {
             abort(403, 'Unauthorized action.');
         }
 

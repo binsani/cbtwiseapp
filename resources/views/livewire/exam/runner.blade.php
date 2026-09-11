@@ -164,23 +164,14 @@
                         </div>
                     </div>
 
-                    <!-- Bottom Nav Actions inside question card -->
-                    <div class="mt-10 pt-6 border-t border-gray-100 flex justify-between items-center">
+                    <!-- Bottom Nav Actions inside question card (visible on sm+) -->
+                    <div class="mt-6 sm:mt-10 pt-4 sm:pt-6 border-t border-gray-100 hidden sm:flex justify-between items-center">
                         <button type="button" @click="prevQuestion()"
                                 class="px-5 py-3 border border-gray-300 text-gray-700 font-bold rounded-2xl hover:bg-gray-50 transition-colors flex items-center space-x-2 disabled:opacity-40"
                                 :disabled="currentIndex === 0">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
                             <span>Previous</span>
                         </button>
-
-                        <!-- Bottom Nav Actions — visible on sm+ inside the card -->
-                        <div class="mt-6 sm:mt-10 pt-4 sm:pt-6 border-t border-gray-100 hidden sm:flex justify-between items-center">
-                            <button type="button" @click="prevQuestion()"
-                                    class="px-5 py-3 border border-gray-300 text-gray-700 font-bold rounded-2xl hover:bg-gray-50 transition-colors flex items-center space-x-2 disabled:opacity-40"
-                                    :disabled="currentIndex === 0">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-                                <span>Previous</span>
-                            </button>
 
                             <div class="flex items-center space-x-2">
                                 <button type="button" wire:click="toggleFlag({{ $activeQuestion->id }})"
@@ -370,9 +361,12 @@
                 showCalc: false,
                 showPalette: false,
 
+                timerInterval: null,
+                isSubmitting: false,
+
                 init() {
                     // Update timer on intervals
-                    setInterval(() => {
+                    this.timerInterval = setInterval(() => {
                         if (this.timeRemaining > 0) {
                             this.timeRemaining--;
                             // Push back to Livewire every 30s
@@ -380,7 +374,14 @@
                                 @this.call('syncTimer', this.timeRemaining);
                             }
                         } else {
-                            @this.call('autoSubmit');
+                            if (this.timerInterval) {
+                                clearInterval(this.timerInterval);
+                                this.timerInterval = null;
+                            }
+                            if (!this.isSubmitting) {
+                                this.isSubmitting = true;
+                                @this.call('autoSubmit');
+                            }
                         }
                     }, 1000);
                 },
@@ -434,7 +435,13 @@
                 },
 
                 confirmSubmit() {
+                    if (this.isSubmitting) return;
                     if (confirm('Are you sure you want to end your exam session and submit?')) {
+                        this.isSubmitting = true;
+                        if (this.timerInterval) {
+                            clearInterval(this.timerInterval);
+                            this.timerInterval = null;
+                        }
                         @this.call('submit');
                     }
                 }

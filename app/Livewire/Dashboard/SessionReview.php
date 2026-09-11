@@ -8,6 +8,7 @@ use App\Models\ExamSession;
 use App\Models\Question;
 use App\Jobs\ExplainQuestionJob;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Component;
 
 class SessionReview extends Component
@@ -91,6 +92,14 @@ class SessionReview extends Component
         $user = Auth::user();
         if (!$user->isPremium()) {
             session()->flash('error', 'AI tutor explanations are exclusive to premium members. Please upgrade your plan!');
+            return;
+        }
+
+        $rateLimitKey = 'ai-rate-limit:' . $user->id;
+        if (RateLimiter::tooManyAttempts($rateLimitKey, 10)) {
+            $seconds = RateLimiter::availableIn($rateLimitKey);
+            $minutes = max(1, (int) ceil($seconds / 60));
+            session()->flash('error', "AI explanation limit reached (10/hour). Please try again in {$minutes} min.");
             return;
         }
 

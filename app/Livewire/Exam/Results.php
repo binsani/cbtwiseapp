@@ -8,6 +8,7 @@ use App\Models\ExamSession;
 use App\Models\Question;
 use App\Jobs\ExplainQuestionJob;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Component;
 
 class Results extends Component
@@ -124,6 +125,14 @@ class Results extends Component
             return;
         }
 
+        $rateLimitKey = 'ai-rate-limit:' . $user->id;
+        if (RateLimiter::tooManyAttempts($rateLimitKey, 10)) {
+            $seconds = RateLimiter::availableIn($rateLimitKey);
+            $minutes = max(1, (int) ceil($seconds / 60));
+            session()->flash('error', "AI explanation limit reached (10/hour). Please try again in {$minutes} min.");
+            return;
+        }
+
         $question = Question::findOrFail($questionId);
         
         // If explanation already exists in cache/DB, return it immediately
@@ -137,7 +146,6 @@ class Results extends Component
         $this->explainingQuestionId = $questionId;
         $this->aiExplanation = 'Generating AI Tutor explanation... please wait.';
 
-        // Dispatch background job (we'll create this job next)
         ExplainQuestionJob::dispatch($questionId, $user->id);
     }
 

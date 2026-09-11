@@ -123,4 +123,15 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Offline Desktop Mode
+    |--------------------------------------------------------------------------
+    |
+    | Enables automatic offline candidate authentication when packaged
+    | within the standalone Electron desktop engine with local SQLite.
+    |
+    */
+    'offline_desktop' => (bool) env('APP_OFFLINE_DESKTOP', false),
+
 ];

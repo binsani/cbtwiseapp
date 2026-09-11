@@ -17,6 +17,14 @@ class Question extends Model
         'times_served', 'times_correct', 'reports_count', 'is_flagged',
     ];
 
+    /**
+     * Attributes hidden from array / JSON serialization to prevent client-side answer sniffing.
+     */
+    protected $hidden = [
+        'correct_option',
+        'explanation',
+    ];
+
     protected function casts(): array
     {
         return [
