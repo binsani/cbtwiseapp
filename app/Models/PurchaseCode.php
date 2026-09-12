@@ -99,6 +99,8 @@ class PurchaseCode extends Model
             $code = self::formatCode();
         } while (self::where('code', $code)->exists());
 
+        $name = $assignedName ?: $studentName;
+
         return self::create([
             'code'                => $code,
             'code_hash'           => hash('sha256', $code),
@@ -107,12 +109,27 @@ class PurchaseCode extends Model
             'status'              => 'active',
             'expires_at'          => $expiresAt,
             'student_name'        => $studentName,
-            'assigned_name'       => $assignedName ?: $studentName,
-            'assigned_email'      => 'student-' . strtolower(str_replace('-', '', $code)) . '@cbtwise.ng',
+            'assigned_name'       => $name,
+            'assigned_email'      => self::emailForName($name, $code),
             'assigned_password'   => Str::password(12),
             'notes'               => $notes,
             'created_by_admin_id' => $adminId,
         ]);
+    }
+
+    /** Create a memorable CBTWise address and add a suffix only when required. */
+    protected static function emailForName(?string $name, string $code): string
+    {
+        $local = Str::of($name ?: 'student-' . str_replace('-', '', $code))
+            ->ascii()->lower()->replaceMatches('/[^a-z0-9]+/', '.')->trim('.')->value();
+        $local = $local ?: 'student';
+        $email = "{$local}@cbtwise.com.ng";
+        $suffix = 2;
+        while (self::where('assigned_email', $email)->exists() || User::where('email', $email)->exists()) {
+            $email = "{$local}.{$suffix}@cbtwise.com.ng";
+            $suffix++;
+        }
+        return $email;
     }
 
     /**

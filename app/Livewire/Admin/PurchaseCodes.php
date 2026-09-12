@@ -124,7 +124,7 @@ class PurchaseCodes extends Component
 
         $callback = function() {
             $file = fopen('php://output', 'w');
-            fputcsv($file, ['ID', 'Code', 'Duration Days', 'Status', 'Used By Student', 'Used By Email', 'Created At']);
+            fputcsv($file, ['ID', 'Code', 'Assigned Name', 'Assigned Email', 'Assigned Password', 'Duration Days', 'Status', 'Created At']);
 
             PurchaseCode::with('usedBy')
                 ->chunk(100, function($codes) use ($file) {
@@ -133,10 +133,11 @@ class PurchaseCodes extends Component
                         fputcsv($file, [
                             $c->id,
                             $c->code,
+                            $c->assigned_name,
+                            $c->assigned_email,
+                            $c->assigned_password,
                             $c->plan_duration_days,
                             $status,
-                            $c->usedBy->name ?? ($c->student_name ?? 'N/A'),
-                            $c->usedBy->email ?? 'N/A',
                             $c->created_at->toDateTimeString(),
                         ]);
                     }

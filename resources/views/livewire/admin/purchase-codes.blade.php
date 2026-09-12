@@ -93,16 +93,16 @@
                         @forelse ($codes as $c)
                             <tr class="hover:bg-slate-50/40 transition-colors">
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-slate-800">
-                                    {{ $c->usedBy->name ?? '—' }}
+                                    {{ $c->assigned_name ?? $c->usedBy->name ?? '—' }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-xs text-slate-500 space-y-1">
-                                    @if ($c->isUsed())
+                                    @if ($c->assigned_email && $c->assigned_password)
                                         <div class="flex items-center gap-1.5">
-                                            <span class="font-mono text-slate-400 select-all">{{ $c->usedBy->email }}</span>
-                                            <button onclick="navigator.clipboard.writeText('{{ $c->usedBy->email }}')" class="text-slate-400 hover:text-slate-700" title="Copy Email">📋</button>
+                                            <span class="font-mono text-slate-400 select-all">{{ $c->assigned_email }}</span>
+                                            <button onclick="navigator.clipboard.writeText('{{ $c->assigned_email }}')" class="text-slate-400 hover:text-slate-700" title="Copy Email">📋</button>
                                         </div>
                                         <div class="flex items-center gap-1.5" x-data="{ show: false }">
-                                            <span class="font-mono text-slate-400" x-text="show ? 'password123' : '•••••••••'"></span>
+                                            <span class="font-mono text-slate-400" x-text="show ? @js($c->assigned_password) : '•••••••••'"></span>
                                             <button @click="show = !show" class="text-slate-400 hover:text-slate-700">👁️</button>
                                         </div>
                                     @else
@@ -188,14 +188,15 @@
                             <div>
                                 <label class="block text-sm font-bold text-slate-700 mb-1">Student Full Name</label>
                                 <input wire:model="studentName" type="text" placeholder="e.g. John Doe" class="w-full px-4 py-3 border border-slate-200 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-2xl text-sm transition-colors" />
+                                <p class="mt-1 text-[10px] text-slate-400">Creates <span class="font-mono">john.doe@cbtwise.com.ng</span>, with a unique suffix if that address already exists.</p>
                                 @error('studentName') <span class="text-xs text-red-500 font-medium">{{ $message }}</span> @enderror
                             </div>
 
                             <!-- Quantity -->
                             <div>
                                 <label class="block text-sm font-bold text-slate-700 mb-1">Quantity</label>
-                                <input wire:model="quantity" type="number" min="1" max="100" class="w-full px-4 py-3 border border-slate-200 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-2xl text-sm transition-colors" />
-                                <span class="text-[10px] text-slate-400 mt-1 block">Maximum 100 codes per batch</span>
+                                <input wire:model="quantity" type="number" min="1" max="500" class="w-full px-4 py-3 border border-slate-200 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-2xl text-sm transition-colors" />
+                                <span class="text-[10px] text-slate-400 mt-1 block">Maximum 500 codes per batch</span>
                                 @error('quantity') <span class="text-xs text-red-500 font-medium">{{ $message }}</span> @enderror
                             </div>
 
