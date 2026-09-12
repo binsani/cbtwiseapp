@@ -1,7 +1,7 @@
 import { app, BrowserWindow, Menu, shell, dialog } from 'electron';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { spawn } from 'child_process';
+import { spawn, spawnSync } from 'child_process';
 import net from 'net';
 import fs from 'fs';
 
@@ -171,6 +171,51 @@ function prepareOfflineDatabase(basePath) {
   }
 }
 
+function prepareOfflineQuestionBank(basePath, dbPath, phpExecutable) {
+  const version = 'post-utme-question-bank-v1';
+  const versionPath = path.join(app.getPath('userData'), 'question-bank.version');
+  const bundledDbPath = path.join(basePath, 'database', 'database.sqlite');
+  const artisanPath = path.join(basePath, 'artisan');
+
+  if (!fs.existsSync(artisanPath) || !fs.existsSync(bundledDbPath)) return true;
+
+  const env = {
+    ...process.env,
+    DB_CONNECTION: 'sqlite',
+    DB_DATABASE: dbPath,
+    APP_OFFLINE_DESKTOP: 'true',
+    APP_URL: OFFLINE_URL,
+  };
+  const migrate = spawnSync(phpExecutable, [artisanPath, 'migrate', '--force', '--no-interaction'], {
+    cwd: basePath,
+    env,
+    windowsHide: true,
+    encoding: 'utf8',
+  });
+  if (migrate.status !== 0) {
+    console.error('Offline migration failed:', migrate.stderr || migrate.stdout);
+    return false;
+  }
+
+  const installedVersion = fs.existsSync(versionPath) ? fs.readFileSync(versionPath, 'utf8').trim() : '';
+  if (installedVersion === version) return true;
+
+  const sync = spawnSync(phpExecutable, [artisanPath, 'offline:sync-question-bank', bundledDbPath], {
+    cwd: basePath,
+    env,
+    windowsHide: true,
+    encoding: 'utf8',
+  });
+  if (sync.status !== 0) {
+    console.error('Offline question-bank sync failed:', sync.stderr || sync.stdout);
+    return false;
+  }
+
+  fs.writeFileSync(versionPath, version, 'utf8');
+  console.log(sync.stdout.trim());
+  return true;
+}
+
 async function startPhpServer() {
   if (phpProcess) return true;
 
@@ -193,6 +238,17 @@ async function startPhpServer() {
         if (response === 0) {
           setMode('online');
         }
+      });
+    }
+    return false;
+  }
+
+  if (!prepareOfflineQuestionBank(basePath, dbPath, phpExecutable)) {
+    if (mainWindow) {
+      dialog.showMessageBox(mainWindow, {
+        type: 'error',
+        title: 'Offline Question Bank Update Failed',
+        message: 'CBTWise could not update its offline question bank. Please switch to Online Mode or reinstall the current desktop update.',
       });
     }
     return false;
