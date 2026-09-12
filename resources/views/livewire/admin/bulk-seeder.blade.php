@@ -10,7 +10,7 @@
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
                 <h1 class="text-2xl font-black text-slate-950 font-heading">Bulk Question Seeder</h1>
-                <p class="text-xs text-slate-500 mt-0.5">Automated ALOC import engine with duplicate prevention and coverage balancing</p>
+                <p class="text-xs text-slate-500 mt-0.5">Import from ALOC or an approved local CSV, with duplicate prevention built in</p>
             </div>
         </div>
 
@@ -43,6 +43,16 @@
         <div class="bg-white border border-slate-100 rounded-3xl shadow-sm p-6 sm:p-8 space-y-6">
             <h3 class="text-sm font-black text-slate-900 uppercase tracking-wider">Import Job Configuration</h3>
 
+            <div>
+                <label class="block font-bold text-slate-700 mb-1.5 text-xs">Question Source</label>
+                <select wire:model.live="source" class="w-full max-w-xl px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-emerald-500 focus:bg-white outline-none">
+                    <option value="aloc">ALOC API — online import</option>
+                    <option value="csv">Approved CSV — local question bank</option>
+                </select>
+                <p class="mt-1.5 text-[11px] text-slate-500">CSV imports are saved directly to your database and work in the offline desktop app after synchronisation.</p>
+            </div>
+
+            @if($source === 'aloc')
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 text-xs">
                 <div>
                     <label class="block font-bold text-slate-700 mb-1.5">Target Examination</label>
@@ -74,6 +84,19 @@
                     </select>
                 </div>
             </div>
+            @else
+            <div class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5 space-y-3">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div>
+                        <p class="text-xs font-bold text-slate-800">Upload licensed question-bank CSV</p>
+                        <p class="text-[11px] text-slate-500 mt-1">Required columns: exam, subject, question_text, option_a through option_d, correct_option.</p>
+                    </div>
+                    <button type="button" wire:click="downloadCsvTemplate" class="text-xs font-bold text-emerald-700 hover:text-emerald-800">Download CSV template</button>
+                </div>
+                <input type="file" wire:model="csvFile" accept=".csv,text/csv" class="block w-full text-xs text-slate-600 file:mr-4 file:rounded-xl file:border-0 file:bg-emerald-100 file:px-3 file:py-2 file:text-xs file:font-bold file:text-emerald-800 hover:file:bg-emerald-200">
+                @error('csvFile') <p class="text-xs font-medium text-rose-600">{{ $message }}</p> @enderror
+            </div>
+            @endif
 
             <div class="flex items-center justify-between pt-4 border-t border-slate-100">
                 <div class="flex items-center gap-3">
@@ -85,10 +108,10 @@
                 </div>
 
                 <button wire:click="startBulkFetch" wire:loading.attr="disabled" class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-2xl text-xs shadow-sm shadow-emerald-600/20 transition-all flex items-center gap-2">
-                    <span wire:loading.remove>⚡ Start Bulk Fetch</span>
+                        <span wire:loading.remove>⚡ {{ $source === 'csv' ? 'Import CSV Questions' : 'Start Bulk Fetch' }}</span>
                     <span wire:loading class="flex items-center gap-1.5">
                         <svg class="animate-spin h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                        Importing from ALOC API...
+                        Importing question bank...
                     </span>
                 </button>
             </div>

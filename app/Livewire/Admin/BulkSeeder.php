@@ -8,14 +8,21 @@ use App\Models\Question;
 use App\Http\Clients\AlocApiClient;
 use App\Services\AdminLogger;
 use Illuminate\Support\Facades\Auth;
+use League\Csv\Reader;
 use Livewire\Component;
+use Livewire\WithFileUploads;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class BulkSeeder extends Component
 {
+    use WithFileUploads;
+
     public $batches = 3;
     public $selectedExamId = 'all';
     public $selectedSubjectId = 'all';
     public $dryRun = false;
+    public $source = 'aloc';
+    public $csvFile;
 
     public $isRunning = false;
     public $logs = [];
@@ -26,6 +33,11 @@ class BulkSeeder extends Component
 
     public function startBulkFetch()
     {
+        if ($this->source === 'csv') {
+            $this->importCsv();
+            return;
+        }
+
         $this->isRunning = true;
         $this->logs = [];
         $this->totalScanned = 0;
@@ -185,6 +197,123 @@ class BulkSeeder extends Component
 
         $this->isRunning = false;
         session()->flash('message', "Bulk run complete. Processed {$this->totalScanned} items; created {$this->totalCreated} new questions.");
+    }
+
+    /**
+     * Import a licensed, administrator-supplied question bank without any
+     * dependency on a third-party API. Column headings are case-insensitive.
+     */
+    public function importCsv(): void
+    {
+        $this->validate([
+            'csvFile' => ['required', 'file', 'mimes:csv,txt', 'max:10240'],
+        ], [
+            'csvFile.required' => 'Choose a CSV file to import.',
+            'csvFile.mimes' => 'The question bank must be a CSV file.',
+        ]);
+
+        $this->isRunning = true;
+        $this->logs = [];
+        $this->totalScanned = 0;
+        $this->totalCreated = 0;
+        $this->totalSkippedDuplicates = 0;
+        $this->totalInvalid = 0;
+
+        try {
+            $csv = Reader::createFromPath($this->csvFile->getRealPath());
+            $csv->setHeaderOffset(0);
+            $headers = collect($csv->getHeader())
+                ->mapWithKeys(fn ($header) => [$this->normaliseHeader($header) => $header]);
+
+            $required = ['exam', 'subject', 'question_text', 'option_a', 'option_b', 'option_c', 'option_d', 'correct_option'];
+            $missing = array_values(array_diff($required, array_keys($headers->all())));
+            if ($missing) {
+                $this->logs[] = '[' . now()->toTimeString() . '] Import stopped: missing CSV columns ' . implode(', ', $missing) . '.';
+                session()->flash('message', 'CSV import needs the required column headings. Download the template and try again.');
+                return;
+            }
+
+            foreach ($csv->getRecords() as $rowNumber => $rawRow) {
+                $row = [];
+                foreach ($headers as $normalised => $original) {
+                    $row[$normalised] = trim((string) ($rawRow[$original] ?? ''));
+                }
+
+                $this->totalScanned++;
+                $exam = Exam::query()
+                    ->whereRaw('LOWER(name) = ?', [strtolower($row['exam'])])
+                    ->orWhereRaw('LOWER(slug) = ?', [strtolower($row['exam'])])
+                    ->first();
+                $subject = $exam
+                    ? Subject::query()->where('exam_id', $exam->id)->whereRaw('LOWER(name) = ?', [strtolower($row['subject'])])->first()
+                    : null;
+
+                $correctOption = strtolower($row['correct_option']);
+                if (!$exam || !$subject || !in_array($correctOption, ['a', 'b', 'c', 'd', 'e'], true) || $row['question_text'] === '') {
+                    $this->totalInvalid++;
+                    continue;
+                }
+
+                $hash = Question::dedupeHash($row['question_text']);
+                if (Question::where('dedupe_hash', $hash)->exists()) {
+                    $this->totalSkippedDuplicates++;
+                    continue;
+                }
+
+                if (!$this->dryRun) {
+                    Question::create([
+                        'dedupe_hash' => $hash,
+                        'exam_id' => $exam->id,
+                        'subject_id' => $subject->id,
+                        'created_by' => Auth::id(),
+                        'year' => is_numeric($row['year'] ?? null) ? (int) $row['year'] : null,
+                        'difficulty' => in_array($row['difficulty'] ?? '', ['easy', 'medium', 'hard'], true) ? $row['difficulty'] : 'medium',
+                        'question_text' => $row['question_text'],
+                        'option_a' => $row['option_a'],
+                        'option_b' => $row['option_b'],
+                        'option_c' => $row['option_c'],
+                        'option_d' => $row['option_d'],
+                        'option_e' => ($row['option_e'] ?? '') ?: null,
+                        'correct_option' => $correctOption,
+                        'explanation' => ($row['explanation'] ?? '') ?: null,
+                        'source' => 'csv',
+                    ]);
+                }
+
+                $this->totalCreated++;
+            }
+
+            $this->logs[] = '[' . now()->toTimeString() . "] CSV import finished! Scanned: {$this->totalScanned}, Created: {$this->totalCreated}, Duplicates skipped: {$this->totalSkippedDuplicates}, Invalid: {$this->totalInvalid}.";
+            AdminLogger::log('question_bank.csv_imported', Question::class, [
+                'scanned' => $this->totalScanned,
+                'created' => $this->totalCreated,
+                'duplicates' => $this->totalSkippedDuplicates,
+                'invalid' => $this->totalInvalid,
+                'dry_run' => $this->dryRun,
+            ]);
+            session()->flash('message', "CSV import complete. Created {$this->totalCreated} questions; skipped {$this->totalSkippedDuplicates} duplicates.");
+        } catch (\Throwable $exception) {
+            report($exception);
+            $this->logs[] = '[' . now()->toTimeString() . '] CSV import failed: ' . $exception->getMessage();
+            session()->flash('message', 'CSV import could not be completed. Check the file and its headings, then try again.');
+        } finally {
+            $this->isRunning = false;
+        }
+    }
+
+    public function downloadCsvTemplate(): StreamedResponse
+    {
+        return response()->streamDownload(function () {
+            $output = fopen('php://output', 'w');
+            fputcsv($output, ['exam', 'subject', 'year', 'difficulty', 'question_text', 'option_a', 'option_b', 'option_c', 'option_d', 'option_e', 'correct_option', 'explanation']);
+            fputcsv($output, ['JAMB UTME', 'Biology', now()->year, 'medium', 'Which organelle produces energy for the cell?', 'Nucleus', 'Mitochondrion', 'Ribosome', 'Cell wall', '', 'b', 'Mitochondria release usable energy during cellular respiration.']);
+            fclose($output);
+        }, 'cbtwise-question-import-template.csv', ['Content-Type' => 'text/csv']);
+    }
+
+    protected function normaliseHeader(string $header): string
+    {
+        return strtolower(trim(str_replace([' ', '-'], '_', $header)));
     }
 
     public function render()
