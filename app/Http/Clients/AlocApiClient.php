@@ -71,8 +71,10 @@ class AlocApiClient
                 $this->lastEndpoint = $endpoint . '?' . http_build_query($query);
                 $response = Http::withHeaders([
                     'Accept' => 'application/json',
+                    // Header names are case-insensitive. Sending X-API-Key
+                    // twice with different casing can be merged into an
+                    // invalid value by an upstream proxy.
                     'X-API-Key' => $this->token,
-                    'x-api-key' => $this->token,
                     'X-ALOC-KEY' => $this->token,
                 ])
                 ->timeout($this->timeout)
@@ -118,7 +120,8 @@ class AlocApiClient
                 Log::error('ALOC Legacy API Error: ' . $response->status() . ' - ' . $response->body());
             }
         } catch (\Exception $e) {
-            Log::error('ALOC API Exception: ' . $e->getMessage());
+            $this->lastError = 'ALOC request failed: ' . $e->getMessage();
+            Log::error($this->lastError);
         }
 
         return [];
