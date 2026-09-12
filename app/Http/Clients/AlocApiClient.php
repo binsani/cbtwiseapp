@@ -14,6 +14,7 @@ class AlocApiClient
 
     public ?string $lastError = null;
     public ?string $lastEndpoint = null;
+    public ?string $lastNextCursor = null;
 
     public function __construct()
     {
@@ -35,9 +36,10 @@ class AlocApiClient
      * Fetch questions for a subject from ALOC API.
      * Supports both modern ALOC Station (dev.aloc.com.ng) and legacy (questions.aloc.com.ng).
      */
-    public function fetchQuestions(string $subject, int $limit = 20): array
+    public function fetchQuestions(string $subject, int $limit = 20, ?string $examType = null, ?string $cursor = null): array
     {
         $this->lastError = null;
+        $this->lastNextCursor = null;
 
         if (empty($this->token)) {
             $this->lastError = 'ALOC_API_TOKEN is empty in environment.';
@@ -54,7 +56,13 @@ class AlocApiClient
                 $slug = $this->normalizeSubjectSlug($subject);
                 // ALOC Station API allows a maximum limit of 15 questions per request
                 $clampedLimit = min($limit, 15);
-                $this->lastEndpoint = "{$endpoint}?subject={$slug}&limit={$clampedLimit}";
+                $query = array_filter([
+                    'subject' => $slug,
+                    'examType' => $examType,
+                    'limit' => $clampedLimit,
+                    'cursor' => $cursor,
+                ], fn ($value) => $value !== null && $value !== '');
+                $this->lastEndpoint = $endpoint . '?' . http_build_query($query);
                 $response = Http::withHeaders([
                     'Accept' => 'application/json',
                     'X-API-Key' => $this->token,
@@ -63,14 +71,15 @@ class AlocApiClient
                 ])
                 ->timeout($this->timeout)
                 ->retry($this->retry, 200)
-                ->get($endpoint, [
-                    'subject' => $slug,
-                    'limit' => $clampedLimit,
-                ]);
+                ->get($endpoint, $query);
 
                 if ($response->successful()) {
                     $json = $response->json();
                     $items = $json['data'] ?? [];
+                    $this->lastNextCursor = data_get($json, 'pagination.nextCursor');
+                    if (empty($items)) {
+                        $this->lastError = "ALOC returned no questions for {$slug}" . ($examType ? " ({$examType})" : '');
+                    }
                     return $this->formatStationQuestions($items);
                 }
 
@@ -154,7 +163,7 @@ class AlocApiClient
         foreach ($items as $item) {
             $options = $item['options'] ?? [];
             $formatted[] = [
-                'question' => $item['text'] ?? $item['question'] ?? '',
+                'question' => $item['text'] ?? $item['questionHtml'] ?? $item['question'] ?? '',
                 'option' => [
                     'a' => $options['A'] ?? $options['a'] ?? '',
                     'b' => $options['B'] ?? $options['b'] ?? '',

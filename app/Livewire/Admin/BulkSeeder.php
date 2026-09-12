@@ -53,12 +53,24 @@ class BulkSeeder extends Component
 
         foreach ($subjects as $subject) {
             $alocSubjectName = $subject->name;
+            $alocExamType = match ($subject->exam?->slug) {
+                'utme' => 'jamb',
+                'waec' => 'waec',
+                'neco' => 'neco',
+                default => null,
+            };
             $subjectCreated = 0;
             $subjectDupes = 0;
+            $cursor = null;
 
             for ($b = 0; $b < $this->batches; $b++) {
                 try {
-                    $alocQuestionsData = $alocClient->fetchQuestions($alocSubjectName, $questionsPerBatch);
+                    $alocQuestionsData = $alocClient->fetchQuestions(
+                        $alocSubjectName,
+                        $questionsPerBatch,
+                        $alocExamType,
+                        $cursor,
+                    );
                 } catch (\Exception $e) {
                     $this->logs[] = "[" . now()->toTimeString() . "] Warning: Failed batch " . ($b+1) . " for {$subject->name}: " . $e->getMessage();
                     continue;
@@ -68,8 +80,10 @@ class BulkSeeder extends Component
                     $reason = $alocClient->lastError ?: "No questions returned";
                     $ep = $alocClient->lastEndpoint ? " [{$alocClient->lastEndpoint}]" : "";
                     $this->logs[] = "[" . now()->toTimeString() . "] Notice: 0 questions for {$subject->name} ({$alocSubjectName}){$ep}. Detail: {$reason}";
-                    continue;
+                    break;
                 }
+
+                $cursor = $alocClient->lastNextCursor;
 
                 foreach ($alocQuestionsData as $item) {
                     $questionText = $item['question'] ?? $item['question_text'] ?? '';
@@ -127,6 +141,11 @@ class BulkSeeder extends Component
                         $this->totalCreated++;
                         $subjectCreated++;
                     }
+                }
+
+                if (!$cursor) {
+                    $this->logs[] = "[" . now()->toTimeString() . "] {$subject->name}: no further ALOC pages available.";
+                    break;
                 }
             }
 
