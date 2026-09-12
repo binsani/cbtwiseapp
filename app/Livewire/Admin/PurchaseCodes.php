@@ -5,6 +5,7 @@ namespace App\Livewire\Admin;
 use App\Models\PurchaseCode;
 use App\Models\User;
 use App\Services\AdminLogger;
+use App\Jobs\GeneratePurchaseCodes;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -65,12 +66,19 @@ class PurchaseCodes extends Component
     {
         $this->validate([
             'studentName' => 'nullable|string|max:100',
-            'quantity' => 'required|integer|min:1|max:100',
+            'quantity' => 'required|integer|min:1|max:500',
             'durationDays' => 'required|integer|min:1|max:3650',
             'notes' => 'nullable|string|max:255',
         ]);
 
         $adminId = Auth::id();
+
+        if ($this->quantity > 50) {
+            GeneratePurchaseCodes::dispatch($adminId, $this->quantity, $this->durationDays, $this->studentName ?: null, $this->notes ?: null);
+            session()->flash('message', "Your {$this->quantity}-code batch is being generated in the background.");
+            $this->closeModal();
+            return;
+        }
 
         for ($i = 0; $i < $this->quantity; $i++) {
             PurchaseCode::generate($adminId, $this->durationDays, $this->studentName ?: null, $this->notes ?: null);

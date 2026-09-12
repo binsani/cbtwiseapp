@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\PurchaseCode;
 use App\Models\User;
+use App\Services\PurchaseCodeRedemptionService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
@@ -72,6 +73,21 @@ class Redeem extends Component
         // 1. Verify reCAPTCHA
         if (!$this->verifyRecaptcha()) {
             return;
+        }
+
+        // New prepaid codes carry their assigned credentials and always create
+        // the assigned account atomically. Older account-extension vouchers
+        // continue through the compatibility branch below.
+        if (!Auth::check()) {
+            try {
+                $result = app(PurchaseCodeRedemptionService::class)->redeem($this->code, request()->ip());
+                Auth::login($result['user']);
+                session()->flash('success', 'Your premium account is ready. You are now signed in.');
+                return redirect()->route('dashboard');
+            } catch (\Illuminate\Validation\ValidationException) {
+                $this->addError('code', 'This purchase code cannot be redeemed.');
+                return;
+            }
         }
 
         // 2. Find purchase code

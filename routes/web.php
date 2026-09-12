@@ -18,6 +18,9 @@ use Illuminate\Support\Facades\Route;
 Route::view('/', 'welcome');
 Route::get('pricing', Pricing::class)->name('pricing');
 Route::get('redeem', Redeem::class)->name('redeem');
+Route::post('redeem-code', \App\Http\Controllers\RedeemPurchaseCodeController::class)
+    ->middleware('throttle:5,1')
+    ->name('redeem-code');
 
 // Public Marketing Pages
 Route::get('download', [App\Http\Controllers\PageController::class, 'download'])->name('download');

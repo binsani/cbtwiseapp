@@ -151,12 +151,12 @@ class Phase3FeaturesTest extends TestCase
 
         $this->assertAuthenticated();
         
-        $user = User::where('email', 'john@example.com')->first();
+        $code->refresh();
+        $user = User::where('email', $code->assigned_email)->first();
         $this->assertNotNull($user);
         $this->assertEquals('premium', $user->plan);
         $this->assertTrue($user->hasRole('user'));
 
-        $code->refresh();
         $this->assertTrue($code->isUsed());
         $this->assertEquals($user->id, $code->used_by_user_id);
     }

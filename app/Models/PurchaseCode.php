@@ -12,10 +12,14 @@ class PurchaseCode extends Model
         'code',
         'code_hash',
         'plan_duration_days',
+        'duration_days',
         'status',
         'expires_at',
         'disabled_at',
         'student_name',
+        'assigned_name',
+        'assigned_email',
+        'assigned_password',
         'used_by_user_id',
         'used_at',
         'notes',
@@ -29,6 +33,8 @@ class PurchaseCode extends Model
             'expires_at' => 'datetime',
             'disabled_at' => 'datetime',
             'plan_duration_days' => 'integer',
+            'duration_days' => 'integer',
+            'assigned_password' => 'encrypted',
         ];
     }
 
@@ -44,12 +50,12 @@ class PurchaseCode extends Model
 
     public function isUsed(): bool
     {
-        return $this->used_by_user_id !== null || $this->status === 'redeemed';
+        return $this->used_by_user_id !== null || in_array($this->status, ['redeemed', 'used'], true);
     }
 
     public function isAvailable(): bool
     {
-        if ($this->status === 'disabled' || $this->disabled_at !== null) {
+        if (in_array($this->status, ['disabled', 'cancelled'], true) || $this->disabled_at !== null) {
             return false;
         }
         if ($this->isUsed()) {
@@ -67,9 +73,13 @@ class PurchaseCode extends Model
     public static function formatCode(): string
     {
         $prefix = config('cbtwise.purchase_code_prefix', 'CBT');
-        $part1 = strtoupper(Str::random(4));
-        $part2 = strtoupper(Str::random(4));
-        $part3 = strtoupper(Str::random(4));
+        $alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+        $segment = static function () use ($alphabet): string {
+            return implode('', array_map(fn () => $alphabet[random_int(0, strlen($alphabet) - 1)], range(1, 4)));
+        };
+        $part1 = $segment();
+        $part2 = $segment();
+        $part3 = $segment();
 
         return "{$prefix}-{$part1}-{$part2}-{$part3}";
     }
@@ -82,7 +92,8 @@ class PurchaseCode extends Model
         int $durationDays = 30,
         ?string $studentName = null,
         ?string $notes = null,
-        ?\DateTimeInterface $expiresAt = null
+        ?\DateTimeInterface $expiresAt = null,
+        ?string $assignedName = null
     ): self {
         do {
             $code = self::formatCode();
@@ -92,9 +103,13 @@ class PurchaseCode extends Model
             'code'                => $code,
             'code_hash'           => hash('sha256', $code),
             'plan_duration_days'  => $durationDays,
-            'status'              => 'available',
+            'duration_days'       => $durationDays,
+            'status'              => 'active',
             'expires_at'          => $expiresAt,
             'student_name'        => $studentName,
+            'assigned_name'       => $assignedName ?: $studentName,
+            'assigned_email'      => 'student-' . strtolower(str_replace('-', '', $code)) . '@cbtwise.ng',
+            'assigned_password'   => Str::password(12),
             'notes'               => $notes,
             'created_by_admin_id' => $adminId,
         ]);
