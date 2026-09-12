@@ -1,6 +1,8 @@
 <?php
 
 use App\Livewire\Forms\LoginForm;
+use App\Services\PurchaseCodeRedemptionService;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
@@ -8,6 +10,7 @@ use Livewire\Volt\Component;
 new #[Layout('layouts.guest')] class extends Component
 {
     public LoginForm $form;
+    public string $purchaseCode = '';
 
     /**
      * Handle an incoming authentication request.
@@ -21,6 +24,22 @@ new #[Layout('layouts.guest')] class extends Component
         Session::regenerate();
 
         $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
+    }
+
+    /** Redeem a new code and sign in without requiring email or password. */
+    public function loginWithPurchaseCode(): void
+    {
+        $this->purchaseCode = strtoupper(trim($this->purchaseCode));
+        $this->validate(['purchaseCode' => ['required', 'regex:/^CBT-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/']]);
+
+        try {
+            $result = app(PurchaseCodeRedemptionService::class)->redeem($this->purchaseCode, request()->ip());
+            Auth::login($result['user']);
+            Session::regenerate();
+            $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
+        } catch (\Illuminate\Validation\ValidationException) {
+            $this->addError('purchaseCode', 'This purchase code cannot be used to sign in.');
+        }
     }
 }; ?>
 
@@ -151,14 +170,15 @@ new #[Layout('layouts.guest')] class extends Component
         <!-- ===== PURCHASE CODE TAB ===== -->
         <div x-show="tab === 'code'" x-transition style="display: none;">
 
-            <form method="GET" action="{{ route('redeem') }}" class="space-y-5">
+            <form wire:submit="loginWithPurchaseCode" class="space-y-5">
                 <!-- Code Field -->
                 <div class="space-y-1.5">
                     <label for="purchase_code" class="block text-sm font-semibold text-slate-800">Purchase Code</label>
                     <input
                         id="purchase_code"
                         type="text"
-                        name="code"
+                        wire:model="purchaseCode"
+                        name="purchase_code"
                         required
                         placeholder="CBT-XXXX-XXXX-XXXX"
                         autocomplete="off"
@@ -166,8 +186,11 @@ new #[Layout('layouts.guest')] class extends Component
                         class="w-full px-4 py-3 bg-white border border-slate-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 shadow-sm transition-all outline-none"
                     />
                     <p class="text-xs text-slate-500 leading-relaxed mt-1">
-                        Enter the purchase code provided by your admin. Your login credentials are already assigned to the code.
+                        Use a new purchase code to create and sign in to its assigned student account. No email or password is needed here.
                     </p>
+                    @error('purchaseCode')
+                        <p class="text-xs text-red-600 font-semibold mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <!-- Activate Button -->
@@ -177,7 +200,7 @@ new #[Layout('layouts.guest')] class extends Component
                     style="background: #2d6a4f;"
                     onmouseover="this.style.background='#1b4332'" onmouseout="this.style.background='#2d6a4f'"
                 >
-                    Activate &amp; Login
+                    Continue with Purchase Code
                 </button>
             </form>
 
