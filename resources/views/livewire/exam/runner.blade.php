@@ -357,7 +357,7 @@
     </div>
 
     <!-- Alpine / JS Helpers -->
-    <script>
+    @script
         document.addEventListener('alpine:init', () => {
             Alpine.data('examRunner', (config) => ({
                 timeRemaining: config.timeRemaining,
@@ -499,7 +499,7 @@
                 }
             }));
         });
-    </script>
+    @endscript
 
     <!-- Livewire Question Reporting Modal -->
     @livewire('exam.report-question')
