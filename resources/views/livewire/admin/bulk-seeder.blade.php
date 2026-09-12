@@ -89,11 +89,11 @@
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div>
                         <p class="text-xs font-bold text-slate-800">Upload licensed question-bank CSV</p>
-                        <p class="text-[11px] text-slate-500 mt-1">Accepts the CBTWise template and ALOC exports directly. Required fields: exam/exam_type, subject, question/question_text, options A–D, and correct answer.</p>
+                        <p class="text-[11px] text-slate-500 mt-1">Upload one CSV or the complete ALOC ZIP. ZIP imports securely read only question files inside data/.</p>
                     </div>
                     <button type="button" wire:click="downloadCsvTemplate" class="text-xs font-bold text-emerald-700 hover:text-emerald-800">Download CSV template</button>
                 </div>
-                <input type="file" wire:model="csvFile" accept=".csv,text/csv" class="block w-full text-xs text-slate-600 file:mr-4 file:rounded-xl file:border-0 file:bg-emerald-100 file:px-3 file:py-2 file:text-xs file:font-bold file:text-emerald-800 hover:file:bg-emerald-200">
+                <input type="file" wire:model="csvFile" accept=".csv,.zip,text/csv,application/zip" class="block w-full text-xs text-slate-600 file:mr-4 file:rounded-xl file:border-0 file:bg-emerald-100 file:px-3 file:py-2 file:text-xs file:font-bold file:text-emerald-800 hover:file:bg-emerald-200">
                 @error('csvFile') <p class="text-xs font-medium text-rose-600">{{ $message }}</p> @enderror
             </div>
             @endif

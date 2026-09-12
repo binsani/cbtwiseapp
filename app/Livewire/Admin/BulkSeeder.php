@@ -219,10 +219,10 @@ class BulkSeeder extends Component
     public function importCsv(): void
     {
         $this->validate([
-            'csvFile' => ['required', 'file', 'mimes:csv,txt', 'max:10240'],
+            'csvFile' => ['required', 'file', 'mimes:csv,txt,zip', 'max:20480'],
         ], [
             'csvFile.required' => 'Choose a CSV file to import.',
-            'csvFile.mimes' => 'The question bank must be a CSV file.',
+            'csvFile.mimes' => 'The question bank must be a CSV or ZIP file.',
         ]);
 
         $this->isRunning = true;
@@ -232,8 +232,21 @@ class BulkSeeder extends Component
         $this->totalSkippedDuplicates = 0;
         $this->totalInvalid = 0;
 
+        // A full ALOC archive can contain thousands of rows. Keep the work
+        // within one request practical on shared hosting and avoid repeating
+        // the same lookup for every question in the archive.
+        if (function_exists('set_time_limit')) {
+            @set_time_limit(600);
+        }
+        $knownHashes = Question::query()->pluck('dedupe_hash')->filter()->flip()->all();
+        $examCache = [];
+        $subjectCache = [];
+
+        $temporaryPath = null;
+        $fileCount = 1;
         try {
-            $csv = Reader::createFromPath($this->csvFile->getRealPath());
+            [$questionPath, $fileCount, $temporaryPath] = $this->prepareQuestionUpload();
+            $csv = Reader::createFromPath($questionPath);
             $csv->setHeaderOffset(0);
             $headers = collect($csv->getHeader())
                 ->mapWithKeys(fn ($header) => [$this->normaliseHeader($header) => $header]);
@@ -272,14 +285,21 @@ class BulkSeeder extends Component
                     'jamb', 'utme', 'jamb utme' => 'utme',
                     'waec', 'wassce' => 'waec',
                     'neco' => 'neco',
+                    'post_utme', 'post-utme', 'post utme' => 'post-utme',
                     default => strtolower($row['exam']),
                 };
-                $exam = Exam::query()
+                $examCacheKey = strtolower($row['exam']) . '|' . $examSlug;
+                $exam = $examCache[$examCacheKey] ??= Exam::query()
                     ->whereRaw('LOWER(name) = ?', [strtolower($row['exam'])])
                     ->orWhereRaw('LOWER(slug) = ?', [$examSlug])
                     ->first();
-                $subject = $exam
-                    ? Subject::query()->where('exam_id', $exam->id)->whereRaw('LOWER(name) = ?', [strtolower($row['subject'])])->first()
+                $subjectCacheKey = ($exam?->id ?? 'missing') . '|' . strtolower($row['subject']);
+                $subject = $subjectCache[$subjectCacheKey] ??= $exam
+                    ? Subject::query()->where('exam_id', $exam->id)
+                        ->where(function ($query) use ($row) {
+                            $query->whereRaw('LOWER(name) = ?', [strtolower(str_replace('-', ' ', $row['subject']))])
+                                ->orWhereRaw('LOWER(slug) = ?', [strtolower($row['subject'])]);
+                        })->first()
                     : null;
 
                 $correctOption = strtolower($row['correct_option']);
@@ -289,7 +309,7 @@ class BulkSeeder extends Component
                 }
 
                 $hash = Question::dedupeHash($row['question_text']);
-                if (Question::where('dedupe_hash', $hash)->exists()) {
+                if (isset($knownHashes[$hash])) {
                     $this->totalSkippedDuplicates++;
                     continue;
                 }
@@ -314,10 +334,11 @@ class BulkSeeder extends Component
                     ]);
                 }
 
+                $knownHashes[$hash] = true;
                 $this->totalCreated++;
             }
 
-            $this->logs[] = '[' . now()->toTimeString() . "] CSV import finished! Scanned: {$this->totalScanned}, Created: {$this->totalCreated}, Duplicates skipped: {$this->totalSkippedDuplicates}, Invalid: {$this->totalInvalid}.";
+            $this->logs[] = '[' . now()->toTimeString() . "] Question-bank import finished! Files: {$fileCount}, Scanned: {$this->totalScanned}, Created: {$this->totalCreated}, Duplicates skipped: {$this->totalSkippedDuplicates}, Invalid: {$this->totalInvalid}.";
             AdminLogger::log('question_bank.csv_imported', Question::class, [
                 'scanned' => $this->totalScanned,
                 'created' => $this->totalCreated,
@@ -331,8 +352,117 @@ class BulkSeeder extends Component
             $this->logs[] = '[' . now()->toTimeString() . '] CSV import failed: ' . $exception->getMessage();
             session()->flash('message', 'CSV import could not be completed. Check the file and its headings, then try again.');
         } finally {
+            if ($temporaryPath && is_file($temporaryPath)) {
+                @unlink($temporaryPath);
+            }
             $this->isRunning = false;
         }
+    }
+
+    /**
+     * Merge only data/*.csv entries from an uploaded ZIP into a temporary CSV.
+     * Scripts, logs, metadata, .env files and macOS resource forks are ignored.
+     */
+    protected function prepareQuestionUpload(): array
+    {
+        $sourcePath = $this->csvFile->getRealPath();
+        if (strtolower($this->csvFile->getClientOriginalExtension()) !== 'zip') {
+            return [$sourcePath, 1, null];
+        }
+
+        if (!class_exists(\ZipArchive::class)) {
+            return $this->prepareQuestionZipWithPhar($sourcePath);
+        }
+
+        $archive = new \ZipArchive();
+        if ($archive->open($sourcePath) !== true) {
+            throw new \RuntimeException('The ZIP archive could not be opened.');
+        }
+
+        $temporaryPath = tempnam(sys_get_temp_dir(), 'cbtwise-questions-');
+        $output = fopen($temporaryPath, 'wb');
+        $fileCount = 0;
+        $wroteHeader = false;
+
+        try {
+            for ($index = 0; $index < $archive->numFiles; $index++) {
+                $entryName = str_replace('\\', '/', $archive->getNameIndex($index));
+                if (str_starts_with($entryName, '__MACOSX/') || str_starts_with(basename($entryName), '._') || !preg_match('#(?:^|/)data/[^/]+\.csv$#i', $entryName)) {
+                    continue;
+                }
+
+                $input = $archive->getStream($archive->getNameIndex($index));
+                if (!$input) {
+                    continue;
+                }
+
+                $rowIndex = 0;
+                while (($row = fgetcsv($input)) !== false) {
+                    if ($rowIndex++ === 0) {
+                        if (!$wroteHeader) {
+                            fputcsv($output, $row);
+                            $wroteHeader = true;
+                        }
+                        continue;
+                    }
+                    fputcsv($output, $row);
+                }
+                fclose($input);
+                $fileCount++;
+            }
+        } finally {
+            fclose($output);
+            $archive->close();
+        }
+
+        if (!$wroteHeader || $fileCount === 0) {
+            @unlink($temporaryPath);
+            throw new \RuntimeException('No question CSV files were found inside the ZIP data folder.');
+        }
+
+        return [$temporaryPath, $fileCount, $temporaryPath];
+    }
+
+    /** Fallback for shared hosts where the optional ext-zip module is disabled. */
+    protected function prepareQuestionZipWithPhar(string $sourcePath): array
+    {
+        $archive = new \PharData($sourcePath);
+        $temporaryPath = tempnam(sys_get_temp_dir(), 'cbtwise-questions-');
+        $output = fopen($temporaryPath, 'wb');
+        $fileCount = 0;
+        $wroteHeader = false;
+
+        try {
+            foreach (new \RecursiveIteratorIterator($archive) as $entry) {
+                $entryName = str_replace('\\', '/', $entry->getPathname());
+                if (!$entry->isFile() || str_contains($entryName, '/__MACOSX/') || str_starts_with(basename($entryName), '._') || !preg_match('#(?:^|/)data/[^/]+\.csv$#i', $entryName)) {
+                    continue;
+                }
+                $input = fopen($entry->getPathname(), 'rb');
+                $rowIndex = 0;
+                while (($row = fgetcsv($input)) !== false) {
+                    if ($rowIndex++ === 0) {
+                        if (!$wroteHeader) {
+                            fputcsv($output, $row);
+                            $wroteHeader = true;
+                        }
+                        continue;
+                    }
+                    fputcsv($output, $row);
+                }
+                fclose($input);
+                $fileCount++;
+            }
+        } finally {
+            fclose($output);
+        }
+
+        if (!$wroteHeader || $fileCount === 0) {
+            @unlink($temporaryPath);
+            throw new \RuntimeException('No question CSV files were found inside the ZIP data folder.');
+        }
+
+        return [$temporaryPath, $fileCount, $temporaryPath];
     }
 
     public function downloadCsvTemplate(): StreamedResponse
