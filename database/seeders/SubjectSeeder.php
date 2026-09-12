@@ -27,6 +27,8 @@ class SubjectSeeder extends Seeder
             'Commerce' => 'shopping-cart',
             'Financial Accounting' => 'credit-card',
             'Civic Education' => 'shield',
+            'History' => 'landmark',
+            'Insurance' => 'shield',
         ];
 
         $exams = Exam::all();

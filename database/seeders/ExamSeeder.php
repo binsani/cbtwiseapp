@@ -41,5 +41,16 @@ class ExamSeeder extends Seeder
                 'is_active' => true,
             ]
         );
+
+        Exam::updateOrCreate(
+            ['slug' => 'post-utme'],
+            [
+                'name' => 'Post-UTME',
+                'description' => 'University post-UTME practice examination',
+                'duration_minutes_default' => 90,
+                'questions_per_subject_default' => 40,
+                'is_active' => true,
+            ]
+        );
     }
 }

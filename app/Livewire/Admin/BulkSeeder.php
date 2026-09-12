@@ -293,12 +293,16 @@ class BulkSeeder extends Component
                     ->whereRaw('LOWER(name) = ?', [strtolower($row['exam'])])
                     ->orWhereRaw('LOWER(slug) = ?', [$examSlug])
                     ->first();
-                $subjectCacheKey = ($exam?->id ?? 'missing') . '|' . strtolower($row['subject']);
+                $subjectSlug = match (strtolower($row['subject'])) {
+                    'accounting' => 'financial-accounting',
+                    default => strtolower($row['subject']),
+                };
+                $subjectCacheKey = ($exam?->id ?? 'missing') . '|' . $subjectSlug;
                 $subject = $subjectCache[$subjectCacheKey] ??= $exam
                     ? Subject::query()->where('exam_id', $exam->id)
-                        ->where(function ($query) use ($row) {
+                        ->where(function ($query) use ($row, $subjectSlug) {
                             $query->whereRaw('LOWER(name) = ?', [strtolower(str_replace('-', ' ', $row['subject']))])
-                                ->orWhereRaw('LOWER(slug) = ?', [strtolower($row['subject'])]);
+                                ->orWhereRaw('LOWER(slug) = ?', [$subjectSlug]);
                         })->first()
                     : null;
 

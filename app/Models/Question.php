@@ -71,17 +71,16 @@ class Question extends Model
     // ── Dedupe Hash ───────────────────────────────────────────────────────────
 
     /**
-     * Generate a SHA-256 hash of the first 60 normalised characters of the question text.
-     * Used to detect duplicate questions from different sources.
+     * Generate a SHA-256 hash of the complete normalised question text.
+     * Used to detect actual duplicate questions without rejecting distinct
+     * questions that happen to begin with the same wording.
      */
     public static function dedupeHash(string $text): string
     {
         $normalised = Str::lower(
             preg_replace('/\s+/', ' ', trim(strip_tags($text)))
         );
-        $slice = mb_substr($normalised, 0, config('cbtwise.dedupe_char_length', 60));
-
-        return hash('sha256', $slice);
+        return hash('sha256', $normalised);
     }
 
     // ── Scopes ────────────────────────────────────────────────────────────────
