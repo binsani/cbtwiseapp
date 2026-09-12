@@ -27,8 +27,9 @@
             "output": "dist"
         },
         "files": [
-            "main.js",
-            "server.php",
+        "main.js",
+        "artisan",
+        "server.php",
             ".env",
             "app/**/*",
             "bootstrap/**/*",
