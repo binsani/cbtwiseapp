@@ -89,7 +89,7 @@
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div>
                         <p class="text-xs font-bold text-slate-800">Upload licensed question-bank CSV</p>
-                        <p class="text-[11px] text-slate-500 mt-1">Required columns: exam, subject, question_text, option_a through option_d, correct_option.</p>
+                        <p class="text-[11px] text-slate-500 mt-1">Accepts the CBTWise template and ALOC exports directly. Required fields: exam/exam_type, subject, question/question_text, options A–D, and correct answer.</p>
                     </div>
                     <button type="button" wire:click="downloadCsvTemplate" class="text-xs font-bold text-emerald-700 hover:text-emerald-800">Download CSV template</button>
                 </div>

@@ -238,8 +238,17 @@ class BulkSeeder extends Component
             $headers = collect($csv->getHeader())
                 ->mapWithKeys(fn ($header) => [$this->normaliseHeader($header) => $header]);
 
-            $required = ['exam', 'subject', 'question_text', 'option_a', 'option_b', 'option_c', 'option_d', 'correct_option'];
-            $missing = array_values(array_diff($required, array_keys($headers->all())));
+            $required = [
+                'exam' => ['exam', 'exam_type'],
+                'subject' => ['subject'],
+                'question_text' => ['question_text', 'question'],
+                'option_a' => ['option_a'], 'option_b' => ['option_b'],
+                'option_c' => ['option_c'], 'option_d' => ['option_d'],
+                'correct_option' => ['correct_option', 'correct_answer'],
+            ];
+            $missing = collect($required)->filter(
+                fn (array $alternatives) => !collect($alternatives)->contains(fn ($header) => $headers->has($header))
+            )->keys()->all();
             if ($missing) {
                 $this->logs[] = '[' . now()->toTimeString() . '] Import stopped: missing CSV columns ' . implode(', ', $missing) . '.';
                 session()->flash('message', 'CSV import needs the required column headings. Download the template and try again.');
@@ -252,10 +261,22 @@ class BulkSeeder extends Component
                     $row[$normalised] = trim((string) ($rawRow[$original] ?? ''));
                 }
 
+                // Accept exports from both CBTWise's template and ALOC's
+                // official CSV export without requiring manual renaming.
+                $row['exam'] = $row['exam'] ?? $row['exam_type'] ?? '';
+                $row['question_text'] = $row['question_text'] ?? $row['question'] ?? '';
+                $row['correct_option'] = $row['correct_option'] ?? $row['correct_answer'] ?? '';
+
                 $this->totalScanned++;
+                $examSlug = match (strtolower($row['exam'])) {
+                    'jamb', 'utme', 'jamb utme' => 'utme',
+                    'waec', 'wassce' => 'waec',
+                    'neco' => 'neco',
+                    default => strtolower($row['exam']),
+                };
                 $exam = Exam::query()
                     ->whereRaw('LOWER(name) = ?', [strtolower($row['exam'])])
-                    ->orWhereRaw('LOWER(slug) = ?', [strtolower($row['exam'])])
+                    ->orWhereRaw('LOWER(slug) = ?', [$examSlug])
                     ->first();
                 $subject = $exam
                     ? Subject::query()->where('exam_id', $exam->id)->whereRaw('LOWER(name) = ?', [strtolower($row['subject'])])->first()
@@ -289,7 +310,7 @@ class BulkSeeder extends Component
                         'option_e' => ($row['option_e'] ?? '') ?: null,
                         'correct_option' => $correctOption,
                         'explanation' => ($row['explanation'] ?? '') ?: null,
-                        'source' => 'csv',
+                        'source' => isset($row['exam_type']) ? 'aloc_csv' : 'csv',
                     ]);
                 }
 
