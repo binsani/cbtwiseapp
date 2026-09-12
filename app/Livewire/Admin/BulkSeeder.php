@@ -330,7 +330,9 @@ class BulkSeeder extends Component
                         'option_e' => ($row['option_e'] ?? '') ?: null,
                         'correct_option' => $correctOption,
                         'explanation' => ($row['explanation'] ?? '') ?: null,
-                        'source' => isset($row['exam_type']) ? 'aloc_csv' : 'csv',
+                        // Keep ALOC CSV imports within the existing database
+                        // enum values while retaining their ALOC provenance.
+                        'source' => isset($row['exam_type']) ? 'aloc' : 'csv',
                     ]);
                 }
 
