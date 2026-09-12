@@ -35,17 +35,29 @@ class BulkSeeder extends Component
 
         $alocClient = new AlocApiClient();
         
-        $query = Subject::with('exam')->where('is_active', true);
-        if ($this->selectedExamId !== 'all') {
-            $query->where('exam_id', $this->selectedExamId);
-        }
         if ($this->selectedSubjectId !== 'all') {
+            // The subject picker contains subjects from every exam. When an
+            // administrator picks one, it must take precedence over the exam
+            // filter so a stale exam selection cannot silently produce zero work.
+            $query = Subject::with('exam');
             $query->where('id', $this->selectedSubjectId);
+        } else {
+            $query = Subject::with('exam');
+            if ($this->selectedExamId !== 'all') {
+                $query->where('exam_id', $this->selectedExamId);
+            }
         }
 
         $subjects = $query->get();
 
         $this->logs[] = "[" . now()->toTimeString() . "] Starting bulk import for {$subjects->count()} subject(s). Batches: {$this->batches}. Dry run: " . ($this->dryRun ? 'YES' : 'NO');
+
+        if ($subjects->isEmpty()) {
+            $this->logs[] = "[" . now()->toTimeString() . "] No subject matches the current selection. Choose a subject again or select All Subjects.";
+            $this->isRunning = false;
+            session()->flash('message', 'No subjects matched this import configuration. Please choose a subject again.');
+            return;
+        }
 
         $questionsPerBatch = 15;
 
