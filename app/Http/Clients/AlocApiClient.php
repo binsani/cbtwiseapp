@@ -58,7 +58,12 @@ class AlocApiClient
                 $clampedLimit = min($limit, 15);
                 $query = array_filter([
                     'subject' => $slug,
+                    // ALOC's public API reference documents `examType`, while
+                    // its migration examples use `exam`. Send both during the
+                    // transition so catalog-confirmed records are not filtered
+                    // out by either gateway version.
                     'examType' => $examType,
+                    'exam' => $examType,
                     'year' => $year,
                     'limit' => $clampedLimit,
                     'cursor' => $cursor,
