@@ -206,7 +206,6 @@
                             </button>
                         </div>
                     </div>
-                </div>
             @else
                 <div class="flex-1 bg-white rounded-3xl border border-gray-100 flex items-center justify-center p-8 text-center">
                     <p class="text-gray-500 font-medium">No questions loaded for this subject.</p>
