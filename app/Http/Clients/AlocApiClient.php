@@ -36,7 +36,7 @@ class AlocApiClient
      * Fetch questions for a subject from ALOC API.
      * Supports both modern ALOC Station (dev.aloc.com.ng) and legacy (questions.aloc.com.ng).
      */
-    public function fetchQuestions(string $subject, int $limit = 20, ?string $examType = null, ?string $cursor = null): array
+    public function fetchQuestions(string $subject, int $limit = 20, ?string $examType = null, ?string $cursor = null, ?int $year = null): array
     {
         $this->lastError = null;
         $this->lastNextCursor = null;
@@ -59,6 +59,7 @@ class AlocApiClient
                 $query = array_filter([
                     'subject' => $slug,
                     'examType' => $examType,
+                    'year' => $year,
                     'limit' => $clampedLimit,
                     'cursor' => $cursor,
                 ], fn ($value) => $value !== null && $value !== '');
@@ -116,6 +117,58 @@ class AlocApiClient
         }
 
         return [];
+    }
+
+    /**
+     * Return the years with questions available for a subject/exam combination.
+     * The modern ALOC endpoint exposes this catalog at no credit cost.
+     */
+    public function fetchAvailableYears(string $subject, ?string $examType = null): array
+    {
+        $this->lastError = null;
+
+        if (empty($this->token)) {
+            $this->lastError = 'ALOC_API_TOKEN is empty in environment.';
+            return [];
+        }
+
+        try {
+            $slug = $this->normalizeSubjectSlug($subject);
+            $endpoint = rtrim($this->baseUri, '/') . '/subjects/' . rawurlencode($slug) . '/years';
+            $this->lastEndpoint = $endpoint;
+            $response = Http::withHeaders([
+                'Accept' => 'application/json',
+                'X-API-Key' => $this->token,
+                'X-ALOC-KEY' => $this->token,
+            ])
+                ->timeout($this->timeout)
+                ->retry($this->retry, 200)
+                ->get($endpoint);
+
+            if (!$response->successful()) {
+                $this->lastError = "ALOC [{$response->status()}]: " . substr($response->body(), 0, 160);
+                return [];
+            }
+
+            return collect($response->json('data', []))
+                ->filter(function (array $item) use ($examType) {
+                    if (!$examType) {
+                        return true;
+                    }
+
+                    return in_array($examType, $item['examTypes'] ?? [], true)
+                        || (int) data_get($item, "breakdown.{$examType}", 0) > 0;
+                })
+                ->pluck('year')
+                ->filter(fn ($year) => is_numeric($year))
+                ->map(fn ($year) => (int) $year)
+                ->values()
+                ->all();
+        } catch (\Exception $e) {
+            $this->lastError = 'ALOC year catalog request failed: ' . $e->getMessage();
+            Log::error($this->lastError);
+            return [];
+        }
     }
 
     /**

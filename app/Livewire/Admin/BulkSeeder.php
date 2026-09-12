@@ -73,15 +73,26 @@ class BulkSeeder extends Component
             };
             $subjectCreated = 0;
             $subjectDupes = 0;
-            $cursor = null;
+            $availableYears = $alocClient->fetchAvailableYears($alocSubjectName, $alocExamType);
+
+            if (empty($availableYears)) {
+                $reason = $alocClient->lastError ?: 'No ALOC years are available for this subject and examination.';
+                $this->logs[] = "[" . now()->toTimeString() . "] Notice: {$subject->name} could not be prepared for import. Detail: {$reason}";
+                continue;
+            }
 
             for ($b = 0; $b < $this->batches; $b++) {
+                // ALOC's question endpoint needs an available year for reliable
+                // results. Spread batches over the catalog instead of repeating
+                // the same request and importing duplicate questions.
+                $year = $availableYears[$b % count($availableYears)];
                 try {
                     $alocQuestionsData = $alocClient->fetchQuestions(
                         $alocSubjectName,
                         $questionsPerBatch,
                         $alocExamType,
-                        $cursor,
+                        null,
+                        $year,
                     );
                 } catch (\Exception $e) {
                     $this->logs[] = "[" . now()->toTimeString() . "] Warning: Failed batch " . ($b+1) . " for {$subject->name}: " . $e->getMessage();
@@ -94,8 +105,6 @@ class BulkSeeder extends Component
                     $this->logs[] = "[" . now()->toTimeString() . "] Notice: 0 questions for {$subject->name} ({$alocSubjectName}){$ep}. Detail: {$reason}";
                     break;
                 }
-
-                $cursor = $alocClient->lastNextCursor;
 
                 foreach ($alocQuestionsData as $item) {
                     $questionText = $item['question'] ?? $item['question_text'] ?? '';
@@ -155,10 +164,6 @@ class BulkSeeder extends Component
                     }
                 }
 
-                if (!$cursor) {
-                    $this->logs[] = "[" . now()->toTimeString() . "] {$subject->name}: no further ALOC pages available.";
-                    break;
-                }
             }
 
             $this->logs[] = "[" . now()->toTimeString() . "] {$subject->name}: +{$subjectCreated} imported, {$subjectDupes} duplicate(s) skipped.";
