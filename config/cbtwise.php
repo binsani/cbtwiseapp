@@ -36,6 +36,8 @@ return [
         'base'    => env('ALOC_API_BASE', 'https://dev.aloc.com.ng/api/v1'),
         'timeout' => (float) env('ALOC_TIMEOUT', 10),
         'retry'   => (int) env('ALOC_RETRY', 2),
+        'year_cache_days' => (int) env('ALOC_YEAR_CACHE_DAYS', 7),
+        'question_cache_days' => (int) env('ALOC_QUESTION_CACHE_DAYS', 30),
     ],
 
     // ── Tawk.to Live Chat ─────────────────────────────────────────────────────

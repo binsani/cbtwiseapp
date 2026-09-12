@@ -77,7 +77,7 @@ class AdminDashboardSuiteTest extends TestCase
         $this->assertNotNull($code);
         $this->assertStringStartsWith('CBT-', $code->code);
         $this->assertEquals(30, $code->plan_duration_days);
-        $this->assertEquals('available', $code->status);
+        $this->assertEquals('active', $code->status);
         $this->assertTrue($code->isAvailable());
 
         $code->disable();

@@ -51,10 +51,10 @@ class BulkSeeder extends Component
             // The subject picker contains subjects from every exam. When an
             // administrator picks one, it must take precedence over the exam
             // filter so a stale exam selection cannot silently produce zero work.
-            $query = Subject::with('exam');
+            $query = Subject::with('exam')->withCount('questions');
             $query->where('id', $this->selectedSubjectId);
         } else {
-            $query = Subject::with('exam');
+            $query = Subject::with('exam')->withCount('questions');
             if ($this->selectedExamId !== 'all') {
                 $query->where('exam_id', $this->selectedExamId);
             }
@@ -85,6 +85,15 @@ class BulkSeeder extends Component
             };
             $subjectCreated = 0;
             $subjectDupes = 0;
+            // Avoid requesting content that is already in the local question
+            // bank. This keeps multi-subject imports fast and prevents ALOC
+            // rate-limit delays after a subject has reached its target.
+            $needed = max(0, (int) $subject->target_question_count - (int) $subject->questions_count);
+            $subjectBatches = min((int) $this->batches, (int) ceil($needed / $questionsPerBatch));
+            if ($subjectBatches === 0) {
+                $this->logs[] = '[' . now()->toTimeString() . "] {$subject->name}: skipped — local target already met ({$subject->questions_count} questions).";
+                continue;
+            }
             $availableYears = $alocClient->fetchAvailableYears($alocSubjectName, $alocExamType);
 
             if (empty($availableYears)) {
@@ -93,7 +102,7 @@ class BulkSeeder extends Component
                 continue;
             }
 
-            for ($b = 0; $b < $this->batches; $b++) {
+            for ($b = 0; $b < $subjectBatches; $b++) {
                 // ALOC's question endpoint needs an available year for reliable
                 // results. Spread batches over the catalog instead of repeating
                 // the same request and importing duplicate questions.
@@ -116,6 +125,10 @@ class BulkSeeder extends Component
                     $ep = $alocClient->lastEndpoint ? " [{$alocClient->lastEndpoint}]" : "";
                     $this->logs[] = "[" . now()->toTimeString() . "] Notice: 0 questions for {$subject->name} ({$alocSubjectName}){$ep}. Detail: {$reason}";
                     break;
+                }
+
+                if ($alocClient->lastFromCache) {
+                    $this->logs[] = '[' . now()->toTimeString() . "] {$subject->name} batch " . ($b + 1) . ': served from local ALOC cache.';
                 }
 
                 foreach ($alocQuestionsData as $item) {

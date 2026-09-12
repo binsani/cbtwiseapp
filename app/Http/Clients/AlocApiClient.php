@@ -4,6 +4,7 @@ namespace App\Http\Clients;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 
 class AlocApiClient
 {
@@ -15,6 +16,7 @@ class AlocApiClient
     public ?string $lastError = null;
     public ?string $lastEndpoint = null;
     public ?string $lastNextCursor = null;
+    public bool $lastFromCache = false;
 
     public function __construct()
     {
@@ -40,6 +42,7 @@ class AlocApiClient
     {
         $this->lastError = null;
         $this->lastNextCursor = null;
+        $this->lastFromCache = false;
 
         if (empty($this->token)) {
             $this->lastError = 'ALOC_API_TOKEN is empty in environment.';
@@ -69,6 +72,13 @@ class AlocApiClient
                     'cursor' => $cursor,
                 ], fn ($value) => $value !== null && $value !== '');
                 $this->lastEndpoint = $endpoint . '?' . http_build_query($query);
+                $cacheKey = 'aloc:questions:' . hash('sha256', $this->lastEndpoint);
+                $cached = Cache::get($cacheKey);
+                if (is_array($cached) && isset($cached['questions'])) {
+                    $this->lastNextCursor = $cached['next_cursor'] ?? null;
+                    $this->lastFromCache = true;
+                    return $cached['questions'];
+                }
                 $response = Http::withHeaders([
                     'Accept' => 'application/json',
                     // Header names are case-insensitive. Sending X-API-Key
@@ -88,7 +98,11 @@ class AlocApiClient
                     if (empty($items)) {
                         $this->lastError = "ALOC returned no questions for {$slug}" . ($examType ? " ({$examType})" : '');
                     }
-                    return $this->formatStationQuestions($items);
+                    $questions = $this->formatStationQuestions($items);
+                    if ($questions) {
+                        Cache::put($cacheKey, ['questions' => $questions, 'next_cursor' => $this->lastNextCursor], now()->addDays(config('cbtwise.aloc.question_cache_days', 30)));
+                    }
+                    return $questions;
                 }
 
                 $errJson = $response->json();
@@ -144,6 +158,11 @@ class AlocApiClient
             $slug = $this->normalizeSubjectSlug($subject);
             $endpoint = rtrim($this->baseUri, '/') . '/subjects/' . rawurlencode($slug) . '/years';
             $this->lastEndpoint = $endpoint;
+            $cacheKey = 'aloc:years:' . hash('sha256', $slug . '|' . $examType);
+            if (($cached = Cache::get($cacheKey)) !== null) {
+                $this->lastFromCache = true;
+                return $cached;
+            }
             $response = Http::withHeaders([
                 'Accept' => 'application/json',
                 'X-API-Key' => $this->token,
@@ -158,7 +177,7 @@ class AlocApiClient
                 return [];
             }
 
-            return collect($response->json('data', []))
+            $years = collect($response->json('data', []))
                 ->filter(function (array $item) use ($examType) {
                     if (!$examType) {
                         return true;
@@ -172,6 +191,8 @@ class AlocApiClient
                 ->map(fn ($year) => (int) $year)
                 ->values()
                 ->all();
+            Cache::put($cacheKey, $years, now()->addDays(config('cbtwise.aloc.year_cache_days', 7)));
+            return $years;
         } catch (\Exception $e) {
             $this->lastError = 'ALOC year catalog request failed: ' . $e->getMessage();
             Log::error($this->lastError);
