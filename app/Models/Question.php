@@ -11,7 +11,7 @@ class Question extends Model
 {
     protected $fillable = [
         'exam_id', 'subject_id', 'topic_id', 'created_by', 'year',
-        'question_text', 'question_image',
+        'question_text', 'passage', 'passage_label', 'question_image',
         'option_a', 'option_b', 'option_c', 'option_d', 'option_e',
         'correct_option', 'explanation', 'difficulty', 'source', 'dedupe_hash',
         'times_served', 'times_correct', 'reports_count', 'is_flagged',

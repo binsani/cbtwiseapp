@@ -141,6 +141,14 @@
                         </div>
 
                         <!-- Question Body -->
+                        @if($activeQuestion->passage)
+                            <section class="mb-6 sm:mb-8 rounded-2xl border border-sky-100 bg-sky-50/60 p-4 sm:p-6 text-slate-700 leading-relaxed">
+                                <p class="mb-3 text-xs font-extrabold uppercase tracking-wider text-sky-700">
+                                    {{ $activeQuestion->passage_label ?: 'Read the passage carefully' }}
+                                </p>
+                                <div class="whitespace-pre-line break-words">{{ $activeQuestion->passage }}</div>
+                            </section>
+                        @endif
                         <div class="prose max-w-none text-gray-800 text-base sm:text-lg mb-6 sm:mb-8 leading-relaxed overflow-x-auto break-words">
                             {!! $activeQuestion->question_text !!}
                             

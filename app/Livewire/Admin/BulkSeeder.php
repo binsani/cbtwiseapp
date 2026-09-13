@@ -238,7 +238,7 @@ class BulkSeeder extends Component
         if (function_exists('set_time_limit')) {
             @set_time_limit(600);
         }
-        $knownHashes = Question::query()->pluck('dedupe_hash')->filter()->flip()->all();
+        $knownHashes = Question::query()->pluck('dedupe_hash', 'id')->filter()->all();
         $examCache = [];
         $subjectCache = [];
 
@@ -279,6 +279,8 @@ class BulkSeeder extends Component
                 $row['exam'] = $row['exam'] ?? $row['exam_type'] ?? '';
                 $row['question_text'] = $row['question_text'] ?? $row['question'] ?? '';
                 $row['correct_option'] = $row['correct_option'] ?? $row['correct_answer'] ?? '';
+                $row['passage'] = $row['passage'] ?? $row['section'] ?? '';
+                $row['passage_label'] = $row['category'] ?? '';
 
                 $this->totalScanned++;
                 $examSlug = match (strtolower($row['exam'])) {
@@ -314,12 +316,21 @@ class BulkSeeder extends Component
 
                 $hash = Question::dedupeHash($row['question_text']);
                 if (isset($knownHashes[$hash])) {
+                    // ALOC CSV exports carry reading passages in the `section`
+                    // column. Earlier imports discarded it, so enrich matching
+                    // questions instead of leaving broken passage references.
+                    if (!$this->dryRun && $row['passage'] !== '') {
+                        Question::whereKey($knownHashes[$hash])->whereNull('passage')->update([
+                            'passage' => $row['passage'],
+                            'passage_label' => $row['passage_label'] ?: null,
+                        ]);
+                    }
                     $this->totalSkippedDuplicates++;
                     continue;
                 }
 
                 if (!$this->dryRun) {
-                    Question::create([
+                    $question = Question::create([
                         'dedupe_hash' => $hash,
                         'exam_id' => $exam->id,
                         'subject_id' => $subject->id,
@@ -327,6 +338,8 @@ class BulkSeeder extends Component
                         'year' => is_numeric($row['year'] ?? null) ? (int) $row['year'] : null,
                         'difficulty' => in_array($row['difficulty'] ?? '', ['easy', 'medium', 'hard'], true) ? $row['difficulty'] : 'medium',
                         'question_text' => $row['question_text'],
+                        'passage' => $row['passage'] ?: null,
+                        'passage_label' => $row['passage_label'] ?: null,
                         'option_a' => $row['option_a'],
                         'option_b' => $row['option_b'],
                         'option_c' => $row['option_c'],
@@ -340,7 +353,7 @@ class BulkSeeder extends Component
                     ]);
                 }
 
-                $knownHashes[$hash] = true;
+                $knownHashes[$hash] = $question->id ?? true;
                 $this->totalCreated++;
             }
 
