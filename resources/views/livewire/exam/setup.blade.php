@@ -304,7 +304,12 @@
                                     <span>Fixed Full Mock Configuration</span>
                                 </div>
                                 <p class="text-xs text-blue-700 leading-relaxed">
-                                    In Mock Mode, questions and durations match the official exam standard (e.g. 40 questions per subject, 2 hours total).
+                                    @if(($selectedExam?->slug ?? '') === 'utme')
+                                        Official JAMB UTME mock: <strong>180 questions in 2 hours</strong> — Use of English: 60; each of the other three subjects: 40.
+                                        <span class="block mt-1">English target mix: 25 Comprehension &amp; Summary, 25 Lexis &amp; Structure, and 10 Oral Forms.</span>
+                                    @else
+                                        In Mock Mode, questions and duration use the selected examination’s standard configuration.
+                                    @endif
                                 </p>
                             </div>
                         @else

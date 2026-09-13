@@ -213,9 +213,14 @@ class Setup extends Component
 
         // Calculate question count and duration
         if ($this->mode === 'mock') {
-            $questionsPerSubject = $exam->questions_per_subject_default ?? 40;
-            $totalQuestions = $questionsPerSubject * $subjectCount;
-            $durationSeconds = ($exam->duration_minutes_default ?? 120) * 60;
+            // Official UTME full mock: Use of English has 60 questions and
+            // each of the other three selected subjects has 40 (180 total).
+            $totalQuestions = $exam->slug === 'utme'
+                ? 180
+                : ($exam->questions_per_subject_default ?? 40) * $subjectCount;
+            $durationSeconds = $exam->slug === 'utme'
+                ? 2 * 60 * 60
+                : ($exam->duration_minutes_default ?? 120) * 60;
         } else {
             // Practice / Study modes
             $totalQuestions = $this->questionCount * $subjectCount;

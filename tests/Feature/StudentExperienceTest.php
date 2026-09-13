@@ -220,4 +220,29 @@ class StudentExperienceTest extends TestCase
         $this->assertTrue($fetcher->lastFetchUsedSubjectFallback);
         $this->assertSame([$question->id], $questions->pluck('id')->all());
     }
+
+    public function test_utme_mock_uses_the_official_180_question_total(): void
+    {
+        $english = Subject::create([
+            'exam_id' => $this->utme->id,
+            'name' => 'English Language',
+            'slug' => 'english-language',
+            'is_active' => true,
+        ]);
+        $physics = Subject::create(['exam_id' => $this->utme->id, 'name' => 'Physics', 'slug' => 'physics', 'is_active' => true]);
+        $chemistry = Subject::create(['exam_id' => $this->utme->id, 'name' => 'Chemistry', 'slug' => 'chemistry', 'is_active' => true]);
+        $this->student->update(['plan' => 'premium']);
+
+        \Livewire\Livewire::actingAs($this->student)
+            ->test(\App\Livewire\Exam\Setup::class)
+            ->set('selectedExamId', $this->utme->id)
+            ->set('mode', 'mock')
+            ->set('selectedSubjects', [(string) $english->id, (string) $this->math->id, (string) $physics->id, (string) $chemistry->id])
+            ->call('startExam');
+
+        $session = \App\Models\ExamSession::where('user_id', $this->student->id)->latest()->first();
+        $this->assertNotNull($session);
+        $this->assertSame(180, $session->total_questions);
+        $this->assertSame(7200, $session->duration_seconds);
+    }
 }

@@ -90,14 +90,17 @@ class Runner extends Component
             $questionFetcher = app(QuestionFetcher::class);
             $exam = $examSession->exam;
             
-            $questionsPerSubject = $examSession->mode === 'mock' 
+            $defaultQuestionsPerSubject = $examSession->mode === 'mock'
                 ? ($exam->questions_per_subject_default ?? 40)
                 : (int) ($examSession->total_questions / count($subjectIds));
                 
             $totalGenerated = 0;
             
             foreach ($subjects as $subject) {
-                $questions = $questionFetcher->fetch($exam, $subject, $questionsPerSubject, $examSession->year, $examSession->topic_id);
+                $questionsForSubject = $examSession->mode === 'mock' && $exam->slug === 'utme'
+                    ? ($subject->slug === 'english-language' ? 60 : 40)
+                    : $defaultQuestionsPerSubject;
+                $questions = $questionFetcher->fetch($exam, $subject, $questionsForSubject, $examSession->year, $examSession->topic_id);
                 $this->topicPracticeUsesSubjectFallback = $this->topicPracticeUsesSubjectFallback
                     || $questionFetcher->lastFetchUsedSubjectFallback;
                 
