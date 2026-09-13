@@ -1,10 +1,52 @@
 <div class="h-dvh flex flex-col bg-gray-50 overflow-hidden"
-     x-data="examRunner({
+     x-data="{
         timeRemaining: @entangle('timeRemaining'),
         currentIndex: @entangle('currentIndex'),
-        selectedSubjectId: @entangle('selectedSubjectId')
-     })"
-     x-init="showCalc = false; init()"
+        selectedSubjectId: @entangle('selectedSubjectId'),
+        showCalc: false,
+        showPalette: false,
+        timerInterval: null,
+        isSubmitting: false,
+        init() {
+            this.showCalc = false;
+            this.timerInterval = setInterval(() => {
+                if (this.timeRemaining > 0) {
+                    this.timeRemaining--;
+                    if (this.timeRemaining % 30 === 0) this.$wire.syncTimer();
+                } else if (!this.isSubmitting) {
+                    this.isSubmitting = true;
+                    this.$wire.autoSubmit();
+                }
+            }, 1000);
+        },
+        formatTime() {
+            const seconds = Math.max(0, Number(this.timeRemaining || 0));
+            return [Math.floor(seconds / 3600), Math.floor((seconds % 3600) / 60), seconds % 60]
+                .map(value => String(value).padStart(2, '0')).join(':');
+        },
+        prevQuestion() {
+            if (this.currentIndex > 0) this.$wire.navigate(--this.currentIndex);
+        },
+        nextQuestion(maxCount) {
+            if (this.currentIndex < maxCount - 1) this.$wire.navigate(++this.currentIndex);
+        },
+        handleKey(event) {
+            if (this.showCalc || ['input', 'textarea', 'select'].includes(document.activeElement?.tagName?.toLowerCase())) return;
+            const key = event.key.toLowerCase();
+            const question = this.$wire.get('activeQuestion');
+            if (['a', 'b', 'c', 'd', 'e'].includes(key) && question?.id) this.$wire.selectOption(question.id, key);
+            else if (key === 'arrowright' || key === 'n') this.nextQuestion(this.$wire.get('questionsList').length);
+            else if (key === 'arrowleft' || key === 'p') this.prevQuestion();
+            else if (key === 'f' && question?.id) this.$wire.toggleFlag(question.id);
+        },
+        confirmSubmit() {
+            if (this.isSubmitting || !confirm('Are you sure you want to end your exam session and submit?')) return;
+            this.isSubmitting = true;
+            if (this.timerInterval) clearInterval(this.timerInterval);
+            this.$wire.submit();
+        }
+     }"
+     x-init="init()"
      @keydown.window="handleKey($event)">
 
     <!-- Top Navigation Bar -->
@@ -318,7 +360,25 @@
          @close-calculator.window="showCalc = false">
         
         <div class="bg-gray-800 text-white rounded-2xl shadow-2xl overflow-hidden border border-gray-700 w-80 max-w-full sm:w-72"
-             x-data="calculator()"
+             x-data="{
+                display: '0', expression: '',
+                clear() { this.display = '0'; this.expression = ''; },
+                num(value) { this.display = this.display === '0' ? value : this.display + value; },
+                op(value) { this.display += ' ' + value + ' '; },
+                backspace() { this.display = this.display.trim(); this.display = this.display.length <= 1 ? '0' : this.display.slice(0, -1); },
+                func(type) {
+                    const value = parseFloat(this.display);
+                    if (!Number.isFinite(value)) { this.display = 'Error'; return; }
+                    if (type === 'sin') this.display = Math.sin(value * Math.PI / 180).toFixed(6);
+                    if (type === 'cos') this.display = Math.cos(value * Math.PI / 180).toFixed(6);
+                    if (type === 'tan') this.display = Math.tan(value * Math.PI / 180).toFixed(6);
+                    if (type === 'sqrt') this.display = Math.sqrt(value).toFixed(6);
+                },
+                calculate() {
+                    if (!/^[0-9+\\-*/().\\s]+$/.test(this.display)) { this.display = 'Error'; return; }
+                    try { this.expression = this.display; this.display = Function('return (' + this.display + ')')().toString(); } catch (error) { this.display = 'Error'; }
+                }
+             }"
              @click.stop>
             
             <!-- Header -->
@@ -375,8 +435,11 @@
     </div>
 
     <!-- Alpine / JS Helpers -->
+    {{-- Legacy controller retained temporarily for reference. The runner now
+         uses the self-contained Alpine state above, which avoids load-order failures. --}}
+    @if(false)
     @script
-    <script>
+    <script type="text/plain">
         (() => {
         const registerExamRunnerComponents = () => {
             Alpine.data('examRunner', (config) => ({
@@ -531,6 +594,7 @@
         })();
     </script>
     @endscript
+    @endif
 
     <!-- Livewire Question Reporting Modal -->
     @livewire('exam.report-question')
