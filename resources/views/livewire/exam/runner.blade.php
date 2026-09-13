@@ -45,6 +45,13 @@
         </div>
     </header>
 
+    @if($topicName && $topicPracticeUsesSubjectFallback)
+        <div class="mx-4 sm:mx-6 mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-900">
+            <span class="font-black">{{ $topicName }}:</span>
+            This set includes untagged questions from the same subject because there are not yet enough questions directly tagged to this topic.
+        </div>
+    @endif
+
     <!-- Subject Tabs -->
     <div class="bg-white border-b border-gray-200 px-3 sm:px-6 py-3 flex space-x-2 overflow-x-auto flex-shrink-0 scrollbar-none touch-scroll">
         @foreach($subjectList as $subj)

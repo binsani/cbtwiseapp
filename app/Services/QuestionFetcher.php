@@ -14,6 +14,9 @@ class QuestionFetcher
 {
     protected AlocApiClient $alocClient;
 
+    /** True when topic practice had to use untagged questions from the same subject. */
+    public bool $lastFetchUsedSubjectFallback = false;
+
     public function __construct(AlocApiClient $alocClient)
     {
         $this->alocClient = $alocClient;
@@ -24,18 +27,43 @@ class QuestionFetcher
      */
     public function fetch(Exam $exam, Subject $subject, int $count, ?int $year = null, ?int $topicId = null): Collection
     {
-        // 1. Fetch from local DB using weighted random
+        $this->lastFetchUsedSubjectFallback = false;
+
+        // 1. Fetch from the local question bank using weighted random.
         $query = Question::query()
             ->forExam($exam->id)
             ->forSubject($subject->id)
-            ->forTopic($topicId)
             ->notFlagged();
 
         if ($year) {
             $query->forYear($year);
         }
 
-        $localQuestions = $query->weightedRandom()->limit($count)->get();
+        if ($topicId) {
+            $topicQuestions = (clone $query)
+                ->forTopic($topicId)
+                ->weightedRandom()
+                ->limit($count)
+                ->get();
+
+            if ($topicQuestions->count() >= $count) {
+                return $topicQuestions;
+            }
+
+            // Historical imports generally do not include a topic field. Use
+            // only untagged questions from this same subject as a fallback,
+            // rather than creating an empty session or mixing another topic.
+            $untaggedQuestions = (clone $query)
+                ->whereNull('topic_id')
+                ->weightedRandom()
+                ->limit($count - $topicQuestions->count())
+                ->get();
+
+            $localQuestions = $topicQuestions->concat($untaggedQuestions);
+            $this->lastFetchUsedSubjectFallback = $untaggedQuestions->isNotEmpty();
+        } else {
+            $localQuestions = $query->weightedRandom()->limit($count)->get();
+        }
 
         // If we have enough questions, return them
         if ($localQuestions->count() >= $count) {

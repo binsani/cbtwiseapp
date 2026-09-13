@@ -7,6 +7,8 @@ use App\Models\Exam;
 use App\Models\Subject;
 use App\Models\Question;
 use App\Models\Bookmark;
+use App\Models\Topic;
+use App\Services\QuestionFetcher;
 use Spatie\Permission\Models\Role;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -190,5 +192,32 @@ class StudentExperienceTest extends TestCase
         $session = \App\Models\ExamSession::where('user_id', $this->student->id)->latest()->first();
         $this->assertNotNull($session);
         $this->assertEquals($topic->id, $session->topic_id);
+    }
+
+    public function test_topic_practice_uses_same_subject_questions_when_imported_questions_are_untagged(): void
+    {
+        $topic = Topic::create([
+            'subject_id' => $this->math->id,
+            'name' => 'Algebra',
+            'sort_order' => 1,
+        ]);
+        $question = Question::create([
+            'exam_id' => $this->utme->id,
+            'subject_id' => $this->math->id,
+            'dedupe_hash' => Question::dedupeHash('Solve 2x = 8.'),
+            'question_text' => 'Solve 2x = 8.',
+            'option_a' => '2',
+            'option_b' => '3',
+            'option_c' => '4',
+            'option_d' => '5',
+            'correct_option' => 'c',
+            'source' => 'csv',
+        ]);
+
+        $fetcher = app(QuestionFetcher::class);
+        $questions = $fetcher->fetch($this->utme, $this->math, 1, null, $topic->id);
+
+        $this->assertTrue($fetcher->lastFetchUsedSubjectFallback);
+        $this->assertSame([$question->id], $questions->pluck('id')->all());
     }
 }

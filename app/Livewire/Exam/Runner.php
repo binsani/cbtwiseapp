@@ -18,6 +18,7 @@ class Runner extends Component
     public $mode;
     public $topicId = null;
     public $topicName = null;
+    public bool $topicPracticeUsesSubjectFallback = false;
     
     // Active Navigation state
     public $selectedSubjectId;
@@ -97,6 +98,8 @@ class Runner extends Component
             
             foreach ($subjects as $subject) {
                 $questions = $questionFetcher->fetch($exam, $subject, $questionsPerSubject, $examSession->year, $examSession->topic_id);
+                $this->topicPracticeUsesSubjectFallback = $this->topicPracticeUsesSubjectFallback
+                    || $questionFetcher->lastFetchUsedSubjectFallback;
                 
                 foreach ($questions as $q) {
                     ExamAnswer::create([
