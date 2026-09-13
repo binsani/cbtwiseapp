@@ -311,18 +311,20 @@
     <div x-show="showCalc" 
          x-cloak
          class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm sm:bg-transparent sm:backdrop-blur-none sm:p-0 sm:fixed sm:top-20 sm:left-24 sm:w-auto" 
-         @keydown.escape.window="showCalc = false">
+         @keydown.escape.window="showCalc = false"
+         @click.self="showCalc = false"
+         @close-calculator.window="showCalc = false">
         
         <div class="bg-gray-800 text-white rounded-2xl shadow-2xl overflow-hidden border border-gray-700 w-80 max-w-full sm:w-72"
              x-data="calculator()"
-             @click.away="showCalc = false">
+             @click.stop>
             
             <!-- Header -->
             <div class="cursor-move bg-gray-900 px-4 py-3 sm:py-2 flex justify-between items-center text-xs font-bold tracking-widest text-gray-300 select-none border-b border-gray-700">
                 <span class="flex items-center gap-1.5">
                     <span class="text-emerald-400">🔢</span> JAMB CBT CALCULATOR
                 </span>
-                <button @click="showCalc = false" class="p-1 rounded-lg hover:bg-gray-700 text-rose-400 hover:text-rose-300 font-bold text-lg leading-none">&times;</button>
+                <button type="button" @click.stop="$dispatch('close-calculator')" aria-label="Close calculator" class="min-h-9 min-w-9 p-1 rounded-lg hover:bg-gray-700 active:bg-gray-600 text-rose-400 hover:text-rose-300 font-bold text-lg leading-none">&times;</button>
             </div>
 
             <!-- Display -->
