@@ -374,6 +374,7 @@
 
     <!-- Alpine / JS Helpers -->
     @script
+    <script>
         (() => {
         const registerExamRunnerComponents = () => {
             Alpine.data('examRunner', (config) => ({
@@ -526,6 +527,7 @@
             document.addEventListener('alpine:init', registerExamRunnerComponents, { once: true });
         }
         })();
+    </script>
     @endscript
 
     <!-- Livewire Question Reporting Modal -->
