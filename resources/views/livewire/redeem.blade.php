@@ -1,7 +1,7 @@
 <div class="min-h-screen py-12 flex flex-col justify-center sm:px-6 lg:px-8 bg-slate-50"
      x-data="{
          isLoggedIn: {{ Auth::check() ? 'true' : 'false' }},
-         recaptchaKey: '{{ env('RECAPTCHA_SITE_KEY') }}',
+         recaptchaKey: @js(config('services.recaptcha.site_key')),
          submitForm() {
              if (!this.recaptchaKey) {
                  $wire.redeem();
@@ -124,7 +124,7 @@
         </div>
     </div>
 
-    @if(env('RECAPTCHA_SITE_KEY'))
-        <script src="https://www.google.com/recaptcha/api.js?render={{ env('RECAPTCHA_SITE_KEY') }}"></script>
+    @if(config('services.recaptcha.site_key'))
+        <script src="https://www.google.com/recaptcha/api.js?render={{ config('services.recaptcha.site_key') }}"></script>
     @endif
 </div>
