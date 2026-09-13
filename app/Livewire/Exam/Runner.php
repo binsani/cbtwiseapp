@@ -161,6 +161,7 @@ class Runner extends Component
         // under a different navigator number after a Livewire refresh.
         return Question::query()
             ->select('questions.*')
+            ->with('topic')
             ->join('exam_answers', 'exam_answers.question_id', '=', 'questions.id')
             ->where('exam_answers.exam_session_id', $this->sessionId)
             ->where('subject_id', $this->selectedSubjectId)
