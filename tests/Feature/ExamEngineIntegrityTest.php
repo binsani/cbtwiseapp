@@ -165,6 +165,49 @@ class ExamEngineIntegrityTest extends TestCase
         $this->assertEquals(1, $q1Fresh->fresh()->times_correct);
     }
 
+    public function test_runner_keeps_question_order_and_does_not_accept_client_supplied_extra_time(): void
+    {
+        $first = Question::create([
+            'exam_id' => $this->utme->id,
+            'subject_id' => $this->math->id,
+            'question_text' => 'First question',
+            'option_a' => 'A', 'option_b' => 'B', 'option_c' => 'C', 'option_d' => 'D',
+            'correct_option' => 'a',
+            'dedupe_hash' => hash('sha256', 'first-runner-question'),
+        ]);
+        $second = Question::create([
+            'exam_id' => $this->utme->id,
+            'subject_id' => $this->math->id,
+            'question_text' => 'Second question',
+            'option_a' => 'A', 'option_b' => 'B', 'option_c' => 'C', 'option_d' => 'D',
+            'correct_option' => 'b',
+            'dedupe_hash' => hash('sha256', 'second-runner-question'),
+        ]);
+        $session = ExamSession::create([
+            'user_id' => $this->student->id,
+            'exam_id' => $this->utme->id,
+            'mode' => 'practice',
+            'subjects' => [$this->math->id],
+            'total_questions' => 2,
+            'duration_seconds' => 300,
+            'started_at' => now()->subSeconds(30),
+            'status' => 'in_progress',
+        ]);
+        ExamAnswer::create(['exam_session_id' => $session->id, 'question_id' => $first->id]);
+        ExamAnswer::create(['exam_session_id' => $session->id, 'question_id' => $second->id]);
+
+        \Livewire\Livewire::actingAs($this->student)
+            ->test(\App\Livewire\Exam\Runner::class, ['session' => $session->id])
+            ->assertSee('First question')
+            ->call('navigate', 1)
+            ->assertSee('Second question')
+            ->call('syncTimer', 999999)
+            ->assertSet('timeRemaining', fn ($value) => $value <= 270 && $value > 0)
+            ->call('selectOption', $second->id, 'b');
+
+        $this->assertSame('b', ExamAnswer::where('exam_session_id', $session->id)->where('question_id', $second->id)->value('selected_option'));
+    }
+
     public function test_ensure_role_middleware_accepts_pipe_delimited_roles(): void
     {
         $moderator = User::factory()->create(['email' => 'mod@cbtwise.com']);

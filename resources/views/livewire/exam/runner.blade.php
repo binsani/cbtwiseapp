@@ -1,4 +1,4 @@
-<div class="h-dvh flex flex-col bg-gray-50 select-none overflow-hidden"
+<div class="h-dvh flex flex-col bg-gray-50 overflow-hidden"
      x-data="examRunner({
         timeRemaining: @entangle('timeRemaining'),
         currentIndex: @entangle('currentIndex'),
@@ -28,7 +28,9 @@
         <div class="flex items-center gap-2 sm:gap-4 flex-shrink-0">
             <!-- Calculator toggle — icon only on mobile -->
             <button type="button"
-                    @click="showCalc = !showCalc"
+                    @click="showCalc = !showCalc; showPalette = false"
+                    :aria-expanded="showCalc.toString()"
+                    aria-controls="exam-calculator"
                     class="p-2 sm:px-4 sm:py-2 bg-emerald-800/80 hover:bg-emerald-600 active:bg-emerald-900 border border-emerald-500/30 rounded-xl text-xs font-bold text-white flex items-center gap-1.5 transition-all shadow-sm"
                     title="Toggle Calculator">
                 <svg class="w-4 h-4 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
@@ -55,7 +57,7 @@
     <!-- Subject Tabs -->
     <div class="bg-white border-b border-gray-200 px-3 sm:px-6 py-3 flex space-x-2 overflow-x-auto flex-shrink-0 scrollbar-none touch-scroll">
         @foreach($subjectList as $subj)
-            <button wire:click="selectSubject({{ $subj['id'] }})"
+            <button wire:key="exam-subject-{{ $subj['id'] }}" wire:click="selectSubject({{ $subj['id'] }})"
                     class="px-4 sm:px-5 py-2.5 rounded-xl font-bold text-sm tracking-wide transition-all duration-300 flex items-center space-x-2 flex-shrink-0
                     {{ $selectedSubjectId == $subj['id'] ? 'bg-emerald-600 text-white shadow-md' : 'text-gray-600 bg-gray-100 hover:bg-gray-200' }}">
                 <span>{{ $subj['name'] }}</span>
@@ -84,7 +86,7 @@
             <!-- Grid -->
             <div class="p-4 overflow-y-auto grid grid-cols-6 sm:grid-cols-8 gap-2">
                 @foreach($questionsList as $idx => $q)
-                    <button @click="currentIndex = {{ $idx }}; showPalette = false"
+                    <button wire:key="mobile-question-{{ $q->id }}" wire:click="navigate({{ $idx }})" @click="showPalette = false"
                             class="h-10 rounded-xl flex items-center justify-center font-bold text-sm transition-all duration-200 border-2
                             {{ $currentIndex == $idx ? 'border-emerald-600 scale-105 shadow-sm' : 'border-transparent' }}
                             {{ $flagged[$q->id] ?? false ? 'bg-amber-500 text-white' : (($answers[$q->id] ?? null) ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200') }}">
@@ -133,7 +135,7 @@
                                 $currentSubjName = strtolower($currentSubj['name'] ?? '');
                             @endphp
                             @if(in_array($currentSubjName, ['mathematics', 'physics', 'chemistry', 'economics', 'financial accounting', 'further mathematics']))
-                                <button @click="showCalc = !showCalc" class="text-xs font-bold text-blue-600 hover:text-blue-800 bg-blue-50 px-3 py-1.5 rounded-xl border border-blue-100 flex items-center space-x-1.5 transition-colors">
+                                <button type="button" @click="showCalc = !showCalc; showPalette = false" :aria-expanded="showCalc.toString()" aria-controls="exam-calculator" class="text-xs font-bold text-blue-600 hover:text-blue-800 bg-blue-50 px-3 py-1.5 rounded-xl border border-blue-100 flex items-center space-x-1.5 transition-colors">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
                                     <span>Calculator</span>
                                 </button>
@@ -162,8 +164,8 @@
                         <!-- Options List -->
                         <div class="space-y-4">
                             @foreach($activeQuestion->getOptions() as $key => $text)
-                                <div wire:click="selectOption({{ $activeQuestion->id }}, '{{ $key }}')"
-                                    class="group border-2 rounded-2xl p-4 sm:p-5 cursor-pointer flex items-center space-x-3 sm:space-x-4 transition-all duration-300 hover:shadow-sm
+                                <button type="button" wire:key="answer-{{ $activeQuestion->id }}-{{ $key }}" wire:click="selectOption({{ $activeQuestion->id }}, '{{ $key }}')"
+                                    class="group w-full border-2 rounded-2xl p-4 sm:p-5 cursor-pointer flex items-center space-x-3 sm:space-x-4 transition-all duration-300 hover:shadow-sm text-left
                                      {{ ($answers[$activeQuestion->id] ?? null) === $key ? 'border-emerald-500 bg-emerald-50/20' : 'border-gray-100 bg-white hover:border-emerald-100' }}">
                                     
                                     <!-- Option Key Badge -->
@@ -174,7 +176,7 @@
                                     
                                     <!-- Option Content -->
                                     <span class="min-w-0 break-words text-gray-700 font-medium leading-relaxed group-hover:text-emerald-950">{!! nl2br(e(strip_tags($text))) !!}</span>
-                                </div>
+                                </button>
                             @endforeach
                         </div>
                     </div>
@@ -288,7 +290,7 @@
                 <!-- Palette Grid -->
                 <div class="grid grid-cols-4 gap-3">
                     @foreach($questionsList as $idx => $q)
-                        <button @click="currentIndex = {{ $idx }}"
+                        <button type="button" wire:key="desktop-question-{{ $q->id }}" wire:click="navigate({{ $idx }})"
                                 class="h-11 rounded-xl flex items-center justify-center font-bold text-sm tracking-wide transition-all duration-300 border-2
                                 {{ $currentIndex == $idx ? 'border-emerald-600 scale-105 shadow-sm' : 'border-transparent' }}
                                 {{ $flagged[$q->id] ?? false ? 'bg-amber-500 text-white' : (($answers[$q->id] ?? null) ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200') }}">
@@ -308,7 +310,7 @@
     </div>
 
     <!-- Alpine.js Scientific Calculator Modal / Dialog -->
-    <div x-show="showCalc" 
+    <div id="exam-calculator" x-show="showCalc"
          x-cloak
          class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm sm:bg-transparent sm:backdrop-blur-none sm:p-0 sm:fixed sm:top-20 sm:left-24 sm:w-auto" 
          @keydown.escape.window="showCalc = false"

@@ -1,8 +1,9 @@
-<div x-data="{ open: @entangle('isOpen') }" x-show="open" 
-     class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
+<div x-data="{ open: @entangle('isOpen') }" x-show="open" x-cloak
+     @keydown.escape.window="$wire.close()"
+     class="fixed inset-0 z-[60] overflow-y-auto">
     
     <!-- Backdrop -->
-    <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" @click="open = false"></div>
+    <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" @click="$wire.close()"></div>
 
     <!-- Modal Container -->
     <div class="flex items-center justify-center min-h-screen p-4">
@@ -13,7 +14,7 @@
                     <h3 class="text-2xl font-bold text-gray-900 font-heading">Report Question Issue</h3>
                     <p class="text-xs text-gray-500 mt-1">Help us maintain the accuracy of our question bank.</p>
                 </div>
-                <button @click="open = false" class="text-gray-400 hover:text-gray-600 font-bold text-lg">&times;</button>
+                <button type="button" wire:click="close" aria-label="Close report dialog" class="min-h-10 min-w-10 text-gray-400 hover:text-gray-600 font-bold text-lg">&times;</button>
             </div>
 
             <!-- Form -->
@@ -41,7 +42,7 @@
 
                 <!-- Actions -->
                 <div class="flex justify-end space-x-3 pt-4 border-t border-gray-100">
-                    <button type="button" @click="open = false" 
+                    <button type="button" wire:click="close"
                             class="px-5 py-2.5 border border-gray-300 text-gray-700 font-bold rounded-2xl hover:bg-gray-50 transition-colors">
                         Cancel
                     </button>

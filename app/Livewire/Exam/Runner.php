@@ -156,39 +156,54 @@ class Runner extends Component
         
         if (!$examSession) return collect();
         
-        return Question::whereIn('id', function($query) {
-                $query->select('question_id')
-                    ->from('exam_answers')
-                    ->where('exam_session_id', $this->sessionId);
-            })
+        // Keep a stable question order for the whole session. A whereIn query
+        // has no ordering guarantee and could otherwise make a question appear
+        // under a different navigator number after a Livewire refresh.
+        return Question::query()
+            ->select('questions.*')
+            ->join('exam_answers', 'exam_answers.question_id', '=', 'questions.id')
+            ->where('exam_answers.exam_session_id', $this->sessionId)
             ->where('subject_id', $this->selectedSubjectId)
+            ->orderBy('exam_answers.id')
             ->get();
     }
     
     public function selectSubject($subjectId)
     {
+        if (!in_array((int) $subjectId, array_column($this->subjectList, 'id'), true)) {
+            return;
+        }
+
         $this->selectedSubjectId = $subjectId;
         $this->currentIndex = 0;
     }
     
     public function selectOption($questionId, $option)
     {
-        $this->answers[$questionId] = $option;
-        
-        // Save to DB in the background
+        $option = strtolower((string) $option);
+        if (!in_array($option, ['a', 'b', 'c', 'd', 'e'], true)) {
+            return;
+        }
+
         $answer = ExamAnswer::where('exam_session_id', $this->sessionId)
             ->where('question_id', $questionId)
             ->first();
-            
-        if ($answer) {
-            $question = Question::find($questionId);
-            $isCorrect = $question && $question->correct_option === $option;
-            
-            $answer->update([
-                'selected_option' => $option,
-                'is_correct' => $isCorrect,
-            ]);
+
+        // Only questions actually assigned to this student's session can be
+        // answered. Do not let a manipulated browser request affect UI state.
+        if (!$answer) {
+            return;
         }
+
+        $this->answers[$questionId] = $option;
+
+        $question = $answer->question;
+        $isCorrect = $question && strtolower((string) $question->correct_option) === $option;
+
+        $answer->update([
+            'selected_option' => $option,
+            'is_correct' => $isCorrect,
+        ]);
     }
     
     public function toggleFlag($questionId)
@@ -203,6 +218,10 @@ class Runner extends Component
 
     public function toggleBookmark($questionId)
     {
+        if (!ExamAnswer::where('exam_session_id', $this->sessionId)->where('question_id', $questionId)->exists()) {
+            return;
+        }
+
         $userId = Auth::id();
         $isBookmarked = !($this->bookmarked[$questionId] ?? false);
         $this->bookmarked[$questionId] = $isBookmarked;
@@ -221,13 +240,24 @@ class Runner extends Component
     
     public function navigate($index)
     {
-        $max = $this->questions->count() - 1;
-        $this->currentIndex = max(0, min($index, $max));
+        $max = max(0, $this->questions->count() - 1);
+        $this->currentIndex = max(0, min((int) $index, $max));
     }
     
-    public function syncTimer($remainingSeconds)
+    public function syncTimer($remainingSeconds = null)
     {
-        $this->timeRemaining = (int) $remainingSeconds;
+        // Time is derived on the server. The browser may pause, be throttled,
+        // or be modified; it must never be able to add exam time.
+        $examSession = ExamSession::where('id', $this->sessionId)
+            ->where('user_id', Auth::id())
+            ->where('status', 'in_progress')
+            ->first();
+
+        if (!$examSession) {
+            return;
+        }
+
+        $this->timeRemaining = $examSession->remainingSeconds();
         
         // Auto submit if no time left
         if ($this->timeRemaining <= 0) {
