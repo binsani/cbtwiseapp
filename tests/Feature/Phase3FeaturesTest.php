@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\User;
 use App\Models\PurchaseCode;
 use App\Mail\PremiumExpiringMail;
+use App\Services\PurchaseCodeRedemptionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Mail;
@@ -159,6 +160,32 @@ class Phase3FeaturesTest extends TestCase
 
         $this->assertTrue($code->isUsed());
         $this->assertEquals($user->id, $code->used_by_user_id);
+    }
+
+    public function test_redeemed_purchase_code_can_sign_its_student_in_again(): void
+    {
+        $admin = User::factory()->create();
+        $code = PurchaseCode::generate($admin->id, 30);
+        $service = app(PurchaseCodeRedemptionService::class);
+
+        $firstSignIn = $service->redeemOrSignIn($code->code);
+        $secondSignIn = $service->redeemOrSignIn($code->code);
+
+        $this->assertSame($firstSignIn['user']->id, $secondSignIn['user']->id);
+        $this->assertDatabaseCount('users', 2);
+    }
+
+    public function test_disabled_purchase_code_cannot_be_used_for_sign_in(): void
+    {
+        $admin = User::factory()->create();
+        $code = PurchaseCode::generate($admin->id, 30);
+        $service = app(PurchaseCodeRedemptionService::class);
+
+        $service->redeemOrSignIn($code->code);
+        $code->disable();
+
+        $this->expectException(\Illuminate\Validation\ValidationException::class);
+        $service->redeemOrSignIn($code->code);
     }
 
     /**

@@ -26,14 +26,14 @@ new #[Layout('layouts.guest')] class extends Component
         $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
     }
 
-    /** Redeem a new code and sign in without requiring email or password. */
+    /** Redeem a new code or sign in with an already activated code. */
     public function loginWithPurchaseCode(): void
     {
         $this->purchaseCode = strtoupper(trim($this->purchaseCode));
         $this->validate(['purchaseCode' => ['required', 'regex:/^CBT-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/']]);
 
         try {
-            $result = app(PurchaseCodeRedemptionService::class)->redeem($this->purchaseCode, request()->ip());
+            $result = app(PurchaseCodeRedemptionService::class)->redeemOrSignIn($this->purchaseCode, request()->ip());
             Auth::login($result['user']);
             Session::regenerate();
             $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
@@ -186,7 +186,7 @@ new #[Layout('layouts.guest')] class extends Component
                         class="w-full px-4 py-3 bg-white border border-slate-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 shadow-sm transition-all outline-none"
                     />
                     <p class="text-xs text-slate-500 leading-relaxed mt-1">
-                        Use a new purchase code to create and sign in to its assigned student account. No email or password is needed here.
+                        Use your purchase code to create your student account the first time, or sign in to the same account again. No email or password is needed.
                     </p>
                     @error('purchaseCode')
                         <p class="text-xs text-red-600 font-semibold mt-1">{{ $message }}</p>
@@ -204,13 +204,7 @@ new #[Layout('layouts.guest')] class extends Component
                 </button>
             </form>
 
-            <!-- Back to Login -->
-            <p class="mt-6 text-center text-sm text-slate-500 font-medium">
-                Already activated?
-                <button type="button" @click="tab = 'login'" class="font-bold text-emerald-700 hover:text-emerald-800 transition-colors ml-1">
-                    Log in here
-                </button>
-            </p>
+            <p class="mt-6 text-center text-sm text-slate-500 font-medium">Your code remains available for future sign-ins unless an administrator disables it.</p>
         </div>
 
     </div>

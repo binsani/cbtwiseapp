@@ -55,7 +55,7 @@ class PurchaseCode extends Model
 
     public function isAvailable(): bool
     {
-        if (in_array($this->status, ['disabled', 'cancelled'], true) || $this->disabled_at !== null) {
+        if ($this->isDisabled()) {
             return false;
         }
         if ($this->isUsed()) {
@@ -65,6 +65,11 @@ class PurchaseCode extends Model
             return false;
         }
         return true;
+    }
+
+    public function isDisabled(): bool
+    {
+        return in_array($this->status, ['disabled', 'cancelled'], true) || $this->disabled_at !== null;
     }
 
     /**
