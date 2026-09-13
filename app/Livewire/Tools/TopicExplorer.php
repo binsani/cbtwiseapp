@@ -75,9 +75,10 @@ class TopicExplorer extends Component
             $topicsQuery->where('name', 'like', '%' . trim($this->search) . '%');
         }
 
-        $topics = $topicsQuery->orderBy('sort_order')->get();
+        $topics = $topicsQuery->withCount('questions')->orderBy('sort_order')->get();
         $activeSubject = $this->selectedSubjectId ? Subject::find($this->selectedSubjectId) : null;
         $activeExam = $this->selectedExamId ? Exam::find($this->selectedExamId) : null;
+        $syllabusSource = config('syllabus_sources.' . $activeExam?->slug);
 
         return view('livewire.tools.topic-explorer', [
             'exams' => $exams,
@@ -85,6 +86,7 @@ class TopicExplorer extends Component
             'topics' => $topics,
             'activeSubject' => $activeSubject,
             'activeExam' => $activeExam,
+            'syllabusSource' => $syllabusSource,
         ])->layout('layouts.app');
     }
 }

@@ -11,7 +11,7 @@
                     Practice By Topic
                 </h1>
                 <p class="text-xs sm:text-sm text-slate-500 mt-1">
-                    Drill down into specific topics across UTME, WAEC, and NECO syllabuses. Strengthen weak areas with targeted questions.
+                    Explore a source-labelled curriculum map for UTME, WAEC, NECO, and Post-UTME preparation.
                 </p>
             </div>
 
@@ -62,6 +62,23 @@
             </div>
         </div>
 
+        @if($syllabusSource)
+            <div class="rounded-3xl border p-5 sm:p-6 {{ $syllabusSource['status'] === 'official' ? 'border-emerald-200 bg-emerald-50/60' : 'border-amber-200 bg-amber-50/60' }}">
+                <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                    <div>
+                        <p class="text-[11px] font-black uppercase tracking-wider {{ $syllabusSource['status'] === 'official' ? 'text-emerald-700' : 'text-amber-700' }}">Syllabus source and coverage</p>
+                        <p class="mt-1 text-sm font-extrabold text-slate-900">{{ $syllabusSource['label'] }}</p>
+                        <p class="mt-1 text-xs leading-relaxed text-slate-600">{{ $syllabusSource['note'] }}</p>
+                    </div>
+                    @if($syllabusSource['url'])
+                        <a href="{{ $syllabusSource['url'] }}" target="_blank" rel="noopener noreferrer" class="shrink-0 inline-flex items-center justify-center px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-700 hover:border-emerald-400 hover:text-emerald-700 transition-colors">
+                            View source ↗
+                        </a>
+                    @endif
+                </div>
+            </div>
+        @endif
+
         <!-- Topics Section -->
         <div class="space-y-4">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -72,7 +89,7 @@
                             {{ count($topics) }} topics
                         </span>
                     </h3>
-                    <p class="text-xs text-slate-500 mt-0.5">Select a topic below to start a dedicated practice session immediately.</p>
+                    <p class="text-xs text-slate-500 mt-0.5">Select a topic to set up focused practice. Question counts show questions explicitly tagged to that topic.</p>
                 </div>
 
                 <!-- Topic Search Box -->
@@ -111,7 +128,7 @@
                             </div>
 
                             <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between">
-                                <span class="text-[11px] text-slate-400 font-medium">Standard Syllabus</span>
+                                <span class="text-[11px] text-slate-400 font-medium">{{ number_format($topic->questions_count) }} tagged question{{ $topic->questions_count === 1 ? '' : 's' }}</span>
                                 <a href="{{ route('exam.setup', ['exam' => $activeExam?->slug ?? 'utme', 'subject' => $activeSubject?->id, 'topic' => $topic->id]) }}" 
                                    class="inline-flex items-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-xs transition-all">
                                     <span>Practice Topic</span>
