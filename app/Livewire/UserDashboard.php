@@ -5,7 +5,6 @@ namespace App\Livewire;
 use App\Models\Bookmark;
 use App\Models\ExamSession;
 use App\Models\ExamAnswer;
-use App\Models\Subject;
 use App\Models\User;
 use App\Jobs\StudyPlanJob;
 use Illuminate\Support\Facades\Auth;
@@ -52,32 +51,40 @@ class UserDashboard extends Component
         $this->referralCode = $user->referral_code;
         $this->isPremium = $user->isPremium();
         
-        // 1. Calculate general stats
-        $sessions = ExamSession::where('user_id', $user->id)
-            ->where('status', 'submitted')
-            ->get();
-            
-        $sessionIds = $sessions->pluck('id');
-        
-        $this->totalTestsTaken = $sessions->count();
-        $totalSeconds = $sessions->sum('duration_seconds');
+        // 1. Calculate dashboard summaries in SQL. Loading every historical
+        // session and answer into PHP became expensive for active students.
+        $submittedSessions = ExamSession::query()
+            ->where('user_id', $user->id)
+            ->where('status', 'submitted');
+        $sessionStats = (clone $submittedSessions)
+            ->selectRaw('COUNT(*) as tests_taken, COALESCE(SUM(duration_seconds), 0) as total_seconds')
+            ->first();
+
+        $this->totalTestsTaken = (int) ($sessionStats->tests_taken ?? 0);
+        $totalSeconds = (int) ($sessionStats->total_seconds ?? 0);
         $this->totalTimeSpentHours = round($totalSeconds / 3600, 1);
 
-        $this->totalAnswered = ExamAnswer::whereIn('exam_session_id', $sessionIds)
-            ->whereNotNull('selected_option')
-            ->count();
-            
-        $correct = ExamAnswer::whereIn('exam_session_id', $sessionIds)
-            ->where('is_correct', true)
-            ->count();
+        $answerStats = ExamAnswer::query()
+            ->join('exam_sessions', 'exam_answers.exam_session_id', '=', 'exam_sessions.id')
+            ->where('exam_sessions.user_id', $user->id)
+            ->where('exam_sessions.status', 'submitted')
+            ->selectRaw('SUM(CASE WHEN exam_answers.selected_option IS NOT NULL THEN 1 ELSE 0 END) as answered')
+            ->selectRaw('SUM(CASE WHEN exam_answers.is_correct = 1 THEN 1 ELSE 0 END) as correct')
+            ->first();
+
+        $this->totalAnswered = (int) ($answerStats->answered ?? 0);
+        $correct = (int) ($answerStats->correct ?? 0);
         
         $this->accuracy = $this->totalAnswered > 0 ? round(($correct / $this->totalAnswered) * 100, 1) : 0;
 
         // 2. Daily Goal & Plan Limits
         $this->dailyGoal = config('cbtwise.free_daily_limit', 20);
         $this->dailyQuestionsUsed = $user->daily_question_count ?? 0;
-        $this->todayAnswered = ExamAnswer::whereIn('exam_session_id', $sessionIds)
-            ->whereDate('updated_at', today())
+        $this->todayAnswered = ExamAnswer::query()
+            ->join('exam_sessions', 'exam_answers.exam_session_id', '=', 'exam_sessions.id')
+            ->where('exam_sessions.user_id', $user->id)
+            ->where('exam_sessions.status', 'submitted')
+            ->whereDate('exam_answers.updated_at', today())
             ->whereNotNull('selected_option')
             ->count();
 
@@ -115,18 +122,23 @@ class UserDashboard extends Component
             ->get();
             
         // 7. Subject Performance for Chart.js & Focus Areas
-        $subAnswers = ExamAnswer::whereIn('exam_session_id', $sessionIds)
+        $subjectRows = ExamAnswer::query()
+            ->join('exam_sessions', 'exam_answers.exam_session_id', '=', 'exam_sessions.id')
             ->join('questions', 'exam_answers.question_id', '=', 'questions.id')
             ->join('subjects', 'questions.subject_id', '=', 'subjects.id')
-            ->select('subjects.name as subject_name', 'exam_answers.is_correct')
+            ->where('exam_sessions.user_id', $user->id)
+            ->where('exam_sessions.status', 'submitted')
+            ->select('subjects.id as subject_id', 'subjects.name as subject_name')
+            ->selectRaw('COUNT(*) as total_answers')
+            ->selectRaw('SUM(CASE WHEN exam_answers.is_correct = 1 THEN 1 ELSE 0 END) as correct_answers')
+            ->groupBy('subjects.id', 'subjects.name')
             ->get();
-            
-        $grouped = $subAnswers->groupBy('subject_name');
-        
-        foreach ($grouped as $name => $group) {
-            $total = $group->count();
-            $corr = $group->where('is_correct', true)->count();
-            $this->subjectPerformance[$name] = round(($corr / $total) * 100, 1);
+
+        foreach ($subjectRows as $subjectRow) {
+            $this->subjectPerformance[$subjectRow->subject_name] = round(
+                ((int) $subjectRow->correct_answers / max(1, (int) $subjectRow->total_answers)) * 100,
+                1,
+            );
         }
         
         // Sort subjects ascending to identify weak vs strong
@@ -137,11 +149,11 @@ class UserDashboard extends Component
             $weakestName = reset($subNames);
             $strongestName = end($subNames);
             
-            $weakestSub = Subject::where('name', $weakestName)->first();
+            $weakestSub = $subjectRows->firstWhere('subject_name', $weakestName);
             $this->weakestSubject = [
                 'name' => $weakestName,
                 'accuracy' => $this->subjectPerformance[$weakestName],
-                'id' => $weakestSub?->id,
+                'id' => $weakestSub?->subject_id,
             ];
             $this->strongestSubject = [
                 'name' => $strongestName,

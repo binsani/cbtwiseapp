@@ -186,13 +186,22 @@ class User extends Authenticatable implements MustVerifyEmail
         $today    = now($tz)->toDateString();
         $yesterday = now($tz)->subDay()->toDateString();
 
-        if ($this->last_active_date?->toDateString() === $yesterday) {
-            $this->increment('study_streak_days');
-        } elseif ($this->last_active_date?->toDateString() !== $today) {
-            $this->update(['study_streak_days' => 1]);
+        // A dashboard visit should not write to the database repeatedly on the
+        // same day. It only needs to update the streak once per local day.
+        if ($this->last_active_date?->toDateString() === $today) {
+            return;
         }
 
-        $this->update(['last_active_date' => $today]);
+        if ($this->last_active_date?->toDateString() === $yesterday) {
+            $this->increment('study_streak_days');
+            $this->update(['last_active_date' => $today]);
+            return;
+        }
+
+        $this->update([
+            'study_streak_days' => 1,
+            'last_active_date' => $today,
+        ]);
     }
 
     // ── Scopes ────────────────────────────────────────────────────────────────
