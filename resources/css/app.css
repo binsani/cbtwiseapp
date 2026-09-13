@@ -3,6 +3,11 @@
 @tailwind utilities;
 
 @layer base {
+    /* Prevent Alpine-controlled dialogs from flashing before Alpine starts. */
+    [x-cloak] {
+        display: none !important;
+    }
+
     :root {
         --cbt-primary: #059669;
         --cbt-primary-dark: #047857;

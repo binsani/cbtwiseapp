@@ -4,7 +4,7 @@
         currentIndex: @entangle('currentIndex'),
         selectedSubjectId: @entangle('selectedSubjectId')
      })"
-     x-init="init()"
+     x-init="showCalc = false; init()"
      @keydown.window="handleKey($event)">
 
     <!-- Top Navigation Bar -->
@@ -374,7 +374,8 @@
 
     <!-- Alpine / JS Helpers -->
     @script
-        document.addEventListener('alpine:init', () => {
+        (() => {
+        const registerExamRunnerComponents = () => {
             Alpine.data('examRunner', (config) => ({
                 timeRemaining: config.timeRemaining,
                 currentIndex: config.currentIndex,
@@ -514,7 +515,17 @@
                     }
                 }
             }));
-        });
+        };
+
+        // Livewire evaluates @script after its JavaScript (and sometimes after
+        // Alpine's alpine:init event) has already loaded. Register immediately
+        // when Alpine exists; only wait for the event during an early load.
+        if (window.Alpine) {
+            registerExamRunnerComponents();
+        } else {
+            document.addEventListener('alpine:init', registerExamRunnerComponents, { once: true });
+        }
+        })();
     @endscript
 
     <!-- Livewire Question Reporting Modal -->
