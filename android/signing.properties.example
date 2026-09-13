@@ -1,0 +1,6 @@
+# Copy this file to signing.properties and replace every placeholder locally.
+# Never commit your real signing.properties file or your keystore.
+storeFile=keystore/cbtwise-release-v2.jks
+storePassword=replace-with-keystore-password
+keyAlias=cbtwise
+keyPassword=replace-with-key-password

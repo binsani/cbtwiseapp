@@ -29,3 +29,5 @@ Thumbs.db
 /dist
 /php-win/
 /public/downloads/
+/android/signing.properties
+/android/keystore/
