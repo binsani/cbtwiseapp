@@ -16,13 +16,14 @@
         "electron:build:linux": "electron-builder --linux AppImage deb",
         "electron:build:mac": "electron-builder --mac dmg zip",
         "electron:build:all": "electron-builder -mwl",
-        "mobile:sync": "cap sync",
+        "mobile:sync": "cap sync && node scripts/prune-mobile-assets.mjs",
         "mobile:open": "cap open android"
     },
     "build": {
         "appId": "com.cbtwise.app",
         "productName": "CBTwise",
         "asar": false,
+        "compression": "maximum",
         "directories": {
             "output": "dist"
         },
@@ -38,6 +39,8 @@
             "database/**/*",
             "lang/**/*",
             "public/**/*",
+            "!public/downloads/**",
+            "!public/storage/**",
             "resources/views/**/*",
             "routes/**/*",
             "storage/**/*",
