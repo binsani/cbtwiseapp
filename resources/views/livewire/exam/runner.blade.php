@@ -150,7 +150,7 @@
                             </section>
                         @endif
                         <div class="prose max-w-none text-gray-800 text-base sm:text-lg mb-6 sm:mb-8 leading-relaxed overflow-x-auto break-words">
-                            {!! $activeQuestion->question_text !!}
+                            {!! nl2br(e(strip_tags($activeQuestion->question_text))) !!}
                             
                             @if($activeQuestion->question_image)
                                 <div class="mt-4">
@@ -173,7 +173,7 @@
                                     </span>
                                     
                                     <!-- Option Content -->
-                                    <span class="min-w-0 break-words text-gray-700 font-medium leading-relaxed group-hover:text-emerald-950">{!! $text !!}</span>
+                                    <span class="min-w-0 break-words text-gray-700 font-medium leading-relaxed group-hover:text-emerald-950">{!! nl2br(e(strip_tags($text))) !!}</span>
                                 </div>
                             @endforeach
                         </div>

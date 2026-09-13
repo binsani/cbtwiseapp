@@ -122,7 +122,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 // Admin Panel Routing (Supports all administrative staff roles)
-Route::middleware(['auth', 'role:admin|moderator|support|content_editor|analyst'])->prefix('admin')->group(function () {
+// High-impact administrative actions remain administrator-only until
+// dedicated, per-action permission policies are introduced.
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::get('/', AdminDashboard::class)->name('admin');
     Route::get('dashboard', AdminDashboard::class)->name('admin.dashboard');
     Route::get('questions', \App\Livewire\Admin\Questions::class)->name('admin.questions');

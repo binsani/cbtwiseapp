@@ -136,7 +136,7 @@
 
                 <!-- Question Text -->
                 <div class="text-slate-800 text-base mb-6 leading-relaxed">
-                    {!! $q['question_text'] !!}
+                    {!! nl2br(e(strip_tags($q['question_text']))) !!}
                     @if($q['question_image'])
                         <div class="mt-3">
                             <img src="{{ asset('storage/' . $q['question_image']) }}" alt="Question Image" class="max-h-48 rounded-xl">
@@ -154,7 +154,7 @@
                                     {{ $q['correct_option'] === $opt ? 'bg-emerald-500 border-emerald-500 text-white' : ($q['selected_option'] === $opt ? 'bg-rose-500 border-rose-500 text-white' : 'bg-white border-slate-200 text-slate-400') }}">
                                     {{ $opt }}
                                 </span>
-                                <span>{!! $q['option_' . $opt] !!}</span>
+                                <span>{!! nl2br(e(strip_tags($q['option_' . $opt]))) !!}</span>
                             </div>
                         @endif
                     @endforeach

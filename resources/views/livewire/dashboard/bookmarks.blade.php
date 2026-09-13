@@ -67,7 +67,7 @@
 
                     <!-- Question Text -->
                     <div class="text-slate-800 text-sm leading-relaxed">
-                        {!! $bookmark->question->question_text !!}
+                        {!! nl2br(e(strip_tags($bookmark->question->question_text))) !!}
                         @if($bookmark->question->question_image)
                             <div class="mt-3">
                                 <img src="{{ asset('storage/' . $bookmark->question->question_image) }}" alt="Question Image" class="max-h-48 rounded-xl">
@@ -85,7 +85,7 @@
                                         {{ $bookmark->question->correct_option === $opt ? 'bg-emerald-500 border-emerald-500 text-white' : 'bg-white border-slate-200 text-slate-450' }}">
                                         {{ $opt }}
                                     </span>
-                                    <span>{!! $bookmark->question->{'option_' . $opt} !!}</span>
+                                    <span>{!! nl2br(e(strip_tags($bookmark->question->{'option_' . $opt}))) !!}</span>
                                 </div>
                             @endif
                         @endforeach

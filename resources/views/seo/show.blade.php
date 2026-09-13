@@ -91,7 +91,7 @@
               >
                 <span class="text-sm font-semibold text-slate-800 leading-relaxed">
                   <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-black mr-2 flex-shrink-0">{{ $i + 1 }}</span>
-                  {!! $q->question_text !!}
+                  {!! nl2br(e(strip_tags($q->question_text))) !!}
                 </span>
                 <svg x-bind:class="open === {{ $i }} ? 'rotate-180' : ''" class="w-4 h-4 text-slate-400 flex-shrink-0 mt-0.5 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
               </button>
@@ -109,7 +109,7 @@
                 @if($q->explanation)
                 <div class="mt-3 p-4 bg-blue-50 border border-blue-100 rounded-xl text-xs text-blue-800">
                   <span class="font-black block mb-1">💡 Explanation</span>
-                  {!! $q->explanation !!}
+                  {!! nl2br(e(strip_tags($q->explanation))) !!}
                 </div>
                 @endif
               </div>

@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Component;
 
 class Redeem extends Component
@@ -37,8 +38,14 @@ class Redeem extends Component
     {
         $secret = config('services.recaptcha.secret_key') ?? env('RECAPTCHA_SECRET_KEY');
 
-        if (app()->environment('testing') || !$secret) {
+        if (app()->environment('testing')) {
             return true;
+        }
+
+        if (!$secret) {
+            Log::critical('reCAPTCHA is not configured for purchase-code redemption.');
+            $this->addError('code', 'Purchase-code sign-in is temporarily unavailable. Please contact support.');
+            return false;
         }
 
         if (!$this->recaptchaToken) {
@@ -69,6 +76,13 @@ class Redeem extends Component
     public function redeem()
     {
         $this->validate();
+
+        $limiterKey = 'purchase-code-redeem:' . request()->ip();
+        if (RateLimiter::tooManyAttempts($limiterKey, 5)) {
+            $this->addError('code', 'Too many attempts. Please wait one minute and try again.');
+            return;
+        }
+        RateLimiter::hit($limiterKey, 60);
 
         // 1. Verify reCAPTCHA
         if (!$this->verifyRecaptcha()) {
