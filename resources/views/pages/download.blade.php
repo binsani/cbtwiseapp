@@ -87,7 +87,7 @@
                         <span>Download for Windows</span>
                     </a>
                     <p class="text-[11px] text-center text-slate-400 mt-2.5 font-medium">
-                        Offline Setup .exe (~476MB) &bull; Includes Offline Engine & Questions
+                        Offline Setup .exe (~162MB) &bull; Includes Offline Engine & Questions
                     </p>
                 </div>
             </div>
