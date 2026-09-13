@@ -5,6 +5,41 @@ namespace App\Services;
 class JambBrochureService
 {
     /**
+     * Requirements, approved programmes and institution-specific waivers are
+     * maintained by JAMB. The live official catalogue is therefore the final
+     * authority, rather than this local planning guide.
+     */
+    public const OFFICIAL_ELIGIBILITY_URL = 'https://eligibility.jamb.gov.ng/';
+    public const OFFICIAL_IBASS_URL = 'https://ibass.jamb.gov.ng/';
+    public const OFFICIAL_FAQ_URL = 'https://www.jamb.gov.ng/FAQ';
+
+    public static function officialSources(): array
+    {
+        return [
+            'eligibility' => [
+                'label' => 'JAMB IBASS Eligibility Checker',
+                'url' => self::OFFICIAL_ELIGIBILITY_URL,
+                'description' => 'Search every available programme by institution and confirm the current UTME subjects, O’Level requirements and any waiver.',
+            ],
+            'brochure' => [
+                'label' => 'JAMB Integrated Brochure & Syllabus',
+                'url' => self::OFFICIAL_IBASS_URL,
+                'description' => 'JAMB’s official brochure and syllabus reference.',
+            ],
+            'faq' => [
+                'label' => 'JAMB candidate FAQ',
+                'url' => self::OFFICIAL_FAQ_URL,
+                'description' => 'JAMB directs candidates to IBASS to verify programmes and subject combinations.',
+            ],
+        ];
+    }
+
+    public static function getQuickGuideCourseCount(): int
+    {
+        return collect(self::getFaculties())->sum(fn (array $faculty) => count($faculty['courses']));
+    }
+
+    /**
      * Get all faculties with their courses and UTME requirements.
      */
     public static function getFaculties(): array

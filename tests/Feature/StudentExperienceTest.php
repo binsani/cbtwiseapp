@@ -121,6 +121,8 @@ class StudentExperienceTest extends TestCase
         $response = $this->actingAs($this->student)->get('/jamb-checker');
         $response->assertStatus(200);
         $response->assertSee('JAMB Course and Subject Combination Checker');
+        $response->assertSee('Verify every final choice with JAMB');
+        $response->assertSee('https://eligibility.jamb.gov.ng/', false);
         $response->assertSee('Medicine and Surgery (MBBS)');
         $response->assertSee('Computer Science / Information Technology');
 

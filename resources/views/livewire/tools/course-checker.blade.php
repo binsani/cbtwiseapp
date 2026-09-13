@@ -3,7 +3,7 @@
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
                 <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-600 mb-1">
-                    <span>JAMB UTME Official Guide</span>
+                    <span>JAMB UTME Guide</span>
                     <span>&bull;</span>
                     <span>Brochure Checker</span>
                 </div>
@@ -11,21 +11,46 @@
                     JAMB Course and Subject Combination Checker
                 </h1>
                 <p class="text-xs sm:text-sm text-slate-500 mt-1">
-                    Instant lookup of compulsory JAMB 4-subject combinations, O'Level subject prerequisites, and top Nigerian universities.
+                    Use our quick guide to plan your subjects, then confirm your exact course and institution in JAMB's official IBASS checker.
                 </p>
             </div>
 
             <div class="flex items-center gap-2">
-                <a href="{{ route('exam.setup', ['exam' => 'utme']) }}" 
+                <a href="{{ $officialSources['eligibility']['url'] }}" target="_blank" rel="noopener noreferrer"
                    class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white rounded-xl text-xs sm:text-sm font-black shadow-sm transition-all flex items-center gap-1.5">
-                    <span>Practice UTME Now</span>
-                    <span>&rarr;</span>
+                    <span>Open Official JAMB Checker</span>
+                    <span aria-hidden="true">↗</span>
                 </a>
             </div>
         </div>
     </x-slot>
 
     <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 space-y-8">
+        <section class="rounded-3xl border border-emerald-200 bg-emerald-50/60 p-5 sm:p-6">
+            <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5">
+                <div class="max-w-3xl">
+                    <div class="flex items-center gap-2 text-emerald-800 font-black text-sm">
+                        <span aria-hidden="true">✓</span>
+                        <span>Verify every final choice with JAMB</span>
+                    </div>
+                    <p class="mt-2 text-sm leading-6 text-slate-700">
+                        JAMB states that its IBASS Eligibility Checker provides the programmes available at each tertiary institution and the UTME subject combination for each course. Requirements, approved programmes and institution waivers can change, so this page is a planning guide—not a substitute for IBASS.
+                    </p>
+                </div>
+                <a href="{{ $officialSources['eligibility']['url'] }}" target="_blank" rel="noopener noreferrer"
+                   class="shrink-0 inline-flex justify-center items-center gap-2 rounded-xl bg-emerald-700 px-5 py-3 text-sm font-black text-white hover:bg-emerald-800 transition-colors">
+                    Check course & institution on JAMB IBASS <span aria-hidden="true">↗</span>
+                </a>
+            </div>
+            <div class="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                @foreach($officialSources as $source)
+                    <a href="{{ $source['url'] }}" target="_blank" rel="noopener noreferrer" class="rounded-2xl border border-emerald-100 bg-white p-4 hover:border-emerald-300 transition-colors">
+                        <p class="text-xs font-black text-slate-900">{{ $source['label'] }} <span aria-hidden="true">↗</span></p>
+                        <p class="mt-1 text-[11px] leading-4 text-slate-500">{{ $source['description'] }}</p>
+                    </a>
+                @endforeach
+            </div>
+        </section>
         <!-- Search & Filter Controls -->
         <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm space-y-5">
             <div class="flex flex-col md:flex-row gap-4">
@@ -120,7 +145,7 @@
                         <div class="bg-white/5 border border-white/10 rounded-2xl p-4">
                             <h4 class="text-xs font-bold uppercase tracking-wider text-slate-300 mb-1 flex items-center gap-1.5">
                                 <span>🏛️</span>
-                                <span>Accredited Universities Offering Course</span>
+                                <span>Example institutions — verify availability on IBASS</span>
                             </h4>
                             <div class="flex flex-wrap gap-1.5 mt-2">
                                 @foreach($activeCourse['institutions'] as $inst)
@@ -154,7 +179,7 @@
                 <h3 class="text-base font-extrabold text-slate-900 font-heading">
                     Matching Courses ({{ count($courses) }})
                 </h3>
-                <span class="text-xs text-slate-400">Click any course to inspect prerequisites</span>
+                <span class="text-xs text-slate-400">{{ $quickGuideCourseCount }} common course guides • confirm your institution on IBASS</span>
             </div>
 
             @if(count($courses) === 0)
@@ -190,7 +215,7 @@
 
                                 <!-- Subject combination badges -->
                                 <div class="mt-4">
-                                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block mb-1.5">JAMB 4 Subjects:</span>
+                                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block mb-1.5">Typical JAMB 4 Subjects:</span>
                                     <div class="flex flex-wrap gap-1.5">
                                         @foreach($course['utme_subjects'] as $subj)
                                             <span class="px-2 py-1 bg-slate-100 text-slate-700 group-hover:bg-emerald-50 group-hover:text-emerald-800 rounded-lg text-[11px] font-bold transition-colors">

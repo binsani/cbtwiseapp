@@ -45,6 +45,8 @@ class CourseChecker extends Component
             'faculties' => $faculties,
             'courses' => $courses,
             'activeCourse' => $activeCourse,
+            'officialSources' => JambBrochureService::officialSources(),
+            'quickGuideCourseCount' => JambBrochureService::getQuickGuideCourseCount(),
         ])->layout('layouts.app');
     }
 }
