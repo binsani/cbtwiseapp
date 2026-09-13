@@ -353,7 +353,7 @@ class BulkSeeder extends Component
                     ]);
                 }
 
-                $knownHashes[$hash] = $question->id ?? true;
+                $knownHashes[$hash] = $this->dryRun ? true : $question->id;
                 $this->totalCreated++;
             }
 
