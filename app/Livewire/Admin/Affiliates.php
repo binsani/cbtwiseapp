@@ -4,6 +4,8 @@ namespace App\Livewire\Admin;
 
 use App\Models\Affiliate;
 use App\Models\AffiliatePayout;
+use App\Models\User;
+use App\Services\AdminLogger;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -19,6 +21,11 @@ class Affiliates extends Component
     public $selectedAffiliateId;
     public $payoutAmount;
     public $paystackReference;
+
+    // Direct affiliate enrolment for existing students.
+    public $showCreateModal = false;
+    public $affiliateEmail = '';
+    public $newAffiliateStatus = 'active';
     
     protected $updatesQueryString = [
         'search' => ['except' => ''],
@@ -57,6 +64,50 @@ class Affiliates extends Component
         $this->payoutAmount = $affiliate->balance_ngn;
         $this->paystackReference = 'MAN-' . strtoupper(bin2hex(random_bytes(6)));
         $this->showPayoutModal = true;
+    }
+
+    public function openCreateModal(): void
+    {
+        $this->resetValidation();
+        $this->affiliateEmail = '';
+        $this->newAffiliateStatus = 'active';
+        $this->showCreateModal = true;
+    }
+
+    public function createAffiliate(): void
+    {
+        $this->validate([
+            'affiliateEmail' => ['required', 'email'],
+            'newAffiliateStatus' => ['required', 'in:pending,active'],
+        ]);
+
+        $user = User::where('email', strtolower(trim($this->affiliateEmail)))->first();
+
+        if (! $user) {
+            $this->addError('affiliateEmail', 'No student account was found with this email address.');
+            return;
+        }
+
+        if (Affiliate::where('user_id', $user->id)->exists()) {
+            $this->addError('affiliateEmail', 'This student already has an affiliate account.');
+            return;
+        }
+
+        $affiliate = Affiliate::create([
+            'user_id' => $user->id,
+            'status' => $this->newAffiliateStatus,
+            'balance_ngn' => 0,
+            'total_earned_ngn' => 0,
+            'approved_at' => $this->newAffiliateStatus === 'active' ? now() : null,
+        ]);
+
+        AdminLogger::log('affiliate.created', $affiliate, [
+            'user_id' => $user->id,
+            'status' => $affiliate->status,
+        ]);
+
+        $this->showCreateModal = false;
+        session()->flash('success', "Affiliate account created for {$user->name}.");
     }
 
     public function recordPayout()

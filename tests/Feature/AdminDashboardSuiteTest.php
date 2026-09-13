@@ -3,11 +3,13 @@
 namespace Tests\Feature;
 
 use App\Models\Exam;
+use App\Models\Affiliate;
 use App\Models\PurchaseCode;
 use App\Models\Question;
 use App\Models\Subject;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -96,5 +98,27 @@ class AdminDashboardSuiteTest extends TestCase
         $hash2 = Question::dedupeHash($text2);
 
         $this->assertEquals($hash1, $hash2);
+    }
+
+    public function test_admin_can_add_an_existing_student_as_an_affiliate(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+        $student = User::factory()->create(['email' => 'affiliate.student@example.com']);
+
+        $this->actingAs($admin);
+
+        Livewire::test(\App\Livewire\Admin\Affiliates::class)
+            ->call('openCreateModal')
+            ->set('affiliateEmail', $student->email)
+            ->set('newAffiliateStatus', 'active')
+            ->call('createAffiliate')
+            ->assertHasNoErrors();
+
+        $this->assertDatabaseHas('affiliates', [
+            'user_id' => $student->id,
+            'status' => 'active',
+        ]);
+        $this->assertSame(1, Affiliate::count());
     }
 }

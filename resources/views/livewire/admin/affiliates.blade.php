@@ -12,6 +12,9 @@
                 <h1 class="text-2xl font-black text-slate-950 font-heading">{{ __('Manage Affiliates') }}</h1>
                 <p class="text-xs text-slate-500 mt-0.5">{{ __('Review user partner applications, approve payouts, and monitor performance.') }}</p>
             </div>
+            <button wire:click="openCreateModal" class="inline-flex items-center justify-center px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-extrabold rounded-xl transition-all shadow-sm">
+                + {{ __('Add Affiliate') }}
+            </button>
         </div>
 
         @if (session()->has('success'))
@@ -73,8 +76,12 @@
             </div>
 
             @if($affiliates->isEmpty())
-                <div class="text-center py-12 text-slate-400">
-                    {{ __('No affiliates found.') }}
+                <div class="text-center py-12">
+                    <p class="text-slate-500 font-semibold">{{ __('No affiliate accounts have been created yet.') }}</p>
+                    <p class="mt-1 text-sm text-slate-400">{{ __('Students can activate their own affiliate account, or add one here using their account email.') }}</p>
+                    <button wire:click="openCreateModal" class="mt-5 px-4 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-sm font-extrabold rounded-xl transition-all">
+                        {{ __('Add an Affiliate') }}
+                    </button>
                 </div>
             @else
                 <div class="overflow-x-auto">
@@ -145,6 +152,36 @@
                 </div>
             @endif
         </div>
+
+        {{-- Create Affiliate Modal --}}
+        @if($showCreateModal)
+            <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+                <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-xl">
+                    <h3 class="text-lg font-black text-slate-900">{{ __('Add Affiliate') }}</h3>
+                    <p class="mt-1 text-xs text-slate-500">{{ __('Enter the email address of an existing student account.') }}</p>
+
+                    <form wire:submit="createAffiliate" class="mt-5 space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">{{ __('Student Email') }}</label>
+                            <input type="email" wire:model="affiliateEmail" placeholder="student@example.com" class="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5 text-sm text-slate-700 font-semibold focus:outline-none">
+                            @error('affiliateEmail') <span class="text-xs text-rose-600 mt-1 block">{{ $message }}</span> @enderror
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">{{ __('Initial Status') }}</label>
+                            <select wire:model="newAffiliateStatus" class="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5 text-sm text-slate-700 font-semibold focus:outline-none">
+                                <option value="active">{{ __('Active') }}</option>
+                                <option value="pending">{{ __('Pending approval') }}</option>
+                            </select>
+                            @error('newAffiliateStatus') <span class="text-xs text-rose-600 mt-1 block">{{ $message }}</span> @enderror
+                        </div>
+                        <div class="flex justify-end gap-3 pt-2">
+                            <button type="button" wire:click="$set('showCreateModal', false)" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-black rounded-xl transition-all">{{ __('Cancel') }}</button>
+                            <button type="submit" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black rounded-xl transition-all">{{ __('Create Affiliate') }}</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        @endif
 
         {{-- Record Manual Payout Modal --}}
         @if($showPayoutModal)
