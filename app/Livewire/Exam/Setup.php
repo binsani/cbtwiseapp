@@ -202,14 +202,63 @@ class Setup extends Component
     {
         $user = Auth::user();
 
+        if (!in_array($this->mode, ['practice', 'mock', 'study'], true)) {
+            $this->addError('mode', 'Please select a valid practice mode.');
+            return;
+        }
+
+        $exam = Exam::active()->find($this->selectedExamId);
+        if (!$exam) {
+            $this->addError('selectedExamId', 'Please select an available examination board.');
+            $this->currentStep = 1;
+            return;
+        }
+
+        $validSubjectIds = $exam->subjects()->whereIn('id', $this->selectedSubjects)->pluck('id')->map(fn ($id) => (string) $id)->all();
+        if (count($validSubjectIds) !== count($this->selectedSubjects)) {
+            $this->addError('selectedSubjects', 'One or more selected subjects do not belong to this examination.');
+            $this->currentStep = 3;
+            return;
+        }
+
+        if ($exam->slug === 'utme' && $this->selectedTopicId) {
+            // A topic drill is intentionally a one-subject focused practice,
+            // not a four-subject UTME mock.
+            if (count($validSubjectIds) !== 1) {
+                $this->addError('selectedSubjects', 'Topic practice requires one selected subject.');
+                $this->currentStep = 3;
+                return;
+            }
+        } elseif ($exam->slug === 'utme') {
+            $englishId = $exam->subjects()->where('slug', 'english-language')->value('id');
+            if (count($validSubjectIds) !== 4 || !$englishId || !in_array((string) $englishId, $validSubjectIds, true)) {
+                $this->addError('selectedSubjects', 'JAMB UTME requires exactly four subjects, including English Language.');
+                $this->currentStep = 3;
+                return;
+            }
+        } elseif (count($validSubjectIds) < 1 || count($validSubjectIds) > 9) {
+            $this->addError('selectedSubjects', 'Please select between one and nine subjects.');
+            $this->currentStep = 3;
+            return;
+        }
+
+        if ($this->mode === 'mock' && !$user->isPremium()) {
+            session()->flash('error', 'Timed mock exams are available on Premium.');
+            $this->currentStep = 2;
+            return;
+        }
+
+        if ($this->selectedTopicId && !\App\Models\Topic::where('id', $this->selectedTopicId)->whereIn('subject_id', $validSubjectIds)->exists()) {
+            $this->selectedTopicId = null;
+        }
+
         // 1. Check daily question limit for free users
         if ($user->hasReachedDailyLimit()) {
             session()->flash('error', 'You have reached your free daily practice limit of ' . config('cbtwise.free_daily_limit', 20) . ' questions. Please upgrade to premium for unlimited practice.');
             return;
         }
 
-        $exam = Exam::findOrFail($this->selectedExamId);
-        $subjectCount = count($this->selectedSubjects);
+        $subjectCount = count($validSubjectIds);
 
         // Calculate question count and duration
         if ($this->mode === 'mock') {
@@ -233,7 +282,7 @@ class Setup extends Component
             'user_id' => $user->id,
             'exam_id' => $exam->id,
             'mode' => $this->mode,
-            'subjects' => $this->selectedSubjects,
+            'subjects' => $validSubjectIds,
             'year' => $this->year === 'random' ? null : (int) $this->year,
             'topic_id' => $this->selectedTopicId ? (int) $this->selectedTopicId : null,
             'total_questions' => $totalQuestions,

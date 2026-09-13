@@ -64,6 +64,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard/history', ExamHistory::class)->name('dashboard.history');
 
     // Practice and Mock Exams shortcuts
+    Route::redirect('exam', 'exam/setup')->name('exam.home');
     Route::get('practice', ExamSetup::class)->name('practice');
     Route::get('practice/start', ExamSetup::class)->name('practice.start');
     Route::get('mock-exams', ExamSetup::class)->name('mock-exams');

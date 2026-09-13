@@ -97,7 +97,7 @@
                             </div>
                             <div class="sm:mt-4">
                                 <h4 class="text-base sm:text-lg font-bold text-gray-900">Standard Practice</h4>
-                                <p class="text-sm text-gray-500 mt-0.5 sm:mt-1">Untimed session with customizable sizes. Great for revision.</p>
+                                <p class="text-sm text-gray-500 mt-0.5 sm:mt-1">Custom-sized revision session with a clear countdown and saved answers.</p>
                             </div>
                         </div>
                         <span class="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full self-start mt-3 sm:mt-0">Free Access</span>
@@ -113,7 +113,7 @@
                             </div>
                             <div class="sm:mt-4">
                                 <h4 class="text-base sm:text-lg font-bold text-gray-900">Study Mode</h4>
-                                <p class="text-sm text-gray-500 mt-0.5 sm:mt-1">Provides instant explanations after answering each question.</p>
+                                <p class="text-sm text-gray-500 mt-0.5 sm:mt-1">Focused revision mode with saved answers for detailed review after the session.</p>
                             </div>
                         </div>
                         <span class="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full self-start mt-3 sm:mt-0">Free Access</span>

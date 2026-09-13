@@ -154,6 +154,12 @@
                 </div>
 
                 <!-- Question Text -->
+                @if($q['passage'])
+                    <section class="mb-5 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:p-5 text-sm leading-6 text-slate-700 whitespace-pre-line break-words">
+                        <p class="mb-2 text-xs font-extrabold uppercase tracking-wider text-slate-600">{{ $q['passage_label'] ?: 'Read the passage carefully' }}</p>
+                        {{ $q['passage'] }}
+                    </section>
+                @endif
                 <div class="prose max-w-none text-gray-800 text-lg mb-6 leading-relaxed">
                     {!! nl2br(e(strip_tags($q['question_text']))) !!}
                     @if($q['question_image'])

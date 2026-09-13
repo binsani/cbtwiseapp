@@ -25,6 +25,11 @@ class History extends Component
             return;
         }
 
+        if ($oldSession->mode === 'mock' && !$user->isPremium()) {
+            session()->flash('error', 'Timed mock exams are available on Premium.');
+            return;
+        }
+
         // Create identical session config
         $newSession = ExamSession::create([
             'user_id' => $user->id,
@@ -32,6 +37,7 @@ class History extends Component
             'mode' => $oldSession->mode,
             'subjects' => $oldSession->subjects,
             'year' => $oldSession->year,
+            'topic_id' => $oldSession->topic_id,
             'total_questions' => $oldSession->total_questions,
             'duration_seconds' => $oldSession->duration_seconds,
             'started_at' => now(),

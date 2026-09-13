@@ -49,6 +49,10 @@ class Results extends Component
 
     public function toggleBookmark($questionId)
     {
+        if (!in_array((int) $questionId, collect($this->reviewQuestions)->pluck('id')->map(fn ($id) => (int) $id)->all(), true)) {
+            return;
+        }
+
         $userId = Auth::id();
         $existing = Bookmark::where('user_id', $userId)->where('question_id', $questionId)->first();
 
@@ -70,12 +74,15 @@ class Results extends Component
     {
         $answers = ExamAnswer::where('exam_session_id', $this->examSession->id)
             ->with('question')
+            ->orderBy('id')
             ->get();
             
         $this->reviewQuestions = $answers->map(fn($ans) => [
             'id' => $ans->question_id,
             'question_text' => $ans->question->question_text,
             'question_image' => $ans->question->question_image,
+            'passage' => $ans->question->passage,
+            'passage_label' => $ans->question->passage_label,
             'option_a' => $ans->question->option_a,
             'option_b' => $ans->question->option_b,
             'option_c' => $ans->question->option_c,
@@ -131,6 +138,10 @@ class Results extends Component
             $minutes = max(1, (int) ceil($seconds / 60));
             session()->flash('error', "AI explanation limit reached (10/hour). Please try again in {$minutes} min.");
             return;
+        }
+
+        if (!in_array((int) $questionId, collect($this->reviewQuestions)->pluck('id')->map(fn ($id) => (int) $id)->all(), true)) {
+            abort(403);
         }
 
         $question = Question::findOrFail($questionId);
