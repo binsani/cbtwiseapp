@@ -3,6 +3,13 @@
 @tailwind utilities;
 
 @layer base {
+    :root {
+        --cbt-primary: #059669;
+        --cbt-primary-dark: #047857;
+        --cbt-surface: #ffffff;
+        --cbt-muted: #f8fafc;
+        --cbt-ink: #0f172a;
+    }
     html {
         -webkit-text-size-adjust: 100%;
         text-size-adjust: 100%;
@@ -36,6 +43,32 @@
 }
 
 @layer utilities {
+    /*
+     * Visual palette guardrail: older pages used blue, indigo, purple, cyan and
+     * teal interchangeably. Keep emerald for actions, amber for warnings and
+     * rose/red for destructive states; render all former accent colours as a
+     * calm slate neutral across web, mobile and desktop.
+     */
+    :is(.bg-blue-50, .bg-blue-100, .bg-indigo-50, .bg-indigo-100, .bg-purple-50, .bg-purple-100, .bg-violet-50, .bg-violet-100, .bg-cyan-50, .bg-cyan-100, .bg-sky-50, .bg-sky-100, .bg-teal-50, .bg-teal-100) {
+        background-color: #f8fafc !important;
+    }
+
+    :is(.text-blue-600, .text-blue-700, .text-blue-800, .text-indigo-600, .text-indigo-700, .text-indigo-800, .text-purple-600, .text-purple-700, .text-purple-800, .text-violet-600, .text-violet-700, .text-cyan-600, .text-cyan-700, .text-sky-600, .text-sky-700, .text-teal-600, .text-teal-700) {
+        color: #475569 !important;
+    }
+
+    :is(.border-blue-100, .border-blue-200, .border-blue-300, .border-indigo-100, .border-indigo-200, .border-indigo-300, .border-purple-100, .border-purple-200, .border-purple-300, .border-violet-100, .border-violet-200, .border-cyan-100, .border-cyan-200, .border-sky-100, .border-sky-200, .border-teal-100, .border-teal-200) {
+        border-color: #e2e8f0 !important;
+    }
+
+    :is([class*="from-blue-"], [class*="from-indigo-"], [class*="from-purple-"], [class*="from-violet-"], [class*="from-cyan-"], [class*="from-sky-"], [class*="from-teal-"]) {
+        --tw-gradient-from: #059669 var(--tw-gradient-from-position) !important;
+        --tw-gradient-to: rgb(5 150 105 / 0) var(--tw-gradient-to-position) !important;
+    }
+
+    :is([class*="to-blue-"], [class*="to-indigo-"], [class*="to-purple-"], [class*="to-violet-"], [class*="to-cyan-"], [class*="to-sky-"], [class*="to-teal-"]) {
+        --tw-gradient-to: #047857 var(--tw-gradient-to-position) !important;
+    }
     .scrollbar-none {
         -ms-overflow-style: none;
         scrollbar-width: none;
