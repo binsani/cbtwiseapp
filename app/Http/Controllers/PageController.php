@@ -67,7 +67,7 @@ class PageController extends Controller
     {
         $localPath = public_path('downloads/CBTwise-Setup.exe');
         if (file_exists($localPath)) {
-            return response()->download($localPath, 'CBTwise-Setup.exe');
+            return response()->download($localPath, 'CBTwise-Setup-1.0.0.exe');
         }
 
         return redirect('https://github.com/binsani/cbtwiseapp/releases/download/v1.0.0/CBTwise.Setup.1.0.0.exe');
