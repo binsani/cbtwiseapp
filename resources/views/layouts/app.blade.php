@@ -14,15 +14,9 @@
         <meta name="theme-color" content="#10b981">
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
 
-        <!-- Prefetching Key Routes -->
-        <link rel="prefetch" href="/dashboard">
-        <link rel="prefetch" href="/exam/setup">
-        <link rel="prefetch" href="/pricing">
-        <link rel="prefetch" href="/redeem">
-
         <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+        <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
+        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -31,8 +25,12 @@
         <script>
             if ('serviceWorker' in navigator) {
                 window.addEventListener('load', () => {
-                    navigator.serviceWorker.register('/sw.js')
-                        .then(reg => console.log('Service Worker registered successfully.'))
+                    navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' })
+                        .then(reg => {
+                            // Check for a new worker immediately after each
+                            // deployment without forcing a refresh mid-exam.
+                            reg.update();
+                        })
                         .catch(err => console.error('Service Worker registration failed: ', err));
                 });
             }
