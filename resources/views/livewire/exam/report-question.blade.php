@@ -1,8 +1,9 @@
+<div>
 @if($isOpen)
-<div class="fixed inset-0 z-[60] overflow-y-auto">
+<div class="fixed inset-0 z-[60] overflow-y-auto" role="dialog" aria-modal="true" aria-label="Report question issue">
     
     <!-- Backdrop -->
-    <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" @click="$wire.close()"></div>
+    <button type="button" wire:click="close" aria-label="Close report dialog" class="fixed inset-0 w-full h-full bg-slate-900/60 backdrop-blur-sm transition-opacity cursor-default"></button>
 
     <!-- Modal Container -->
     <div class="flex items-center justify-center min-h-screen p-4">
@@ -56,3 +57,4 @@
     </div>
 </div>
 @endif
+</div>
