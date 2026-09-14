@@ -131,6 +131,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::get('/', AdminDashboard::class)->name('admin');
     Route::get('dashboard', AdminDashboard::class)->name('admin.dashboard');
+    Route::get('topic-lessons', \App\Livewire\Admin\TopicLessons::class)->name('admin.topic-lessons');
     Route::get('questions', \App\Livewire\Admin\Questions::class)->name('admin.questions');
     Route::get('exams-subjects', \App\Livewire\Admin\ExamsSubjects::class)->name('admin.exams-subjects');
     Route::get('users', \App\Livewire\Admin\Users::class)->name('admin.users');
