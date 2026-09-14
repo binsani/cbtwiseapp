@@ -129,11 +129,10 @@
 
                             <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between">
                                 <span class="text-[11px] text-slate-400 font-medium">{{ number_format($topic->questions_count) }} tagged question{{ $topic->questions_count === 1 ? '' : 's' }}</span>
-                                <a href="{{ route('exam.setup', ['exam' => $activeExam?->slug ?? 'utme', 'subject' => $activeSubject?->id, 'topic' => $topic->id]) }}" 
-                                   class="inline-flex items-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-xs transition-all">
-                                    <span>Practice Topic</span>
-                                    <span>&rarr;</span>
-                                </a>
+                                <div class="flex items-center gap-2">
+                                    <a href="{{ route('topic.learn', $topic) }}" class="text-xs font-bold text-slate-600 hover:text-emerald-700">Learn</a>
+                                    <a href="{{ route('exam.setup', ['exam' => $activeExam?->slug ?? 'utme', 'subject' => $activeSubject?->id, 'topic' => $topic->id]) }}" class="inline-flex items-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-xs transition-all"><span>Practice</span><span>&rarr;</span></a>
+                                </div>
                             </div>
                         </div>
                     @endforeach

@@ -78,6 +78,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('tools/topics', \App\Livewire\Tools\TopicExplorer::class)->name('topics.explorer');
     Route::get('question-search', \App\Livewire\Tools\QuestionSearch::class)->name('question.search');
     Route::get('post-utme', \App\Livewire\Tools\PostUtmePlanner::class)->name('post-utme');
+    Route::get('topic-practice/{topic}/learn', \App\Livewire\Tools\TopicLessonPage::class)->name('topic.learn');
 
     // Exam practice flow
     Route::get('exam/setup', ExamSetup::class)->name('exam.setup');
