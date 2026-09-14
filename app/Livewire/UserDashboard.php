@@ -36,6 +36,7 @@ class UserDashboard extends Component
 
     public $recentSessions = [];
     public $subjectPerformance = []; // subject name => accuracy %
+    public $weakTopics = [];
     
     public $studyPlan = null;
     public $studyPlanStatus = null; // null, generating, ready, failed, no_data, rate_limited
@@ -160,8 +161,37 @@ class UserDashboard extends Component
                 'accuracy' => $this->subjectPerformance[$strongestName],
             ];
         }
+
+        // 8. Give each student a short, evidence-based revision queue. Only
+        // answered, topic-tagged questions count so skipped questions and
+        // unclassified legacy imports do not produce misleading advice.
+        $this->weakTopics = ExamAnswer::query()
+            ->join('exam_sessions', 'exam_answers.exam_session_id', '=', 'exam_sessions.id')
+            ->join('questions', 'exam_answers.question_id', '=', 'questions.id')
+            ->join('topics', 'questions.topic_id', '=', 'topics.id')
+            ->join('subjects', 'topics.subject_id', '=', 'subjects.id')
+            ->where('exam_sessions.user_id', $user->id)
+            ->where('exam_sessions.status', 'submitted')
+            ->whereNotNull('exam_answers.selected_option')
+            ->select('topics.id as topic_id', 'topics.name as topic_name', 'subjects.name as subject_name')
+            ->selectRaw('COUNT(*) as answered_count')
+            ->selectRaw('SUM(CASE WHEN exam_answers.is_correct = 1 THEN 1 ELSE 0 END) as correct_answers')
+            ->groupBy('topics.id', 'topics.name', 'subjects.name')
+            ->havingRaw('COUNT(*) >= 3')
+            ->orderByRaw('SUM(CASE WHEN exam_answers.is_correct = 1 THEN 1 ELSE 0 END) / COUNT(*) asc')
+            ->orderByDesc('answered_count')
+            ->limit(3)
+            ->get()
+            ->map(fn ($topic) => [
+                'id' => (int) $topic->topic_id,
+                'name' => $topic->topic_name,
+                'subject' => $topic->subject_name,
+                'accuracy' => round(((int) $topic->correct_answers / max(1, (int) $topic->answered_count)) * 100),
+                'answered' => (int) $topic->answered_count,
+            ])
+            ->all();
         
-        // 8. Study Plan Cache check
+        // 9. Study Plan Cache check
         $this->studyPlan = Cache::get("study-plan:{$user->id}");
         $this->studyPlanStatus = Cache::get("study-plan-status:{$user->id}");
     }

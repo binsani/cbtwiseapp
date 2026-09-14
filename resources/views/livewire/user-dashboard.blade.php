@@ -165,6 +165,33 @@
         </div>
     @endif
 
+    @if(count($weakTopics))
+        <section class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-5 sm:p-6">
+            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-4">
+                <div>
+                    <p class="text-[10px] font-black uppercase tracking-wider text-emerald-700">Your revision queue</p>
+                    <h3 class="mt-1 text-lg font-black text-slate-900 font-heading">Strengthen these topics next</h3>
+                    <p class="mt-1 text-xs text-slate-500">Based on answered questions in completed practice sessions.</p>
+                </div>
+                <a href="{{ route('topic.practice') }}" class="text-xs font-extrabold text-emerald-700 hover:text-emerald-800 whitespace-nowrap">Browse all topics &rarr;</a>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                @foreach($weakTopics as $topic)
+                    <a href="{{ route('exam.setup', ['topic' => $topic['id']]) }}" class="group rounded-2xl border border-slate-200 bg-slate-50/70 p-4 hover:border-emerald-400 hover:bg-emerald-50/50 transition-colors">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="min-w-0">
+                                <p class="text-[10px] font-bold uppercase tracking-wide text-slate-500 truncate">{{ $topic['subject'] }}</p>
+                                <h4 class="mt-1 text-sm font-extrabold text-slate-900 group-hover:text-emerald-800 leading-snug">{{ $topic['name'] }}</h4>
+                            </div>
+                            <span class="shrink-0 rounded-lg bg-white border border-slate-200 px-2 py-1 text-xs font-black text-rose-600">{{ $topic['accuracy'] }}%</span>
+                        </div>
+                        <p class="mt-3 text-[11px] font-semibold text-emerald-700">Practice {{ $topic['answered'] }} answered question{{ $topic['answered'] === 1 ? '' : 's' }} &rarr;</p>
+                    </a>
+                @endforeach
+            </div>
+        </section>
+    @endif
+
     <!-- Quick CBT Launch Hub -->
     <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm space-y-4">
         <div class="flex items-center justify-between">
