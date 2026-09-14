@@ -1,6 +1,5 @@
-<div x-data="{ open: @entangle('isOpen') }" x-show="open" x-cloak
-     @keydown.escape.window="$wire.close()"
-     class="fixed inset-0 z-[60] overflow-y-auto">
+@if($isOpen)
+<div class="fixed inset-0 z-[60] overflow-y-auto">
     
     <!-- Backdrop -->
     <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" @click="$wire.close()"></div>
@@ -56,3 +55,4 @@
         </div>
     </div>
 </div>
+@endif

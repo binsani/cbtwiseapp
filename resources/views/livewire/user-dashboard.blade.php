@@ -1,67 +1,4 @@
-<div class="dashboard-shell space-y-6 sm:space-y-8"
-     x-data="{
-         status: @entangle('studyPlanStatus'),
-         useFallback: false,
-         chartInstance: null,
-         initChart(attempts = 0) {
-             const data = @json($subjectPerformance);
-             const labels = Object.keys(data);
-             const values = Object.values(data);
-
-             if (labels.length === 0) return;
-
-             const ctx = document.getElementById('subjectChart');
-             if (!ctx) return;
-
-             if (typeof Chart === 'undefined') {
-                 if (attempts < 5) {
-                     setTimeout(() => this.initChart(attempts + 1), 200);
-                 } else {
-                     this.useFallback = true;
-                 }
-                 return;
-             }
-
-             try {
-                 if (this.chartInstance) {
-                     this.chartInstance.destroy();
-                 }
-                 this.chartInstance = new Chart(ctx, {
-                     type: 'bar',
-                     data: {
-                         labels: labels,
-                         datasets: [{
-                             label: 'Accuracy %',
-                             data: values,
-                             backgroundColor: values.map(v => v >= 75 ? 'rgba(16, 185, 129, 0.85)' : (v >= 50 ? 'rgba(245, 158, 11, 0.85)' : 'rgba(239, 68, 68, 0.85)')),
-                             borderRadius: 8,
-                             borderSkipped: false,
-                         }]
-                     },
-                     options: {
-                         responsive: true,
-                         maintainAspectRatio: false,
-                         scales: {
-                             y: {
-                                 beginAtZero: true,
-                                 max: 100,
-                                 ticks: { callback: v => v + '%' },
-                                 grid: { color: 'rgba(241, 245, 249, 1)' }
-                             },
-                             x: { grid: { display: false } }
-                         },
-                         plugins: {
-                             legend: { display: false }
-                         }
-                     }
-                 });
-             } catch (e) {
-                 console.warn('Chart init fallback:', e);
-                 this.useFallback = true;
-             }
-         }
-     }"
-     x-init="$nextTick(() => initChart())">
+<div class="dashboard-shell space-y-6 sm:space-y-8">
 
     <!-- Navigation Tabs -->
     <x-dashboard-nav />
@@ -337,11 +274,8 @@
                             <span>Complete practice exams to unlock your subject accuracy breakdown.</span>
                         </div>
                     @else
-                        <div x-show="!useFallback" class="h-64">
-                            <canvas id="subjectChart"></canvas>
-                        </div>
-                        <!-- Native CSS Bar Chart Fallback (Offline Electron / Low-bandwidth 3G / Adblocked) -->
-                        <div x-show="useFallback" class="space-y-3.5 py-2">
+                        <!-- Native chart: reliable online, offline and when third-party scripts are blocked. -->
+                        <div class="space-y-3.5 py-2">
                             @foreach($subjectPerformance as $subjectName => $score)
                                 <div>
                                     <div class="flex justify-between text-xs font-bold mb-1">
@@ -476,17 +410,18 @@
                     </div>
                 </div>
 
-                <div class="border-t border-slate-100 pt-4" 
-                     wire:poll.3s="checkStudyPlanStatus" 
-                     x-show="status === 'generating'">
+                @if($studyPlanStatus === 'generating')
+                <div class="border-t border-slate-100 pt-4" wire:poll.3s="checkStudyPlanStatus">
                     <div class="flex flex-col items-center justify-center py-8 text-center">
                         <div class="animate-spin rounded-full h-8 w-8 border-4 border-emerald-500 border-t-transparent mb-3"></div>
                         <p class="text-xs font-bold text-slate-700">Analyzing your performance patterns...</p>
                         <p class="text-[11px] text-slate-400 mt-0.5">Generating targeted recommendations.</p>
                     </div>
                 </div>
+                @endif
 
-                <div class="border-t border-slate-100 pt-4" x-show="status !== 'generating'">
+                @if($studyPlanStatus !== 'generating')
+                <div class="border-t border-slate-100 pt-4">
                     @if ($studyPlan)
                         <div class="prose prose-slate prose-sm max-w-none text-slate-600 text-xs overflow-y-auto max-h-80">
                             {!! str($studyPlan)->markdown() !!}
@@ -507,6 +442,7 @@
                         </div>
                     @endif
                 </div>
+                @endif
             </div>
 
             <!-- Referral Quick Box -->
@@ -535,6 +471,3 @@
         </div>
     </div>
 </div>
-
-<!-- Load Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
