@@ -18,6 +18,7 @@ class Results extends Component
     public $breakdown = [];
     public $reviewQuestions = [];
     public $bookmarkedQuestionIds = [];
+    public $revisionTopics = [];
     
     // AI explaining states
     public $explainingQuestionId = null;
@@ -36,6 +37,7 @@ class Results extends Component
         // Eager load questions and user answers
         $this->loadReviewQuestions();
         $this->loadBookmarks();
+        $this->loadRevisionTopics();
     }
 
     protected function loadBookmarks()
@@ -93,6 +95,36 @@ class Results extends Component
             'is_correct' => (bool) $ans->is_correct,
             'explanation' => $ans->question->explanation,
         ])->toArray();
+    }
+
+    protected function loadRevisionTopics(): void
+    {
+        $topics = ExamAnswer::where('exam_session_id', $this->examSession->id)
+            ->whereNotNull('selected_option')
+            ->with('question.topic.subject')
+            ->orderBy('id')
+            ->get()
+            ->filter(fn ($answer) => $answer->question?->topic)
+            ->groupBy(fn ($answer) => $answer->question->topic->id)
+            ->map(function ($answers) {
+                $topic = $answers->first()->question->topic;
+                $answered = $answers->count();
+                $correct = $answers->where('is_correct', true)->count();
+
+                return [
+                    'id' => $topic->id,
+                    'name' => $topic->name,
+                    'subject' => $topic->subject?->name,
+                    'accuracy' => round(($correct / max(1, $answered)) * 100),
+                    'answered' => $answered,
+                ];
+            })
+            ->sortBy([['accuracy', 'asc'], ['answered', 'desc']])
+            ->take(3)
+            ->values()
+            ->all();
+
+        $this->revisionTopics = $topics;
     }
 
     /**

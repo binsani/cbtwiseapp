@@ -108,6 +108,23 @@
         </div>
     </div>
 
+    @if(count($revisionTopics))
+        <section class="mb-10 bg-emerald-50/60 border border-emerald-200 rounded-3xl p-5 sm:p-6">
+            <p class="text-[10px] font-black uppercase tracking-wider text-emerald-700">Recommended next step</p>
+            <h3 class="mt-1 text-lg font-black text-slate-900 font-heading">Turn this result into progress</h3>
+            <p class="mt-1 text-xs text-slate-600">Practice the topics below before taking your next full CBT.</p>
+            <div class="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                @foreach($revisionTopics as $topic)
+                    <a href="{{ route('exam.setup', ['topic' => $topic['id']]) }}" class="rounded-2xl bg-white border border-emerald-100 p-4 hover:border-emerald-400 transition-colors">
+                        <p class="text-[10px] font-bold uppercase tracking-wide text-slate-500 truncate">{{ $topic['subject'] }}</p>
+                        <p class="mt-1 text-sm font-extrabold text-slate-900 leading-snug">{{ $topic['name'] }}</p>
+                        <p class="mt-3 text-xs font-bold text-rose-600">{{ $topic['accuracy'] }}% accuracy &middot; Practice now &rarr;</p>
+                    </a>
+                @endforeach
+            </div>
+        </section>
+    @endif
+
     <!-- Question Review Section -->
     <div class="space-y-6">
         <h3 class="text-2xl font-bold text-gray-900 mb-6 font-heading">Question-by-Question Review</h3>
