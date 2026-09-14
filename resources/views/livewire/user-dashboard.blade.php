@@ -132,6 +132,12 @@
             <span>🎯</span>
         </a>
 
+        <a href="{{ route('question.search') }}"
+           class="flex items-center justify-center gap-2 px-5 py-3.5 bg-slate-800 hover:bg-slate-900 text-white text-sm font-black rounded-2xl transition-all shadow-md">
+            <span>Search Questions</span>
+            <span>⌕</span>
+        </a>
+
         <a href="{{ route('mock-exams') }}"
            class="flex items-center justify-center gap-2 px-6 py-3.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-sm font-black rounded-2xl transition-all shadow-md shadow-blue-600/10 hover:shadow-lg">
             <span>Take Mock Exam</span>

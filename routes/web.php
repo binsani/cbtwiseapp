@@ -76,6 +76,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Practice by Topic (Syllabus Drill)
     Route::get('topic-practice', \App\Livewire\Tools\TopicExplorer::class)->name('topic.practice');
     Route::get('tools/topics', \App\Livewire\Tools\TopicExplorer::class)->name('topics.explorer');
+    Route::get('question-search', \App\Livewire\Tools\QuestionSearch::class)->name('question.search');
 
     // Exam practice flow
     Route::get('exam/setup', ExamSetup::class)->name('exam.setup');
