@@ -60,8 +60,7 @@ class Runner extends Component
         $this->topicName = $examSession->topic?->name;
         
         // Calculate remaining seconds
-        $elapsed = now()->diffInSeconds($examSession->started_at);
-        $this->timeRemaining = max(0, $examSession->duration_seconds - $elapsed);
+        $this->timeRemaining = $examSession->remainingSeconds();
         
         if ($this->timeRemaining <= 0) {
             $this->autoSubmit();

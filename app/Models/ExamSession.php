@@ -59,10 +59,14 @@ class ExamSession extends Model
     public function remainingSeconds(): int
     {
         if (! $this->started_at) {
-            return $this->duration_seconds;
+            return (int) $this->duration_seconds;
         }
-        $elapsed = now()->diffInSeconds($this->started_at);
-        return max(0, $this->duration_seconds - $elapsed);
+
+        // Carbon can return a fractional difference. The exam UI is a
+        // whole-second countdown, so never send decimal seconds to it.
+        $elapsed = (int) floor(now()->diffInSeconds($this->started_at));
+
+        return max(0, (int) $this->duration_seconds - $elapsed);
     }
 
     public function isInProgress(): bool

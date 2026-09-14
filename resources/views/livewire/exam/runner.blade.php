@@ -5,14 +5,22 @@
         selectedSubjectId: @entangle('selectedSubjectId'),
         showCalc: false,
         showPalette: false,
+        displaySeconds: 0,
+        calcDisplay: '0',
+        calcExpression: '',
         timerInterval: null,
         isSubmitting: false,
         init() {
             this.showCalc = false;
+            this.displaySeconds = Math.max(0, Math.floor(Number(this.timeRemaining || 0)));
             this.timerInterval = setInterval(() => {
-                if (this.timeRemaining > 0) {
-                    this.timeRemaining--;
-                    if (this.timeRemaining % 30 === 0) this.$wire.syncTimer();
+                if (this.displaySeconds > 0) {
+                    this.displaySeconds--;
+                    if (this.displaySeconds % 30 === 0) {
+                        this.$wire.syncTimer().then(() => {
+                            this.displaySeconds = Math.max(0, Math.floor(Number(this.timeRemaining || 0)));
+                        });
+                    }
                 } else if (!this.isSubmitting) {
                     this.isSubmitting = true;
                     this.$wire.autoSubmit();
@@ -20,7 +28,7 @@
             }, 1000);
         },
         formatTime() {
-            const seconds = Math.max(0, Number(this.timeRemaining || 0));
+            const seconds = Math.max(0, Math.floor(Number(this.displaySeconds || 0)));
             return [Math.floor(seconds / 3600), Math.floor((seconds % 3600) / 60), seconds % 60]
                 .map(value => String(value).padStart(2, '0')).join(':');
         },
@@ -44,6 +52,25 @@
             this.isSubmitting = true;
             if (this.timerInterval) clearInterval(this.timerInterval);
             this.$wire.submit();
+        },
+        calcClear() { this.calcDisplay = '0'; this.calcExpression = ''; },
+        calcNum(value) { this.calcDisplay = this.calcDisplay === '0' ? value : this.calcDisplay + value; },
+        calcOp(value) { this.calcDisplay += ' ' + value + ' '; },
+        calcBackspace() {
+            this.calcDisplay = this.calcDisplay.trim();
+            this.calcDisplay = this.calcDisplay.length <= 1 ? '0' : this.calcDisplay.slice(0, -1);
+        },
+        calcFunc(type) {
+            const value = parseFloat(this.calcDisplay);
+            if (!Number.isFinite(value)) { this.calcDisplay = 'Error'; return; }
+            if (type === 'sin') this.calcDisplay = Math.sin(value * Math.PI / 180).toFixed(6);
+            if (type === 'cos') this.calcDisplay = Math.cos(value * Math.PI / 180).toFixed(6);
+            if (type === 'tan') this.calcDisplay = Math.tan(value * Math.PI / 180).toFixed(6);
+            if (type === 'sqrt') this.calcDisplay = Math.sqrt(value).toFixed(6);
+        },
+        calcCalculate() {
+            if (!/^[0-9+\\-*/().\\s]+$/.test(this.calcDisplay)) { this.calcDisplay = 'Error'; return; }
+            try { this.calcExpression = this.calcDisplay; this.calcDisplay = Function('return (' + this.calcDisplay + ')')().toString(); } catch (error) { this.calcDisplay = 'Error'; }
         }
      }"
      x-init="init()"
@@ -359,27 +386,7 @@
          @click.self="showCalc = false"
          @close-calculator.window="showCalc = false">
         
-        <div class="bg-gray-800 text-white rounded-2xl shadow-2xl overflow-hidden border border-gray-700 w-80 max-w-full sm:w-72"
-             x-data="{
-                display: '0', expression: '',
-                clear() { this.display = '0'; this.expression = ''; },
-                num(value) { this.display = this.display === '0' ? value : this.display + value; },
-                op(value) { this.display += ' ' + value + ' '; },
-                backspace() { this.display = this.display.trim(); this.display = this.display.length <= 1 ? '0' : this.display.slice(0, -1); },
-                func(type) {
-                    const value = parseFloat(this.display);
-                    if (!Number.isFinite(value)) { this.display = 'Error'; return; }
-                    if (type === 'sin') this.display = Math.sin(value * Math.PI / 180).toFixed(6);
-                    if (type === 'cos') this.display = Math.cos(value * Math.PI / 180).toFixed(6);
-                    if (type === 'tan') this.display = Math.tan(value * Math.PI / 180).toFixed(6);
-                    if (type === 'sqrt') this.display = Math.sqrt(value).toFixed(6);
-                },
-                calculate() {
-                    if (!/^[0-9+\\-*/().\\s]+$/.test(this.display)) { this.display = 'Error'; return; }
-                    try { this.expression = this.display; this.display = Function('return (' + this.display + ')')().toString(); } catch (error) { this.display = 'Error'; }
-                }
-             }"
-             @click.stop>
+        <div class="bg-gray-800 text-white rounded-2xl shadow-2xl overflow-hidden border border-gray-700 w-80 max-w-full sm:w-72" @click.stop>
             
             <!-- Header -->
             <div class="cursor-move bg-gray-900 px-4 py-3 sm:py-2 flex justify-between items-center text-xs font-bold tracking-widest text-gray-300 select-none border-b border-gray-700">
@@ -391,45 +398,45 @@
 
             <!-- Display -->
             <div class="p-4 bg-gray-950 text-right">
-                <div class="text-[11px] text-gray-500 font-mono min-h-[16px]" x-text="expression"></div>
-                <div class="text-2xl font-bold font-mono tracking-wider truncate text-emerald-400" x-text="display">0</div>
+                <div class="text-[11px] text-gray-500 font-mono min-h-[16px]" x-text="calcExpression"></div>
+                <div class="text-2xl font-bold font-mono tracking-wider truncate text-emerald-400" x-text="calcDisplay">0</div>
             </div>
 
             <!-- Keys Grid -->
             <div class="grid grid-cols-5 gap-1.5 p-3 bg-gray-900 text-xs font-semibold">
                 <!-- Row 1 -->
-                <button @click="clear()" class="py-3 sm:py-2.5 bg-gray-700 hover:bg-gray-600 rounded-lg text-rose-300 font-bold">C</button>
-                <button @click="op('(')" class="py-3 sm:py-2.5 bg-gray-700 hover:bg-gray-600 rounded-lg">(</button>
-                <button @click="op(')')" class="py-3 sm:py-2.5 bg-gray-700 hover:bg-gray-600 rounded-lg">)</button>
-                <button @click="backspace()" class="py-3 sm:py-2.5 bg-gray-700 hover:bg-gray-600 rounded-lg">DEL</button>
-                <button @click="op('/')" class="py-3 sm:py-2.5 bg-amber-600 hover:bg-amber-500 text-white rounded-lg">/</button>
+                <button @click="calcClear()" class="py-3 sm:py-2.5 bg-gray-700 hover:bg-gray-600 rounded-lg text-rose-300 font-bold">C</button>
+                <button @click="calcOp('(')" class="py-3 sm:py-2.5 bg-gray-700 hover:bg-gray-600 rounded-lg">(</button>
+                <button @click="calcOp(')')" class="py-3 sm:py-2.5 bg-gray-700 hover:bg-gray-600 rounded-lg">)</button>
+                <button @click="calcBackspace()" class="py-3 sm:py-2.5 bg-gray-700 hover:bg-gray-600 rounded-lg">DEL</button>
+                <button @click="calcOp('/')" class="py-3 sm:py-2.5 bg-amber-600 hover:bg-amber-500 text-white rounded-lg">/</button>
 
                 <!-- Row 2 -->
-                <button @click="func('sin')" class="py-3 sm:py-2.5 bg-gray-800 hover:bg-gray-700 rounded-lg text-[10px]">sin</button>
-                <button @click="num('7')" class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg">7</button>
-                <button @click="num('8')" class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg">8</button>
-                <button @click="num('9')" class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg">9</button>
-                <button @click="op('*')" class="py-3 sm:py-2.5 bg-amber-600 hover:bg-amber-500 text-white rounded-lg">&times;</button>
+                <button @click="calcFunc('sin')" class="py-3 sm:py-2.5 bg-gray-800 hover:bg-gray-700 rounded-lg text-[10px]">sin</button>
+                <button @click="calcNum('7')" class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg">7</button>
+                <button @click="calcNum('8')" class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg">8</button>
+                <button @click="calcNum('9')" class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg">9</button>
+                <button @click="calcOp('*')" class="py-3 sm:py-2.5 bg-amber-600 hover:bg-amber-500 text-white rounded-lg">&times;</button>
 
                 <!-- Row 3 -->
-                <button @click="func('cos')" class="py-3 sm:py-2.5 bg-gray-800 hover:bg-gray-700 rounded-lg text-[10px]">cos</button>
-                <button @click="num('4')" class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg">4</button>
-                <button @click="num('5')" class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg">5</button>
-                <button @click="num('6')" class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg">6</button>
-                <button @click="op('-')" class="py-3 sm:py-2.5 bg-amber-600 hover:bg-amber-500 text-white rounded-lg">-</button>
+                <button @click="calcFunc('cos')" class="py-3 sm:py-2.5 bg-gray-800 hover:bg-gray-700 rounded-lg text-[10px]">cos</button>
+                <button @click="calcNum('4')" class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg">4</button>
+                <button @click="calcNum('5')" class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg">5</button>
+                <button @click="calcNum('6')" class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg">6</button>
+                <button @click="calcOp('-')" class="py-3 sm:py-2.5 bg-amber-600 hover:bg-amber-500 text-white rounded-lg">-</button>
 
                 <!-- Row 4 -->
-                <button @click="func('tan')" class="py-3 sm:py-2.5 bg-gray-800 hover:bg-gray-700 rounded-lg text-[10px]">tan</button>
-                <button @click="num('1')" class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg">1</button>
-                <button @click="num('2')" class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg">2</button>
-                <button @click="num('3')" class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg">3</button>
-                <button @click="op('+')" class="py-3 sm:py-2.5 bg-amber-600 hover:bg-amber-500 text-white rounded-lg">+</button>
+                <button @click="calcFunc('tan')" class="py-3 sm:py-2.5 bg-gray-800 hover:bg-gray-700 rounded-lg text-[10px]">tan</button>
+                <button @click="calcNum('1')" class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg">1</button>
+                <button @click="calcNum('2')" class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg">2</button>
+                <button @click="calcNum('3')" class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg">3</button>
+                <button @click="calcOp('+')" class="py-3 sm:py-2.5 bg-amber-600 hover:bg-amber-500 text-white rounded-lg">+</button>
 
                 <!-- Row 5 -->
-                <button @click="func('sqrt')" class="py-3 sm:py-2.5 bg-gray-800 hover:bg-gray-700 rounded-lg text-[10px]">&radic;</button>
-                <button @click="num('0')" class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg col-span-2">0</button>
-                <button @click="num('.')" class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg">.</button>
-                <button @click="calculate()" class="py-3 sm:py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg">=</button>
+                <button @click="calcFunc('sqrt')" class="py-3 sm:py-2.5 bg-gray-800 hover:bg-gray-700 rounded-lg text-[10px]">&radic;</button>
+                <button @click="calcNum('0')" class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg col-span-2">0</button>
+                <button @click="calcNum('.')" class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg">.</button>
+                <button @click="calcCalculate()" class="py-3 sm:py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg">=</button>
             </div>
         </div>
     </div>
