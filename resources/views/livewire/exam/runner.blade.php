@@ -1,80 +1,4 @@
-<div class="h-dvh flex flex-col bg-gray-50 overflow-hidden"
-     x-data="{
-        timeRemaining: @entangle('timeRemaining'),
-        currentIndex: @entangle('currentIndex'),
-        selectedSubjectId: @entangle('selectedSubjectId'),
-        showCalc: false,
-        showPalette: false,
-        displaySeconds: 0,
-        calcDisplay: '0',
-        calcExpression: '',
-        timerInterval: null,
-        isSubmitting: false,
-        init() {
-            this.showCalc = false;
-            this.displaySeconds = Math.max(0, Math.floor(Number(this.timeRemaining || 0)));
-            this.timerInterval = setInterval(() => {
-                if (this.displaySeconds > 0) {
-                    this.displaySeconds--;
-                    if (this.displaySeconds % 30 === 0) {
-                        this.$wire.syncTimer().then(() => {
-                            this.displaySeconds = Math.max(0, Math.floor(Number(this.timeRemaining || 0)));
-                        });
-                    }
-                } else if (!this.isSubmitting) {
-                    this.isSubmitting = true;
-                    this.$wire.autoSubmit();
-                }
-            }, 1000);
-        },
-        formatTime() {
-            const seconds = Math.max(0, Math.floor(Number(this.displaySeconds || 0)));
-            return [Math.floor(seconds / 3600), Math.floor((seconds % 3600) / 60), seconds % 60]
-                .map(value => String(value).padStart(2, '0')).join(':');
-        },
-        prevQuestion() {
-            if (this.currentIndex > 0) this.$wire.navigate(--this.currentIndex);
-        },
-        nextQuestion(maxCount) {
-            if (this.currentIndex < maxCount - 1) this.$wire.navigate(++this.currentIndex);
-        },
-        handleKey(event) {
-            if (this.showCalc || ['input', 'textarea', 'select'].includes(document.activeElement?.tagName?.toLowerCase())) return;
-            const key = event.key.toLowerCase();
-            const question = this.$wire.get('activeQuestion');
-            if (['a', 'b', 'c', 'd', 'e'].includes(key) && question?.id) this.$wire.selectOption(question.id, key);
-            else if (key === 'arrowright' || key === 'n') this.nextQuestion(this.$wire.get('questionsList').length);
-            else if (key === 'arrowleft' || key === 'p') this.prevQuestion();
-            else if (key === 'f' && question?.id) this.$wire.toggleFlag(question.id);
-        },
-        confirmSubmit() {
-            if (this.isSubmitting || !confirm('Are you sure you want to end your exam session and submit?')) return;
-            this.isSubmitting = true;
-            if (this.timerInterval) clearInterval(this.timerInterval);
-            this.$wire.submit();
-        },
-        calcClear() { this.calcDisplay = '0'; this.calcExpression = ''; },
-        calcNum(value) { this.calcDisplay = this.calcDisplay === '0' ? value : this.calcDisplay + value; },
-        calcOp(value) { this.calcDisplay += ' ' + value + ' '; },
-        calcBackspace() {
-            this.calcDisplay = this.calcDisplay.trim();
-            this.calcDisplay = this.calcDisplay.length <= 1 ? '0' : this.calcDisplay.slice(0, -1);
-        },
-        calcFunc(type) {
-            const value = parseFloat(this.calcDisplay);
-            if (!Number.isFinite(value)) { this.calcDisplay = 'Error'; return; }
-            if (type === 'sin') this.calcDisplay = Math.sin(value * Math.PI / 180).toFixed(6);
-            if (type === 'cos') this.calcDisplay = Math.cos(value * Math.PI / 180).toFixed(6);
-            if (type === 'tan') this.calcDisplay = Math.tan(value * Math.PI / 180).toFixed(6);
-            if (type === 'sqrt') this.calcDisplay = Math.sqrt(value).toFixed(6);
-        },
-        calcCalculate() {
-            if (!/^[0-9+\\-*/().\\s]+$/.test(this.calcDisplay)) { this.calcDisplay = 'Error'; return; }
-            try { this.calcExpression = this.calcDisplay; this.calcDisplay = Function('return (' + this.calcDisplay + ')')().toString(); } catch (error) { this.calcDisplay = 'Error'; }
-        }
-     }"
-     x-init="init()"
-     @keydown.window="handleKey($event)">
+<div class="h-dvh flex flex-col bg-gray-50 overflow-hidden">
 
     <!-- Top Navigation Bar -->
     <header class="bg-gradient-to-r from-emerald-700 to-emerald-950 text-white px-3 sm:px-6 py-3 flex justify-between items-center shadow-md flex-shrink-0 gap-2">
@@ -91,14 +15,14 @@
         <!-- Timer — full hh:mm:ss on md+, compact mm:ss on mobile -->
         <div class="flex items-center gap-1.5 sm:gap-3 bg-white/10 px-3 sm:px-5 py-1.5 sm:py-2 rounded-2xl border border-white/10 shadow-inner flex-shrink-0">
             <svg class="w-4 h-4 sm:w-5 sm:h-5 text-emerald-300 animate-pulse flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            <span class="font-mono text-base sm:text-xl font-bold tracking-widest text-emerald-100 tabular-nums" x-text="formatTime()">00:00</span>
+            <span id="exam-timer" data-seconds="{{ (int) $timeRemaining }}" class="font-mono text-base sm:text-xl font-bold tracking-widest text-emerald-100 tabular-nums">00:00:00</span>
         </div>
 
         <div class="flex items-center gap-2 sm:gap-4 flex-shrink-0">
             <!-- Calculator toggle — icon only on mobile -->
             <button type="button"
-                    @click="showCalc = !showCalc; showPalette = false"
-                    :aria-expanded="showCalc.toString()"
+                    id="calculator-toggle"
+                    aria-expanded="false"
                     aria-controls="exam-calculator"
                     class="p-2 sm:px-4 sm:py-2 bg-emerald-800/80 hover:bg-emerald-600 active:bg-emerald-900 border border-emerald-500/30 rounded-xl text-xs font-bold text-white flex items-center gap-1.5 transition-all shadow-sm"
                     title="Toggle Calculator">
@@ -110,7 +34,7 @@
                 <p class="text-xs text-emerald-200">Candidate</p>
                 <p class="text-sm font-bold truncate max-w-[120px]">{{ Auth::user()->name }}</p>
             </div>
-            <button @click="confirmSubmit()" class="px-3 sm:px-5 py-2 bg-rose-600 hover:bg-rose-700 active:bg-rose-800 rounded-xl font-bold text-xs sm:text-sm shadow-md hover:shadow-lg transition-all duration-300 whitespace-nowrap">
+            <button type="button" wire:click="submit" wire:confirm="Are you sure you want to end your exam session and submit?" class="px-3 sm:px-5 py-2 bg-rose-600 hover:bg-rose-700 active:bg-rose-800 rounded-xl font-bold text-xs sm:text-sm shadow-md hover:shadow-lg transition-all duration-300 whitespace-nowrap">
                 End Exam
             </button>
         </div>
@@ -135,14 +59,12 @@
     </div>
 
     <!-- Mobile: Slide-up Question Palette Drawer -->
-    <div x-show="showPalette"
-         x-cloak
-         @click.self="showPalette = false"
+    <div id="question-palette" class="hidden"
          class="fixed inset-0 z-50 bg-black/50 lg:hidden flex items-end">
         <div class="w-full bg-white rounded-t-3xl max-h-[70vh] flex flex-col overflow-hidden shadow-2xl">
             <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100 flex-shrink-0">
                 <h3 class="text-base font-black text-slate-900">Question Navigator</h3>
-                <button @click="showPalette = false" class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-600">
+                    <button type="button" data-palette-close class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-600">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
@@ -155,7 +77,7 @@
             <!-- Grid -->
             <div class="p-4 overflow-y-auto grid grid-cols-6 sm:grid-cols-8 gap-2">
                 @foreach($questionsList as $idx => $q)
-                    <button wire:key="mobile-question-{{ $q->id }}" wire:click="navigate({{ $idx }})" @click="showPalette = false"
+                    <button wire:key="mobile-question-{{ $q->id }}" wire:click="navigate({{ $idx }})" data-palette-close
                             class="h-10 rounded-xl flex items-center justify-center font-bold text-sm transition-all duration-200 border-2
                             {{ $currentIndex == $idx ? 'border-emerald-600 scale-105 shadow-sm' : 'border-transparent' }}
                             {{ $flagged[$q->id] ?? false ? 'bg-amber-500 text-white' : (($answers[$q->id] ?? null) ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200') }}">
@@ -165,7 +87,7 @@
             </div>
             <!-- Submit -->
             <div class="px-4 pb-6 pt-2 flex-shrink-0 border-t border-slate-100">
-                <button @click="confirmSubmit()" class="w-full py-3.5 bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-700 hover:to-blue-700 text-white font-extrabold rounded-2xl shadow-lg transition-all">
+                <button type="button" wire:click="submit" wire:confirm="Are you sure you want to submit this exam?" class="w-full py-3.5 bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-700 hover:to-blue-700 text-white font-extrabold rounded-2xl shadow-lg transition-all">
                     Submit Exam Sheet
                 </button>
             </div>
@@ -204,7 +126,7 @@
                                 $currentSubjName = strtolower($currentSubj['name'] ?? '');
                             @endphp
                             @if(in_array($currentSubjName, ['mathematics', 'physics', 'chemistry', 'economics', 'financial accounting', 'further mathematics']))
-                                <button type="button" @click="showCalc = !showCalc; showPalette = false" :aria-expanded="showCalc.toString()" aria-controls="exam-calculator" class="text-xs font-bold text-blue-600 hover:text-blue-800 bg-blue-50 px-3 py-1.5 rounded-xl border border-blue-100 flex items-center space-x-1.5 transition-colors">
+                                <button type="button" data-calculator-toggle aria-expanded="false" aria-controls="exam-calculator" class="text-xs font-bold text-blue-600 hover:text-blue-800 bg-blue-50 px-3 py-1.5 rounded-xl border border-blue-100 flex items-center space-x-1.5 transition-colors">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
                                     <span>Calculator</span>
                                 </button>
@@ -252,9 +174,9 @@
 
                     <!-- Bottom Nav Actions inside question card (visible on sm+) -->
                     <div class="mt-6 sm:mt-10 pt-4 sm:pt-6 border-t border-gray-100 hidden sm:flex justify-between items-center">
-                        <button type="button" @click="prevQuestion()"
+                        <button type="button" wire:click="previousQuestion"
                                 class="px-5 py-3 border border-gray-300 text-gray-700 font-bold rounded-2xl hover:bg-gray-50 transition-colors flex items-center space-x-2 disabled:opacity-40"
-                                :disabled="currentIndex === 0">
+                                @disabled($currentIndex === 0)>
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
                             <span>Previous</span>
                         </button>
@@ -284,9 +206,9 @@
                                 </button>
                             </div>
 
-                            <button type="button" @click="nextQuestion({{ $questionsList->count() }})"
+                            <button type="button" wire:click="nextQuestion"
                                     class="px-5 py-3 bg-emerald-600 text-white font-bold rounded-2xl hover:bg-emerald-700 transition-colors flex items-center space-x-2 disabled:opacity-40"
-                                    :disabled="currentIndex === {{ $questionsList->count() - 1 }}">
+                                    @disabled($currentIndex === $questionsList->count() - 1)>
                                 <span>Next</span>
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                             </button>
@@ -304,9 +226,9 @@
         <div class="fixed bottom-0 left-0 right-0 z-30 lg:hidden bg-white border-t border-slate-200 px-2 py-2 shadow-2xl pb-[max(0.5rem,env(safe-area-inset-bottom))]">
             <div class="flex items-center gap-1">
                 <!-- Prev -->
-                <button type="button" @click="prevQuestion()"
+                <button type="button" wire:click="previousQuestion"
                         class="flex-1 flex flex-col items-center justify-center py-2 rounded-xl font-bold text-slate-600 hover:bg-slate-100 disabled:opacity-30 transition-colors"
-                        :disabled="currentIndex === 0">
+                        @disabled($currentIndex === 0)>
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
                     <span class="text-[9px] font-black">Prev</span>
                 </button>
@@ -319,9 +241,9 @@
                 </button>
 
                 <!-- Q Counter — opens drawer -->
-                <button type="button" @click="showPalette = true"
+                <button type="button" data-palette-toggle
                         class="flex-[1.5] flex flex-col items-center justify-center py-2 rounded-xl bg-emerald-600 text-white font-bold transition-colors active:bg-emerald-700">
-                    <span class="text-sm font-black leading-tight" x-text="(currentIndex + 1) + '/' + {{ $questionsList->count() }}"></span>
+                    <span class="text-sm font-black leading-tight">{{ $currentIndex + 1 }}/{{ $questionsList->count() }}</span>
                     <span class="text-[9px] font-black">Palette ↑</span>
                 </button>
 
@@ -333,9 +255,9 @@
                 </button>
 
                 <!-- Next -->
-                <button type="button" @click="nextQuestion({{ $questionsList->count() }})"
+                <button type="button" wire:click="nextQuestion"
                         class="flex-1 flex flex-col items-center justify-center py-2 rounded-xl font-bold text-slate-600 hover:bg-slate-100 disabled:opacity-30 transition-colors"
-                        :disabled="currentIndex === {{ $questionsList->count() - 1 }}">
+                        @disabled($currentIndex === $questionsList->count() - 1)>
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
                     <span class="text-[9px] font-black">Next</span>
                 </button>
@@ -371,7 +293,7 @@
 
             <!-- Submit card -->
             <div class="border-t border-gray-100 pt-6 mt-6">
-                <button @click="confirmSubmit()" class="w-full py-4 bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-700 hover:to-blue-700 text-white font-extrabold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
+                <button type="button" wire:click="submit" wire:confirm="Are you sure you want to submit this exam?" class="w-full py-4 bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-700 hover:to-blue-700 text-white font-extrabold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
                     Submit Exam Sheet
                 </button>
             </div>
@@ -379,67 +301,167 @@
     </div>
 
     <!-- Alpine.js Scientific Calculator Modal / Dialog -->
-    <div id="exam-calculator" x-show="showCalc"
-         x-cloak
-         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm sm:bg-transparent sm:backdrop-blur-none sm:p-0 sm:fixed sm:top-20 sm:left-24 sm:w-auto" 
-         @keydown.escape.window="showCalc = false"
-         @click.self="showCalc = false"
-         @close-calculator.window="showCalc = false">
+    <div id="exam-calculator" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm sm:bg-transparent sm:backdrop-blur-none sm:p-0 sm:fixed sm:top-20 sm:left-24 sm:w-auto"
+         data-calculator-modal>
         
-        <div class="bg-gray-800 text-white rounded-2xl shadow-2xl overflow-hidden border border-gray-700 w-80 max-w-full sm:w-72" @click.stop>
+        <div class="bg-gray-800 text-white rounded-2xl shadow-2xl overflow-hidden border border-gray-700 w-80 max-w-full sm:w-72">
             
             <!-- Header -->
             <div class="cursor-move bg-gray-900 px-4 py-3 sm:py-2 flex justify-between items-center text-xs font-bold tracking-widest text-gray-300 select-none border-b border-gray-700">
                 <span class="flex items-center gap-1.5">
                     <span class="text-emerald-400">🔢</span> JAMB CBT CALCULATOR
                 </span>
-                <button type="button" @click.stop="$dispatch('close-calculator')" aria-label="Close calculator" class="min-h-9 min-w-9 p-1 rounded-lg hover:bg-gray-700 active:bg-gray-600 text-rose-400 hover:text-rose-300 font-bold text-lg leading-none">&times;</button>
+                <button type="button" data-calculator-close aria-label="Close calculator" class="min-h-9 min-w-9 p-1 rounded-lg hover:bg-gray-700 active:bg-gray-600 text-rose-400 hover:text-rose-300 font-bold text-lg leading-none">&times;</button>
             </div>
 
             <!-- Display -->
             <div class="p-4 bg-gray-950 text-right">
-                <div class="text-[11px] text-gray-500 font-mono min-h-[16px]" x-text="calcExpression"></div>
-                <div class="text-2xl font-bold font-mono tracking-wider truncate text-emerald-400" x-text="calcDisplay">0</div>
+                <div id="calculator-expression" class="text-[11px] text-gray-500 font-mono min-h-[16px]"></div>
+                <div id="calculator-display" class="text-2xl font-bold font-mono tracking-wider truncate text-emerald-400">0</div>
             </div>
 
             <!-- Keys Grid -->
             <div class="grid grid-cols-5 gap-1.5 p-3 bg-gray-900 text-xs font-semibold">
                 <!-- Row 1 -->
-                <button @click="calcClear()" class="py-3 sm:py-2.5 bg-gray-700 hover:bg-gray-600 rounded-lg text-rose-300 font-bold">C</button>
-                <button @click="calcOp('(')" class="py-3 sm:py-2.5 bg-gray-700 hover:bg-gray-600 rounded-lg">(</button>
-                <button @click="calcOp(')')" class="py-3 sm:py-2.5 bg-gray-700 hover:bg-gray-600 rounded-lg">)</button>
-                <button @click="calcBackspace()" class="py-3 sm:py-2.5 bg-gray-700 hover:bg-gray-600 rounded-lg">DEL</button>
-                <button @click="calcOp('/')" class="py-3 sm:py-2.5 bg-amber-600 hover:bg-amber-500 text-white rounded-lg">/</button>
+                <button data-calc="clear" class="py-3 sm:py-2.5 bg-gray-700 hover:bg-gray-600 rounded-lg text-rose-300 font-bold">C</button>
+                <button data-calc="(" class="py-3 sm:py-2.5 bg-gray-700 hover:bg-gray-600 rounded-lg">(</button>
+                <button data-calc=")" class="py-3 sm:py-2.5 bg-gray-700 hover:bg-gray-600 rounded-lg">)</button>
+                <button data-calc="backspace" class="py-3 sm:py-2.5 bg-gray-700 hover:bg-gray-600 rounded-lg">DEL</button>
+                <button data-calc="/" class="py-3 sm:py-2.5 bg-amber-600 hover:bg-amber-500 text-white rounded-lg">/</button>
 
                 <!-- Row 2 -->
-                <button @click="calcFunc('sin')" class="py-3 sm:py-2.5 bg-gray-800 hover:bg-gray-700 rounded-lg text-[10px]">sin</button>
-                <button @click="calcNum('7')" class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg">7</button>
-                <button @click="calcNum('8')" class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg">8</button>
-                <button @click="calcNum('9')" class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg">9</button>
-                <button @click="calcOp('*')" class="py-3 sm:py-2.5 bg-amber-600 hover:bg-amber-500 text-white rounded-lg">&times;</button>
+                <button data-calc="sin" class="py-3 sm:py-2.5 bg-gray-800 hover:bg-gray-700 rounded-lg text-[10px]">sin</button>
+                <button data-calc="7" class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg">7</button>
+                <button data-calc="8" class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg">8</button>
+                <button data-calc="9" class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg">9</button>
+                <button data-calc="*" class="py-3 sm:py-2.5 bg-amber-600 hover:bg-amber-500 text-white rounded-lg">&times;</button>
 
                 <!-- Row 3 -->
-                <button @click="calcFunc('cos')" class="py-3 sm:py-2.5 bg-gray-800 hover:bg-gray-700 rounded-lg text-[10px]">cos</button>
-                <button @click="calcNum('4')" class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg">4</button>
-                <button @click="calcNum('5')" class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg">5</button>
-                <button @click="calcNum('6')" class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg">6</button>
-                <button @click="calcOp('-')" class="py-3 sm:py-2.5 bg-amber-600 hover:bg-amber-500 text-white rounded-lg">-</button>
+                <button data-calc="cos" class="py-3 sm:py-2.5 bg-gray-800 hover:bg-gray-700 rounded-lg text-[10px]">cos</button>
+                <button data-calc="4" class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg">4</button>
+                <button data-calc="5" class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg">5</button>
+                <button data-calc="6" class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg">6</button>
+                <button data-calc="-" class="py-3 sm:py-2.5 bg-amber-600 hover:bg-amber-500 text-white rounded-lg">-</button>
 
                 <!-- Row 4 -->
-                <button @click="calcFunc('tan')" class="py-3 sm:py-2.5 bg-gray-800 hover:bg-gray-700 rounded-lg text-[10px]">tan</button>
-                <button @click="calcNum('1')" class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg">1</button>
-                <button @click="calcNum('2')" class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg">2</button>
-                <button @click="calcNum('3')" class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg">3</button>
-                <button @click="calcOp('+')" class="py-3 sm:py-2.5 bg-amber-600 hover:bg-amber-500 text-white rounded-lg">+</button>
+                <button data-calc="tan" class="py-3 sm:py-2.5 bg-gray-800 hover:bg-gray-700 rounded-lg text-[10px]">tan</button>
+                <button data-calc="1" class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg">1</button>
+                <button data-calc="2" class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg">2</button>
+                <button data-calc="3" class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg">3</button>
+                <button data-calc="+" class="py-3 sm:py-2.5 bg-amber-600 hover:bg-amber-500 text-white rounded-lg">+</button>
 
                 <!-- Row 5 -->
-                <button @click="calcFunc('sqrt')" class="py-3 sm:py-2.5 bg-gray-800 hover:bg-gray-700 rounded-lg text-[10px]">&radic;</button>
-                <button @click="calcNum('0')" class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg col-span-2">0</button>
-                <button @click="calcNum('.')" class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg">.</button>
-                <button @click="calcCalculate()" class="py-3 sm:py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg">=</button>
+                <button data-calc="sqrt" class="py-3 sm:py-2.5 bg-gray-800 hover:bg-gray-700 rounded-lg text-[10px]">&radic;</button>
+                <button data-calc="0" class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg col-span-2">0</button>
+                <button data-calc="." class="py-3 sm:py-2.5 bg-gray-600 hover:bg-gray-500 rounded-lg">.</button>
+                <button data-calc="equals" class="py-3 sm:py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg">=</button>
             </div>
         </div>
     </div>
+
+    <script>
+        (() => {
+            if (window.__cbtWiseExamUiBound) return;
+            window.__cbtWiseExamUiBound = true;
+
+            let remaining = null;
+            let calculatorValue = '0';
+            let calculatorExpression = '';
+
+            const formatTime = (seconds) => {
+                seconds = Math.max(0, Math.floor(Number(seconds) || 0));
+                return [Math.floor(seconds / 3600), Math.floor((seconds % 3600) / 60), seconds % 60]
+                    .map(value => String(value).padStart(2, '0')).join(':');
+            };
+
+            const renderCalculator = () => {
+                const display = document.getElementById('calculator-display');
+                const expression = document.getElementById('calculator-expression');
+                if (display) display.textContent = calculatorValue;
+                if (expression) expression.textContent = calculatorExpression;
+            };
+
+            const setCalculatorOpen = (open) => {
+                const modal = document.getElementById('exam-calculator');
+                if (!modal) return;
+                modal.classList.toggle('hidden', !open);
+                document.querySelectorAll('[data-calculator-toggle], #calculator-toggle').forEach((button) => {
+                    button.setAttribute('aria-expanded', String(open));
+                });
+                if (open) renderCalculator();
+            };
+
+            const syncTimer = () => {
+                const timer = document.getElementById('exam-timer');
+                if (!timer) return;
+                if (remaining === null) remaining = Number(timer.dataset.seconds || 0);
+                timer.textContent = formatTime(remaining);
+            };
+
+            document.addEventListener('click', (event) => {
+                const calculatorToggle = event.target.closest('[data-calculator-toggle], #calculator-toggle');
+                if (calculatorToggle) {
+                    event.preventDefault();
+                    setCalculatorOpen(document.getElementById('exam-calculator')?.classList.contains('hidden'));
+                    return;
+                }
+
+                if (event.target.closest('[data-calculator-close]') || event.target === document.getElementById('exam-calculator')) {
+                    setCalculatorOpen(false);
+                    return;
+                }
+
+                if (event.target.closest('[data-palette-toggle]')) {
+                    document.getElementById('question-palette')?.classList.remove('hidden');
+                    return;
+                }
+
+                if (event.target.closest('[data-palette-close]')) {
+                    document.getElementById('question-palette')?.classList.add('hidden');
+                    return;
+                }
+
+                const key = event.target.closest('[data-calc]')?.dataset.calc;
+                if (!key) return;
+
+                event.preventDefault();
+                if (key === 'clear') {
+                    calculatorValue = '0'; calculatorExpression = '';
+                } else if (key === 'backspace') {
+                    calculatorValue = calculatorValue.trim();
+                    calculatorValue = calculatorValue.length <= 1 ? '0' : calculatorValue.slice(0, -1);
+                } else if (['sin', 'cos', 'tan', 'sqrt'].includes(key)) {
+                    const value = parseFloat(calculatorValue);
+                    if (!Number.isFinite(value)) calculatorValue = 'Error';
+                    else if (key === 'sin') calculatorValue = Math.sin(value * Math.PI / 180).toFixed(6);
+                    else if (key === 'cos') calculatorValue = Math.cos(value * Math.PI / 180).toFixed(6);
+                    else if (key === 'tan') calculatorValue = Math.tan(value * Math.PI / 180).toFixed(6);
+                    else calculatorValue = Math.sqrt(value).toFixed(6);
+                } else if (key === 'equals') {
+                    if (!/^[0-9+\-*/().\s]+$/.test(calculatorValue)) calculatorValue = 'Error';
+                    else {
+                        try { calculatorExpression = calculatorValue; calculatorValue = Function('return (' + calculatorValue + ')')().toString(); }
+                        catch (_) { calculatorValue = 'Error'; }
+                    }
+                } else if (['+', '-', '*', '/', '(', ')'].includes(key)) {
+                    calculatorValue += ' ' + key + ' ';
+                } else {
+                    calculatorValue = calculatorValue === '0' ? key : calculatorValue + key;
+                }
+                renderCalculator();
+            });
+
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape') setCalculatorOpen(false);
+            });
+
+            syncTimer();
+            setInterval(() => {
+                if (remaining === null) syncTimer();
+                else { remaining = Math.max(0, remaining - 1); syncTimer(); }
+            }, 1000);
+        })();
+    </script>
 
     <!-- Alpine / JS Helpers -->
     {{-- Legacy controller retained temporarily for reference. The runner now

@@ -243,6 +243,16 @@ class Runner extends Component
         $max = max(0, $this->questions->count() - 1);
         $this->currentIndex = max(0, min((int) $index, $max));
     }
+
+    public function previousQuestion(): void
+    {
+        $this->navigate($this->currentIndex - 1);
+    }
+
+    public function nextQuestion(): void
+    {
+        $this->navigate($this->currentIndex + 1);
+    }
     
     public function syncTimer($remainingSeconds = null)
     {
