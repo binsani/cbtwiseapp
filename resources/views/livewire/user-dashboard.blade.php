@@ -138,6 +138,12 @@
             <span>⌕</span>
         </a>
 
+        <a href="{{ route('post-utme') }}"
+           class="flex items-center justify-center gap-2 px-5 py-3.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-sm font-black rounded-2xl transition-all">
+            <span>Post-UTME Planner</span>
+            <span>&rarr;</span>
+        </a>
+
         <a href="{{ route('mock-exams') }}"
            class="flex items-center justify-center gap-2 px-6 py-3.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-sm font-black rounded-2xl transition-all shadow-md shadow-blue-600/10 hover:shadow-lg">
             <span>Take Mock Exam</span>
