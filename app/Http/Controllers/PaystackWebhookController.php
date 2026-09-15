@@ -4,31 +4,22 @@ namespace App\Http\Controllers;
 
 use App\Models\Payment;
 use App\Models\User;
-use App\Mail\ReceiptMail;
+use App\Services\PaymentService;
+use App\Services\PaystackService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 
 class PaystackWebhookController extends Controller
 {
     /**
      * Handle incoming webhooks from Paystack.
      */
-    public function handle(Request $request)
+    public function handle(Request $request, PaystackService $paystack)
     {
         $signature = $request->header('x-paystack-signature');
-        $secretKey = config('cbtwise.paystack.secret_key');
-
-        if (!$signature || !$secretKey) {
-            Log::warning('Paystack Webhook received without signature or secret key config.');
-            return response()->json(['message' => 'Signature or Secret missing'], 400);
-        }
-
-        // Verify signature
         $payload = $request->getContent();
-        $computedSignature = hash_hmac('sha512', $payload, $secretKey);
 
-        if ($computedSignature !== $signature) {
+        if (! $paystack->signatureIsValid($payload, $signature)) {
             Log::warning('Paystack Webhook signature mismatch.');
             return response()->json(['message' => 'Invalid signature'], 400);
         }
@@ -71,7 +62,7 @@ class PaystackWebhookController extends Controller
                     }
 
                     if ($payment->status === 'pending') {
-                        \App\Services\PaymentService::processSuccess($payment, $data);
+                        PaymentService::processSuccess($payment, $data);
                     }
                 }
             }

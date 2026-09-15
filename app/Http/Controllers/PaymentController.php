@@ -3,21 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\Payment;
-use App\Models\User;
-use App\Mail\ReceiptMail;
 use App\Services\PaymentService;
+use App\Services\PaystackService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 
 class PaymentController extends Controller
 {
     /**
      * Initialize a Paystack transaction and redirect the user.
      */
-    public function initialize(Request $request)
+    public function initialize(Request $request, PaystackService $paystack)
     {
         $request->validate([
             'plan_type' => 'required|in:monthly,quarterly,yearly',
@@ -25,27 +22,15 @@ class PaymentController extends Controller
 
         $user = Auth::user();
         $planType = $request->plan_type;
+        $plan = $paystack->plan($planType);
 
-        // Plan configurations: prices in kobo (100 kobo = ₦1) & durations in days
-        $plans = [
-            'monthly' => ['price' => 150000, 'days' => 30],
-            'quarterly' => ['price' => 400000, 'days' => 90],
-            'yearly' => ['price' => 1200000, 'days' => 365],
-        ];
-
-        $plan = $plans[$planType];
-        $secretKey = config('cbtwise.paystack.secret_key');
-
-        if (!$secretKey) {
+        if (! $plan || ! $paystack->isConfigured()) {
             Log::error('Paystack Secret Key is missing in configuration.');
             return redirect()->back()->with('error', 'Payment configuration error. Please contact support.');
         }
 
         try {
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $secretKey,
-                'Content-Type' => 'application/json',
-            ])->post(config('cbtwise.paystack.payment_url', 'https://api.paystack.co') . '/transaction/initialize', [
+            $response = $paystack->initializeTransaction([
                 'email' => $user->email,
                 'amount' => $plan['price'],
                 'callback_url' => route('payment.callback'),
@@ -88,7 +73,7 @@ class PaymentController extends Controller
     /**
      * Handle the transaction callback from Paystack.
      */
-    public function callback(Request $request)
+    public function callback(Request $request, PaystackService $paystack)
     {
         $reference = $request->query('reference');
 
@@ -96,12 +81,14 @@ class PaymentController extends Controller
             return redirect()->route('pricing')->with('error', 'Invalid payment reference.');
         }
 
-        $secretKey = config('cbtwise.paystack.secret_key');
+        if (! $paystack->isConfigured()) {
+            Log::error('Paystack Secret Key is missing during callback verification.');
+
+            return redirect()->route('pricing')->with('error', 'Payment configuration error. Please contact support.');
+        }
 
         try {
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $secretKey,
-            ])->get(config('cbtwise.paystack.payment_url', 'https://api.paystack.co') . '/transaction/verify/' . $reference);
+            $response = $paystack->verifyTransaction($reference);
 
             if ($response->successful()) {
                 $result = $response->json();

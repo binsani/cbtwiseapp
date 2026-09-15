@@ -29,6 +29,24 @@ class PaymentService
                 return;
             }
 
+            $user = User::where('id', $lockedPayment->user_id)
+                ->lockForUpdate()
+                ->first();
+
+            if (! $user || ! self::paystackPayloadMatchesPayment($lockedPayment, $user, $paystackData)) {
+                $lockedPayment->update([
+                    'status' => 'failed',
+                    'paystack_data' => $paystackData,
+                ]);
+
+                Log::warning('Paystack success payload rejected during payment processing.', [
+                    'payment_id' => $lockedPayment->id,
+                    'reference' => $lockedPayment->paystack_reference,
+                ]);
+
+                return;
+            }
+
             // 1. Update Payment status
             $lockedPayment->update([
                 'status' => 'success',
@@ -37,65 +55,73 @@ class PaymentService
             ]);
 
             // 2. Upgrade User atomically
-            /** @var User|null $user */
-            $user = User::where('id', $lockedPayment->user_id)
-                ->lockForUpdate()
-                ->first();
+            $currentExpiry = $user->premium_expires_at;
+            $baseDate = ($currentExpiry && $currentExpiry->isFuture()) ? $currentExpiry : now();
 
-            if ($user) {
-                $currentExpiry = $user->premium_expires_at;
-                $baseDate = ($currentExpiry && $currentExpiry->isFuture()) ? $currentExpiry : now();
-                
-                $user->update([
-                    'plan' => 'premium',
-                    'premium_expires_at' => $baseDate->addDays($lockedPayment->plan_duration_days),
-                ]);
+            $user->update([
+                'plan' => 'premium',
+                'premium_expires_at' => $baseDate->addDays($lockedPayment->plan_duration_days),
+            ]);
 
-                // Send receipt email
+            // Send receipt email
+            try {
+                Mail::to($user->email)->send(new ReceiptMail($lockedPayment));
+            } catch (\Exception $e) {
+                Log::error('Failed to send Receipt Mail in PaymentService: ' . $e->getMessage());
+            }
+
+            // 3. Process Affiliate Conversion with duplicate check
+            $metadata = $paystackData['metadata'] ?? [];
+            $cookieToken = $metadata['affiliate_token'] ?? null;
+
+            if ($cookieToken) {
                 try {
-                    Mail::to($user->email)->send(new ReceiptMail($lockedPayment));
-                } catch (\Exception $e) {
-                    Log::error('Failed to send Receipt Mail in PaymentService: ' . $e->getMessage());
-                }
+                    $alreadyConverted = AffiliateConversion::where('payment_id', $lockedPayment->id)->exists();
 
-                // 3. Process Affiliate Conversion with duplicate check
-                $metadata = $paystackData['metadata'] ?? [];
-                $cookieToken = $metadata['affiliate_token'] ?? null;
+                    if (!$alreadyConverted) {
+                        $click = AffiliateClick::where('cookie_token', $cookieToken)->latest()->first();
 
-                if ($cookieToken) {
-                    try {
-                        $alreadyConverted = AffiliateConversion::where('payment_id', $lockedPayment->id)->exists();
+                        if ($click) {
+                            $affiliate = Affiliate::find($click->affiliate_id);
 
-                        if (!$alreadyConverted) {
-                            $click = AffiliateClick::where('cookie_token', $cookieToken)->latest()->first();
-                            
-                            if ($click) {
-                                $affiliate = Affiliate::find($click->affiliate_id);
-                                
-                                if ($affiliate && $affiliate->isActive() && $affiliate->user_id !== $user->id) {
-                                    $rate = (int) config('cbtwise_phase5.affiliate_commission_rate', 20);
-                                    $commission = ($lockedPayment->amountNaira()) * ($rate / 100);
+                            if ($affiliate && $affiliate->isActive() && $affiliate->user_id !== $user->id) {
+                                $rate = (int) config('cbtwise_phase5.affiliate_commission_rate', 20);
+                                $commission = ($lockedPayment->amountNaira()) * ($rate / 100);
 
-                                    AffiliateConversion::create([
-                                        'affiliate_id'     => $affiliate->id,
-                                        'referred_user_id' => $user->id,
-                                        'payment_id'       => $lockedPayment->id,
-                                        'commission_ngn'   => $commission,
-                                        'commission_rate'  => $rate,
-                                        'status'           => 'pending',
-                                        'cookie_token'     => $cookieToken,
-                                        'converted_at'     => now(),
-                                    ]);
+                                AffiliateConversion::create([
+                                    'affiliate_id'     => $affiliate->id,
+                                    'referred_user_id' => $user->id,
+                                    'payment_id'       => $lockedPayment->id,
+                                    'commission_ngn'   => $commission,
+                                    'commission_rate'  => $rate,
+                                    'status'           => 'pending',
+                                    'cookie_token'     => $cookieToken,
+                                    'converted_at'     => now(),
+                                ]);
 
-                                    Log::info("Affiliate conversion recorded for affiliate #{$affiliate->id}, referred user #{$user->id}");
-                                }
+                                Log::info("Affiliate conversion recorded for affiliate #{$affiliate->id}, referred user #{$user->id}");
                             }
                         }
-                    } catch (\Exception $e) {
-                        Log::error('Failed to record affiliate conversion: ' . $e->getMessage());
                     }
+                } catch (\Exception $e) {
+                    Log::error('Failed to record affiliate conversion: ' . $e->getMessage());
                 }
             }
         });
+    }
+
+    private static function paystackPayloadMatchesPayment(Payment $payment, User $user, array $paystackData): bool
+    {
+        $status = $paystackData['status'] ?? null;
+        $reference = $paystackData['reference'] ?? null;
+        $amount = (int) ($paystackData['amount'] ?? 0);
+        $currency = strtoupper((string) ($paystackData['currency'] ?? 'NGN'));
+        $email = strtolower((string) data_get($paystackData, 'customer.email', ''));
+
+        return $status === 'success'
+            && $reference === $payment->paystack_reference
+            && $amount === (int) $payment->amount_kobo
+            && $currency === 'NGN'
+            && ($email === '' || $email === strtolower($user->email));
     }
 }
